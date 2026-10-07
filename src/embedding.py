@@ -12,7 +12,7 @@ class LocalEmbeddings(Embeddings):
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
         logger.info(f"Loading embedding model: {model_name}")
         self.model = SentenceTransformer(model_name)
-        logger.info(f"Embedding model loaded (dim={self.model.get_sentence_embedding_dimension()})")
+        logger.info(f"Embedding model loaded (dim={self.model.get_embedding_dimension()})")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         embeddings = self.model.encode(texts, convert_to_numpy=True)
