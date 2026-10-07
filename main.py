@@ -2,7 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from config.config import PDF_DIR, CHROMA_DIR, DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_API_BASE
+from config.config import PDF_DIR, VECTOR_STORE_DIR, DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_API_BASE
 from utils.logger import setup_logger
 from src.document_loader import load_pdf_documents
 from src.text_splitter import split_documents
@@ -27,7 +27,7 @@ def initialize_rag_system(recreate: bool = False):
 
     embedding_model = get_embedding_model()
 
-    index_path = CHROMA_DIR / "index.json"
+    index_path = VECTOR_STORE_DIR / "index.json"
     if recreate or not index_path.exists():
         logger.info("Creating new vector store from PDF documents")
         documents = load_pdf_documents(PDF_DIR)
@@ -46,10 +46,10 @@ def initialize_rag_system(recreate: bool = False):
         texts = [doc["page_content"] for doc in docs_dict]
         embeddings = create_embeddings(texts, embedding_model)
 
-        vector_store = create_vector_store(docs_dict, embeddings, CHROMA_DIR)
+        vector_store = create_vector_store(docs_dict, embeddings, VECTOR_STORE_DIR)
     else:
         logger.info("Loading existing vector store")
-        vector_store = load_vector_store(CHROMA_DIR)
+        vector_store = load_vector_store(VECTOR_STORE_DIR)
 
         if vector_store is None:
             logger.warning("Failed to load vector store, recreating from scratch")
@@ -67,7 +67,7 @@ def initialize_rag_system(recreate: bool = False):
             texts = [doc["page_content"] for doc in docs_dict]
             embeddings = create_embeddings(texts, embedding_model)
 
-            vector_store = create_vector_store(docs_dict, embeddings, CHROMA_DIR)
+            vector_store = create_vector_store(docs_dict, embeddings, VECTOR_STORE_DIR)
 
     retriever = create_retriever(vector_store)
 

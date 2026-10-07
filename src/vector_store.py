@@ -1,9 +1,8 @@
-import os
 import json
 import numpy as np
 from typing import List, Dict, Any, Optional
 from pathlib import Path
-from config.config import CHROMA_DIR, RETRIEVAL_TOP_K
+from config.config import RETRIEVAL_TOP_K
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
