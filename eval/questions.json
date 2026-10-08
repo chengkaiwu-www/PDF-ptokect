@@ -1,0 +1,134 @@
+{
+  "_说明": [
+    "固定问题集，用于给「检索」这一步单独打分，S2 起作为单变量对照实验的度量基准。",
+    "expected_keywords：命中判定用的关键词（任一命中即算召回成功）。",
+    "  选择原则：既要在含答案的块里出现，又不能出现得太普遍——若一个词在全库出现几十次，",
+    "  指标会失去区分度（怎么排都算命中）。因此每个词都事先统计过覆盖块数。",
+    "  仍要强调：关键词命中是 Hit Rate 的廉价代理指标，不是人工标注的真值，",
+    "  只能用于「同一批题、同一套判定」的横向比较。",
+    "source_hint：该题答案大致来自哪份文档，仅作排查参考，不参与判定。"
+  ],
+  "questions": [
+    {
+      "id": "q01",
+      "question": "梯度下降的更新公式是什么",
+      "expected_keywords": ["更新公式"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q02",
+      "question": "线性判别分析 LDA 的核心思想是什么",
+      "expected_keywords": ["线性判别分析"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q03",
+      "question": "支持向量机中的软间隔是什么",
+      "expected_keywords": ["软间隔", "松弛变量"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q04",
+      "question": "EM 算法的迭代步骤是怎样的",
+      "expected_keywords": ["EM 算法", "期望最大化"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q05",
+      "question": "决策树如何选择划分特征",
+      "expected_keywords": ["信息增益", "基尼指数"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q06",
+      "question": "什么是过拟合，怎么缓解",
+      "expected_keywords": ["过拟合"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q07",
+      "question": "感知机的损失函数是什么",
+      "expected_keywords": ["误分类点"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q08",
+      "question": "K 均值聚类算法的步骤",
+      "expected_keywords": ["均值聚类", "聚类中心"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q09",
+      "question": "隐马尔可夫模型的三个基本问题",
+      "expected_keywords": ["隐马尔可夫"],
+      "source_hint": "pumpkin-book.pdf"
+    },
+    {
+      "id": "q10",
+      "question": "什么是正则化，它有什么用",
+      "expected_keywords": ["正则化项"],
+      "source_hint": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "q11",
+      "question": "逻辑回归的代价函数是怎么推导的",
+      "expected_keywords": ["对数似然"],
+      "source_hint": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "q12",
+      "question": "神经网络的反向传播算法是怎么工作的",
+      "expected_keywords": ["反向传播", "链式法则"],
+      "source_hint": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "q13",
+      "question": "特征缩放和均值归一化怎么做",
+      "expected_keywords": ["特征缩放", "均值归一化"],
+      "source_hint": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "q14",
+      "question": "如何判断模型是偏差问题还是方差问题",
+      "expected_keywords": ["高偏差", "高方差"],
+      "source_hint": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "q15",
+      "question": "RAG 是什么",
+      "expected_keywords": ["检索增强"],
+      "source_hint": "llm-universe.pdf"
+    },
+    {
+      "id": "q16",
+      "question": "如何选择向量数据库",
+      "expected_keywords": ["向量数据库"],
+      "source_hint": "llm-universe.pdf"
+    },
+    {
+      "id": "q17",
+      "question": "LangChain 有哪些核心组件",
+      "expected_keywords": ["核心组件"],
+      "source_hint": "llm-universe.pdf"
+    },
+    {
+      "id": "q18",
+      "question": "什么是提示词，怎么设计提示词",
+      "expected_keywords": ["提示词"],
+      "source_hint": "llm-universe.pdf"
+    },
+    {
+      "id": "q19",
+      "question": "Streamlit 如何搭建大模型应用界面",
+      "expected_keywords": ["Streamlit"],
+      "source_hint": "llm-universe.pdf"
+    },
+    {
+      "id": "q20",
+      "question": "RAG 有哪些好处",
+      "expected_keywords": ["好处", "Benefits"],
+      "source_hint": "test_document.pdf",
+      "note": "S1 用过的那道题，保留以观察前后一致性"
+    }
+  ]
+}
