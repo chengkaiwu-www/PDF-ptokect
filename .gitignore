@@ -22,3 +22,8 @@ data/vector_store/
 
 # 本地模型权重：体积大（百 MB 级），可用 huggingface_hub 走镜像站重新下载，不入库
 models/
+
+# 语料 PDF：体积大（数十 MB）且属第三方版权材料，不入库。
+# 用 scripts/download_corpus.py 一键获取；test_document.pdf 是本项目自带的英文测试样例，保留入库
+data/pdfs/*.pdf
+!data/pdfs/test_document.pdf
