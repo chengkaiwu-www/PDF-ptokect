@@ -19,8 +19,19 @@ MODELS_DIR = BASE_DIR / "models"
 PDF_DIR.mkdir(parents=True, exist_ok=True)
 VECTOR_STORE_DIR.mkdir(parents=True, exist_ok=True)
 
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
+# --- 切分参数（S2 起支持单变量对照实验，均可用环境变量覆盖）---
+# CHUNK_UNIT: "char" 按字符数 | "token" 按 embedding 模型的 token 数
+#   为什么需要 token：embedding 模型的输入上限是按 token 算的（bge-small-zh 为 512）。
+#   中文约 1 字 = 1 token，而英文约 3.5 字 = 1 token，
+#   所以「1000 字符」对英文安全、对中文必然超限被静默截断。
+# CHUNK_NORMALIZE: 是否先把 PDF 物理行合并成语义段落
+# CHUNK_NORMALIZE 默认关闭：实测把 PDF 物理行合并成语义段落反而使指标下降
+# （Hit@1 0.60 -> 0.55），因为小标题被并进上一段、破坏了 "\n\n" 分隔符。
+# 代码保留以便复现该负面结论，详见 README「实验 6」。
+CHUNK_UNIT = os.getenv("CHUNK_UNIT", "token")
+CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "384"))
+CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "80"))
+CHUNK_NORMALIZE = os.getenv("CHUNK_NORMALIZE", "0") == "1"
 
 # --- Embedding 模型 ---
 # 取值可以是 HuggingFace 模型名（如 "BAAI/bge-m3"），也可以是本地模型目录路径。
