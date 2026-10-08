@@ -1,17 +1,28 @@
-from typing import List
+# 必须先导入 config：它会在模块顶部设置 HF_ENDPOINT（镜像站），
+# 早于 sentence_transformers / huggingface_hub 的导入才能生效。
+from config.config import EMBEDDING_MODEL
+
+from typing import List, Optional
+
 from langchain_core.embeddings import Embeddings
 from sentence_transformers import SentenceTransformer
+
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
 
 class LocalEmbeddings(Embeddings):
-    """Local sentence-transformers embedding model."""
+    """
+    基于 sentence-transformers 的本地 embedding 模型。
 
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
-        logger.info(f"Loading embedding model: {model_name}")
-        self.model = SentenceTransformer(model_name)
+    默认加载 config.EMBEDDING_MODEL 指定的模型，也可由构造参数覆盖。
+    """
+
+    def __init__(self, model_name: Optional[str] = None):
+        self.model_name = model_name or EMBEDDING_MODEL
+        logger.info(f"Loading embedding model: {self.model_name}")
+        self.model = SentenceTransformer(self.model_name)
         logger.info(f"Embedding model loaded (dim={self.model.get_embedding_dimension()})")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
