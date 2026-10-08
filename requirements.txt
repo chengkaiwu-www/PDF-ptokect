@@ -3,6 +3,10 @@ langchain-community>=0.0.10
 langchain-core>=0.1.0
 langchain-deepseek>=0.1.0
 langchain-text-splitters>=0.2.0
-pypdf>=3.17.0
+pypdfium2>=4.0.0
 sentence-transformers>=2.2.2
+transformers>=4.30.0
 python-dotenv>=1.0.0
+
+# 辅助脚本用：create_test_pdf.py 生成英文测试 PDF
+reportlab>=4.0.0

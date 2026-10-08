@@ -47,8 +47,8 @@ class RAGPipeline:
             source = metadata.get("source", "unknown")
             content = doc.get("page_content", "")
 
-            # 展示给人和 LLM 的页码必须是 1 基的。PyPDFLoader 提供的 page_label
-            # 正好是这个语义（PDF 第 1 页 -> "1"），优先使用；某些 loader 不带该
+            # 展示给人和 LLM 的页码必须是 1 基的。loader 提供的 page_label
+            # 正好是这个语义（PDF 第 1 页 -> "1"），优先使用；若某个 loader 不带该
             # 字段，则回退到 0 基的 page + 1，避免出现 "Page: 0" 这种误读。
             page = metadata.get("page_label")
             if page is None:
