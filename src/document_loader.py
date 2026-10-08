@@ -35,15 +35,10 @@ def load_pdf_documents(pdf_directory: Path) -> List[Document]:
             logger.info(f"Loading PDF: {pdf_file.name}")
             loader = PyPDFLoader(str(pdf_file))
             docs = loader.load()
-
-            # PyPDFLoader 写入的 metadata["page"] 是 0 基下标（PDF 第 1 页 -> page=0），
-            # 直接展示会显示 "Page: 0"。在「PDF -> Document」这个边界上统一规范化为
-            # 1 基页码，下游（展示、过滤、引用溯源）拿到的就都是人类可读的页码，
-            # 避免每一处消费方各写一次 +1（off-by-one 是最容易埋雷的一类 bug）。
-            for doc in docs:
-                if isinstance(doc.metadata.get("page"), int):
-                    doc.metadata["page"] += 1
-
+            # 注意：PyPDFLoader 生成的 metadata 里有两个页码字段，不要混淆——
+            #   page       : 0 基下标，供程序做索引（PDF 第 1 页 -> page=0）
+            #   page_label : 1 基的展示标签，等于人翻 PDF 时看到的页码
+            # 这里保持原样不做修改，展示场景由 rag_pipeline 负责挑选正确的字段。
             logger.info(f"Loaded {len(docs)} page(s) from {pdf_file.name}")
             documents.extend(docs)
         except Exception as e:
