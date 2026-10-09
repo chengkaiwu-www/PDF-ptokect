@@ -1,0 +1,242 @@
+{
+  "mode": "synth",
+  "dim": 512,
+  "corpus_size": 1857,
+  "queries": 20,
+  "k": 4,
+  "repeats": 3,
+  "results": {
+    "2000": [
+      {
+        "method": "brute (numpy)",
+        "param": "-",
+        "build_sec": 0.0,
+        "latency_ms_per_query": 0.060889997985213995,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss flat",
+        "param": "-",
+        "build_sec": 0.0014388998970389366,
+        "latency_ms_per_query": 0.0549100028971831,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=16",
+        "build_sec": 0.07731280010193586,
+        "latency_ms_per_query": 0.016013334970921278,
+        "recall_at_k": 0.6875
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=64",
+        "build_sec": 0.07731280010193586,
+        "latency_ms_per_query": 0.030888333761443693,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=256",
+        "build_sec": 0.07731280010193586,
+        "latency_ms_per_query": 0.07151333071912327,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=50 nprobe=1",
+        "build_sec": 0.022461999906226993,
+        "latency_ms_per_query": 0.01109499717131257,
+        "recall_at_k": 0.0375
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=50 nprobe=8",
+        "build_sec": 0.022461999906226993,
+        "latency_ms_per_query": 0.010423331211010616,
+        "recall_at_k": 0.3125
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=50 nprobe=32",
+        "build_sec": 0.022461999906226993,
+        "latency_ms_per_query": 0.023706668677429356,
+        "recall_at_k": 0.875
+      }
+    ],
+    "20000": [
+      {
+        "method": "brute (numpy)",
+        "param": "-",
+        "build_sec": 0.0,
+        "latency_ms_per_query": 0.5401150013009708,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss flat",
+        "param": "-",
+        "build_sec": 0.013567200163379312,
+        "latency_ms_per_query": 0.5073450001267095,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=16",
+        "build_sec": 22.004851900041103,
+        "latency_ms_per_query": 0.11747833341360092,
+        "recall_at_k": 0.175
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=64",
+        "build_sec": 22.004851900041103,
+        "latency_ms_per_query": 0.2927566684472064,
+        "recall_at_k": 0.4625
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=256",
+        "build_sec": 22.004851900041103,
+        "latency_ms_per_query": 0.8259050004805127,
+        "recall_at_k": 0.85
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=1",
+        "build_sec": 0.30132299987599254,
+        "latency_ms_per_query": 0.009416664640108745,
+        "recall_at_k": 0.0125
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=8",
+        "build_sec": 0.30132299987599254,
+        "latency_ms_per_query": 0.02379500074312091,
+        "recall_at_k": 0.0625
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=32",
+        "build_sec": 0.30132299987599254,
+        "latency_ms_per_query": 0.09081333021943769,
+        "recall_at_k": 0.3375
+      }
+    ],
+    "100000": [
+      {
+        "method": "brute (numpy)",
+        "param": "-",
+        "build_sec": 0.0,
+        "latency_ms_per_query": 2.5706916659449535,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss flat",
+        "param": "-",
+        "build_sec": 0.08154879999347031,
+        "latency_ms_per_query": 2.616198333756377,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=16",
+        "build_sec": 175.05396040016785,
+        "latency_ms_per_query": 0.13864666689187288,
+        "recall_at_k": 0.0625
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=64",
+        "build_sec": 175.05396040016785,
+        "latency_ms_per_query": 0.4360883341481288,
+        "recall_at_k": 0.1625
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=256",
+        "build_sec": 175.05396040016785,
+        "latency_ms_per_query": 1.3183533330447972,
+        "recall_at_k": 0.5125
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=1",
+        "build_sec": 1.0939285999629647,
+        "latency_ms_per_query": 0.01612833390633265,
+        "recall_at_k": 0.0375
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=8",
+        "build_sec": 1.0939285999629647,
+        "latency_ms_per_query": 0.14309333249305684,
+        "recall_at_k": 0.125
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=32",
+        "build_sec": 1.0939285999629647,
+        "latency_ms_per_query": 0.6174966654119391,
+        "recall_at_k": 0.3375
+      }
+    ],
+    "200000": [
+      {
+        "method": "brute (numpy)",
+        "param": "-",
+        "build_sec": 0.0,
+        "latency_ms_per_query": 4.977608332410455,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss flat",
+        "param": "-",
+        "build_sec": 0.15398359997197986,
+        "latency_ms_per_query": 5.244155003068348,
+        "recall_at_k": 1.0
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=16",
+        "build_sec": 401.7420264999382,
+        "latency_ms_per_query": 0.1721266657114029,
+        "recall_at_k": 0.0375
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=64",
+        "build_sec": 401.7420264999382,
+        "latency_ms_per_query": 0.45832499939327437,
+        "recall_at_k": 0.075
+      },
+      {
+        "method": "faiss hnsw",
+        "param": "M=32 efSearch=256",
+        "build_sec": 401.7420264999382,
+        "latency_ms_per_query": 1.581373333465308,
+        "recall_at_k": 0.25
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=1",
+        "build_sec": 1.489175499882549,
+        "latency_ms_per_query": 0.0443900004029274,
+        "recall_at_k": 0.0125
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=8",
+        "build_sec": 1.489175499882549,
+        "latency_ms_per_query": 0.3115949997057518,
+        "recall_at_k": 0.1
+      },
+      {
+        "method": "faiss ivf",
+        "param": "nlist=256 nprobe=32",
+        "build_sec": 1.489175499882549,
+        "latency_ms_per_query": 1.1977183322111764,
+        "recall_at_k": 0.35
+      }
+    ]
+  }
+}
