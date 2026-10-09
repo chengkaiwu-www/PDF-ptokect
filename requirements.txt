@@ -8,5 +8,11 @@ sentence-transformers>=2.2.2
 transformers>=4.30.0
 python-dotenv>=1.0.0
 
+# 向量索引（S3）。版本必须锁 1.7.4：
+#   1.8.x / 1.15.x 在本机 Windows + Anaconda 环境下，IndexHNSWFlat 的 add()
+#   会直接段错误（OpenMP 运行时 DLL 冲突，MKL 的 libiomp5md 与 faiss 自带的
+#   OpenMP 同时加载）。1.7.4 的 wheel 不触发该问题，flat / hnsw / ivf 全部可用。
+faiss-cpu==1.7.4
+
 # 辅助脚本用：create_test_pdf.py 生成英文测试 PDF
 reportlab>=4.0.0

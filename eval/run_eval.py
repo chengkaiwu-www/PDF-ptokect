@@ -10,12 +10,17 @@ S5 会在此基础上扩展成完整评测体系（更多问题 + 生成侧指�
   有效性问题：若全库没有任何块包含该题的关键词，说明题目或语料有问题，
               标记为 invalid 并从指标中剔除——避免拿一道「根本无答案」的题拉低分数
 
+S3 改动：不再自己读 index.json 算余弦，而是**直接调用线上向量库**
+（src.vector_store），这样评的就是真实检索路径。做 chunk 策略 A/B 时请固定
+VECTOR_BACKEND=brute，保证与历史数字同口径（brute 是精确检索 = 真值）。
+
 注意：关键词命中是 Hit Rate 的廉价实现（不需要人工标注「哪一块是标准答案」）。
 它是代理指标，不是真值；结论只能横向比较（同一批题、同一套判定），不能当绝对分数。
 
 用法：
-  D:\\anaconda\\python.exe eval/run_eval.py --index data/vector_store/index.json --top-k 4
-  D:\\anaconda\\python.exe eval/run_eval.py --questions eval/questions.json --detail
+  D:\\anaconda\\python.exe eval/run_eval.py --top-k 4
+  D:\\anaconda\\python.exe eval/run_eval.py --backend faiss --faiss-index-type hnsw
+  set VECTOR_BACKEND=brute && D:\\anaconda\\python.exe eval/run_eval.py --detail
 """
 
 import argparse
@@ -25,23 +30,13 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
-import numpy as np
-
 # 保证能 import 到项目根目录下的 config / src
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from config.config import VECTOR_STORE_DIR, RETRIEVAL_TOP_K  # noqa: E402
+from config.config import VECTOR_STORE_DIR, RETRIEVAL_TOP_K, VECTOR_BACKEND  # noqa: E402
 from src.embedding import get_embedding_model  # noqa: E402
-
-
-def load_index(index_path: Path) -> Dict[str, Any]:
-    if not index_path.exists():
-        print(f"[ERROR] 索引文件不存在: {index_path}")
-        print("        先执行: python main.py --recreate")
-        sys.exit(1)
-    with open(index_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+from src.vector_store import load_vector_store  # noqa: E402
 
 
 def load_questions(path: Path) -> List[Dict[str, Any]]:
@@ -53,21 +48,10 @@ def load_questions(path: Path) -> List[Dict[str, Any]]:
     return data["questions"] if isinstance(data, dict) else data
 
 
-def cosine_scores(index: Dict[str, Any], query_vec: np.ndarray) -> np.ndarray:
-    """对所有块算与 query 的余弦相似度。等价于「暴力检索」，与线上 SimpleVectorStore 一致。"""
-    doc_vecs = np.asarray(index["embeddings"], dtype=np.float32)
-    # 预归一化能让余弦退化为点积；模型输出未归一化，这里显式归一化，避免除零
-    doc_norms = np.linalg.norm(doc_vecs, axis=1, keepdims=True)
-    doc_norms[doc_norms == 0] = 1e-12
-    q_norm = np.linalg.norm(query_vec)
-    q_norm = q_norm if q_norm > 0 else 1e-12
-    return (doc_vecs / doc_norms) @ (query_vec / q_norm)
-
-
-def corpus_keyword_coverage(index: Dict[str, Any], keywords: List[str]) -> int:
+def corpus_keyword_coverage(documents: List[Dict[str, Any]], keywords: List[str]) -> int:
     """统计全库中有多少块包含该题的关键词，用于判断题目是否有效。"""
     count = 0
-    for doc in index["documents"]:
+    for doc in documents:
         text = doc.get("page_content", "")
         if any(k in text for k in keywords):
             count += 1
@@ -75,17 +59,25 @@ def corpus_keyword_coverage(index: Dict[str, Any], keywords: List[str]) -> int:
 
 
 def evaluate(
-    index: Dict[str, Any],
+    store,
     questions: List[Dict[str, Any]],
     embedding_model,
     top_k: int,
     detail: bool,
 ) -> Dict[str, Any]:
-    n_chunks = len(index["documents"])
-    dim = len(index["embeddings"][0]) if index["embeddings"] else 0
+    documents = store.documents
+    n_chunks = len(documents)
+    dim = int(store.meta.get("dim") or 0)
+    # 取实例上的实时类型：--faiss-index-type 会在内存里重建索引，
+    # 此时磁盘 meta 记的类型（可能是上次落盘的）已经过时
+    live_type = getattr(store, "index_type", None) or store.meta.get("index_type", "-")
 
     print("=" * 78)
-    print(f"语料块数: {n_chunks}    向量维度: {dim}    评测题目: {len(questions)}    Top-K: {top_k}")
+    print(
+        f"语料块数: {n_chunks}    向量维度: {dim}    "
+        f"检索后端: {store.backend_name}/{live_type}    "
+        f"评测题目: {len(questions)}    Top-K: {top_k}"
+    )
     print("=" * 78)
 
     per_question: List[Dict[str, Any]] = []
@@ -99,17 +91,18 @@ def evaluate(
         question = q["question"]
         keywords = q.get("expected_keywords", [])
 
-        coverage = corpus_keyword_coverage(index, keywords) if keywords else 0
-        query_vec = np.asarray(embedding_model.embed_query(question), dtype=np.float32)
-        scores = cosine_scores(index, query_vec)
+        coverage = corpus_keyword_coverage(documents, keywords) if keywords else 0
+        query_vec = embedding_model.embed_query(question)
 
-        # 取前 top_k（不设阈值截断，保证口径稳定：始终看前 k 名）
-        order = np.argsort(scores)[::-1][:top_k]
-        ranked = [(int(i), float(scores[i])) for i in order]
+        # 走线上检索路径；threshold 显式关掉，保证口径稳定：始终看前 k 名
+        hits = store.similarity_search(
+            query_vec, k=top_k, threshold=float("-inf"), with_scores=True
+        )
+        ranked = [(doc, float(score)) for doc, score in hits]
 
         first_hit_rank = None
-        for rank, (idx, _score) in enumerate(ranked, start=1):
-            text = index["documents"][idx].get("page_content", "")
+        for rank, (doc, _score) in enumerate(ranked, start=1):
+            text = doc.get("page_content", "")
             if keywords and any(k in text for k in keywords):
                 first_hit_rank = rank
                 break
@@ -129,10 +122,10 @@ def evaluate(
             hit_at_1 += 1 if first_hit_rank == 1 else 0
             rr_sum += (1.0 / first_hit_rank) if first_hit_rank else 0.0
 
-        top1 = ranked[0] if ranked else (None, 0.0)
+        top1_doc, top1_score = ranked[0] if ranked else (None, 0.0)
         top1_src = (
-            Path(index["documents"][top1[0]].get("metadata", {}).get("source", "?")).name
-            if top1[0] is not None else "-"
+            Path(top1_doc.get("metadata", {}).get("source", "?")).name
+            if top1_doc is not None else "-"
         )
 
         per_question.append({
@@ -142,23 +135,25 @@ def evaluate(
             "first_hit_rank": first_hit_rank,
             "corpus_coverage": coverage,
             "top1_source": top1_src,
-            "top1_score": round(top1[1], 4),
+            "top1_score": round(top1_score, 4),
             "note": q.get("note", ""),
         })
 
         if detail:
             print(f"\n[{qid}] {status}  题目: {question}")
             print(f"      库中含关键词的块数: {coverage}   首个命中排名: {first_hit_rank}")
-            for rank, (idx, score) in enumerate(ranked, start=1):
-                meta = index["documents"][idx].get("metadata", {})
+            for rank, (doc, score) in enumerate(ranked, start=1):
+                meta = doc.get("metadata", {})
                 src = Path(meta.get("source", "?")).name
                 page = meta.get("page_label", meta.get("page", "?"))
-                snippet = index["documents"][idx].get("page_content", "").replace("\n", " ")[:60]
-                mark = "*" if (keywords and any(k in index["documents"][idx].get("page_content", "") for k in keywords)) else " "
-                print(f"      {mark} #{rank} score={score:.4f}  {src} p{page}  {snippet}")
+                snippet = doc.get("page_content", "").replace("\n", " ")[:60]
+                hit = keywords and any(k in doc.get("page_content", "") for k in keywords)
+                print(f"      {'*' if hit else ' '} #{rank} score={score:.4f}  {src} p{page}  {snippet}")
 
     elapsed = time.time() - t0
     summary = {
+        "backend": store.backend_name,
+        "index_type": live_type,
         "chunks": n_chunks,
         "dim": dim,
         "top_k": top_k,
@@ -197,20 +192,34 @@ def evaluate(
 
 def main():
     parser = argparse.ArgumentParser(description="检索质量评测")
-    parser.add_argument("--index", type=str, default=str(VECTOR_STORE_DIR / "index.json"),
-                        help="索引文件路径")
+    parser.add_argument("--store-dir", type=str, default=str(VECTOR_STORE_DIR),
+                        help="向量库目录（含 documents.json / embeddings.npy）")
     parser.add_argument("--questions", type=str, default=str(PROJECT_ROOT / "eval" / "questions.json"),
                         help="问题集 JSON 路径")
     parser.add_argument("--top-k", type=int, default=RETRIEVAL_TOP_K, help="召回条数")
+    parser.add_argument("--backend", type=str, default=VECTOR_BACKEND,
+                        help="检索后端：brute | faiss")
+    parser.add_argument("--faiss-index-type", type=str, default=None,
+                        help="FAISS 索引类型：flat | hnsw | ivf（仅 backend=faiss 生效）")
     parser.add_argument("--detail", action="store_true", help="逐题打印召回明细")
     parser.add_argument("--save", type=str, default="", help="把结果 JSON 存到指定路径")
     args = parser.parse_args()
 
-    index = load_index(Path(args.index))
+    if args.faiss_index_type:
+        print(f"[INFO] FAISS 索引类型覆盖为 {args.faiss_index_type}（内存中按需重建，不落盘）")
+
     questions = load_questions(Path(args.questions))
     embedding_model = get_embedding_model()
 
-    result = evaluate(index, questions, embedding_model, args.top_k, args.detail)
+    store = load_vector_store(
+        Path(args.store_dir), backend=args.backend, index_type=args.faiss_index_type
+    )
+    if store is None:
+        print(f"[ERROR] 未找到向量库: {args.store_dir}")
+        print("        先执行: python main.py --recreate")
+        sys.exit(1)
+
+    result = evaluate(store, questions, embedding_model, args.top_k, args.detail)
 
     if args.save:
         out = Path(args.save)

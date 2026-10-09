@@ -9,7 +9,7 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 
-def _load_single_pdf(pdf_path: Path) -> List[Document]:
+def load_pdf_file(pdf_path: Path) -> List[Document]:
     """
     用 pypdfium2（PDFium 引擎）逐页抽取文字。
 
@@ -86,7 +86,7 @@ def load_pdf_documents(pdf_directory: Path) -> List[Document]:
     for pdf_file in pdf_files:
         try:
             logger.info(f"Loading PDF: {pdf_file.name}")
-            docs = _load_single_pdf(pdf_file)
+            docs = load_pdf_file(pdf_file)
             chars = sum(len(d.page_content) for d in docs)
             logger.info(f"Loaded {len(docs)} page(s) / {chars} chars from {pdf_file.name}")
             documents.extend(docs)
