@@ -264,6 +264,10 @@ python eval/run_eval.py --retriever hybrid            # 关键词口径
 python eval/run_eval.py --retriever hybrid --judge     # 语义口径
 ```
 
+> **注意默认值有意不一致**：`main.py` 的默认检索模式是 `RETRIEVAL_MODE=hybrid`（线上要好效果），
+> 而 `eval/run_eval.py` 的 `--retriever` 默认是 `vector`（评测要固定基线口径，与 S2/S3 的历史数字可比）。
+> 这不是 bug —— **评测默认值一旦跟着线上变，历史数据就失去可比性**。
+
 **为什么必须两套**：实测同一批检索结果，换判定器后 `vector` 的 Hit@1 从 0.60 变 0.90，
 而算法之间的差距几乎消失。**只跑一套口径，你测到的是判定器，不是检索方法。**
 
