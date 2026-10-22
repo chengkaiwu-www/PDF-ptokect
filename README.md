@@ -16,15 +16,19 @@ PDF-ptokect/
 │   ├── text_splitter.py     # 2. 文本切分（RecursiveCharacterTextSplitter，支持 token 计数）
 │   ├── embedding.py         # 3. 向量化（sentence-transformers）
 │   ├── vector_utils.py      # L2 归一化 / 内容指纹（索引层与检索层的公共约定）
-│   ├── vector_store.py      # 4. 向量库：暴力检索 + FAISS（flat/hnsw/ivf），支持增量与去重
-│   └── rag_pipeline.py      # 5. 检索 + 组装 prompt + 调 LLM
+│   ├── vector_store.py      # 4. 稠密检索：暴力检索 + FAISS（flat/hnsw/ivf），支持增量与去重
+│   ├── bm25.py              # 4'. 稀疏检索：自研 Okapi BM25（jieba 分词 + 倒排表）
+│   ├── hybrid_retriever.py  # 5. 多通道召回 + RRF 融合 + 可选精排（检索层唯一入口）
+│   ├── reranker.py          # 5'. Cross-Encoder 精排（bge-reranker-base）
+│   └── rag_pipeline.py      # 6. 组装 prompt + 调 LLM（只管生成编排，不管检索策略）
 ├── eval/
 │   ├── questions.json       # 固定问题集（20 题，每题带命中关键词）
-│   └── run_eval.py          # 检索评测脚本：Hit@1 / Hit@k / MRR
+│   ├── run_eval.py          # 检索评测：Hit@1 / Hit@k / MRR，四种策略可切换
+│   └── judge.py             # 第二套判定口径：LLM-as-Judge（带缓存）
 ├── scripts/
 │   ├── download_corpus.py   # 一键获取测试语料 PDF
 │   └── benchmark_ann.py     # ANN 规模实验：暴力 vs FAISS(flat/hnsw/ivf) 的延迟与召回
-├── results/                 # benchmark 原始输出（JSON，入库作为实验证据）
+├── results/                 # benchmark 原始输出 + LLM 判定缓存（入库作为实验证据）
 ├── utils/
 │   └── logger.py            # 统一日志
 ├── models/                  # 本地 embedding 模型（不入库，见「环境准备」）
@@ -85,7 +89,25 @@ PDF-ptokect/
    > 用 `allow_patterns` 跳过冗余的 `pytorch_model.bin`，下载量从 183MB 降到 92MB。
    > 也可直接指定 HuggingFace 模型名，例如 `EMBEDDING_MODEL=BAAI/bge-m3`（会自动走镜像下载）。
 
-4. 准备语料（不入库，需自行下载）：
+4. 准备精排模型（**可选**，只有用 `--rerank` 或 `RERANK_ENABLED=1` 时才需要，约 1.1GB）：
+
+   ```bash
+   python -c "
+   import os
+   os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+   from huggingface_hub import snapshot_download
+   snapshot_download(
+       repo_id='BAAI/bge-reranker-base',
+       local_dir='models/bge-reranker-base',
+       allow_patterns=['*.json', '*.txt', '*.model', '*.safetensors'],
+       ignore_patterns=['*.onnx', '*.h5', 'pytorch_model.bin'],
+   )
+   "
+   ```
+
+   > 不装也能跑：默认 `RERANK_ENABLED=0`，混合检索（向量 + BM25 + RRF）不依赖它。
+
+5. 准备语料（不入库，需自行下载）：
 
    ```bash
    python scripts/download_corpus.py            # GitHub 直连
@@ -125,9 +147,30 @@ python eval/run_eval.py --detail --save results/eval.json
 python eval/run_eval.py --backend brute
 python eval/run_eval.py --backend faiss --faiss-index-type hnsw
 
+# 对比四种检索策略（S4：单变量对照）
+python eval/run_eval.py --retriever vector            # 纯向量（S3 基线）
+python eval/run_eval.py --retriever bm25              # 纯 BM25
+python eval/run_eval.py --retriever hybrid            # 向量 + BM25 + RRF
+python eval/run_eval.py --retriever hybrid --rerank   # 再加 Cross-Encoder 精排
+
+# 换第二套判定口径（LLM-as-Judge，需 API key；判定结果会缓存到 results/）
+python eval/run_eval.py --retriever hybrid --judge
+
+# 参数敏感性
+python eval/run_eval.py --retriever hybrid --rrf-k 10
+python eval/run_eval.py --retriever hybrid --rrf-weight "1,2"    # vector:1, bm25:2
+python eval/run_eval.py --retriever hybrid --candidate-k 10
+
 # ANN 规模实验：暴力 vs FAISS(flat/hnsw/ivf) 的延迟与 Recall@k
 python scripts/benchmark_ann.py --mode synth --out results/ann_benchmark_synth.json
 python scripts/benchmark_ann.py --mode corpus --real-queries
+```
+
+问答时也可以直接切检索策略：
+
+```bash
+python main.py --query "什么是 RAG？" --retriever hybrid --rerank
+python main.py --query "什么是 RAG？" --no-rerank
 ```
 
 未配置 `DEEPSEEK_API_KEY` 时，程序仍可运行**检索部分**，只是不调用 LLM 生成答案。
@@ -153,6 +196,11 @@ python scripts/benchmark_ann.py --mode corpus --real-queries
 | `FAISS_EF_SEARCH` | `64` | HNSW 查询候选池（运行时参数，调大更准更慢） |
 | `FAISS_NLIST` | `256` | IVF 聚类簇数 |
 | `FAISS_NPROBE` | `8` | IVF 查询时搜索的簇数 |
+| `RETRIEVAL_MODE` | `hybrid` | 召回通道：`vector` / `bm25` / `hybrid`（双通道 + RRF） |
+| `RETRIEVAL_CANDIDATE_K` | `50` | 每路召回候选数（必须远大于 `RETRIEVAL_TOP_K`） |
+| `RRF_K` | `60` | RRF 平滑常数；越小头部优势越大 |
+| `RERANK_ENABLED` | `0` | 是否启用 Cross-Encoder 精排 |
+| `RERANKER_MODEL` | `models/bge-reranker-base` | 精排模型路径 |
 
 > **阈值必须随模型重新标定**：`RETRIEVAL_SCORE_THRESHOLD` 的含义取决于 embedding 模型的分数分布
 > （bge 和 MiniLM 的尺度完全不同），照抄别人的阈值是没有意义的。
@@ -173,28 +221,63 @@ python scripts/benchmark_ann.py --mode corpus --real-queries
   实测中文 PDF 抽取失败，见实验 3。
 - **为什么切分按 token 而不是按字符？**
   embedding 模型的输入上限是按 token 算的，按字符切会让中文块超限被静默截断，见实验 4。
+- **为什么向量检索之外还要加 BM25？**
+  两者的**错误模式不同**：向量把罕见词「平均」掉，BM25 遇到改写就零分。
+  失败集合交集不大，取并集才有收益。但注意实验 7 的结果：在当前的 20 题集上，
+  混合检索**没有**在 Hit@1 上打败纯向量——加进来是因为它提供了另一种错误模式，
+  而不是因为它让指标更好看。
+- **为什么用 RRF 融合而不是加权分数和？**
+  余弦分数 ∈ [-1,1]、BM25 无上界，直接相加会被量纲大的一方支配，权重也失去意义。
+  RRF 只看名次，跨模型/跨语料不用重新调参。代价是丢掉分数差距信息，
+  因此它只做融合，排序精度交给精排。
+- **为什么精排不直接用在全库上？**
+  Cross-Encoder 要把 `[query, doc]` 拼起来过一次完整前向，**无法预计算**。
+  50 个候选实测 625 ms；全库 1857 个候选就是 20 秒以上。
+  所以是两段式：Bi-Encoder 召回（快、粗、可预计算）→ Cross-Encoder 精排（慢、准、候选少）。
+- **`use_reranker` 为什么从 `RAGPipeline` 里删掉了？**
+  它原本是「声明了但从未生效的参数」。根因不是没实现，而是**放错了层**：
+  检索策略应由检索层决定，`RAGPipeline` 只负责组装 context 和调 LLM。
+  挪到 `HybridRetriever(reranker=...)` 之后，做检索 A/B 完全不用碰生成代码。
 - **embedding 模型**：`BAAI/bge-small-zh-v1.5`（512 维，中文）。取代了最初的
   `all-MiniLM-L6-v2`——后者是纯英文模型，见实验 1。
 
 ## 评测方法（`eval/`）
 
-`eval/questions.json` 是 20 道固定问题（覆盖 3 篇文档），每题带 `expected_keywords`。
-`eval/run_eval.py` **直接调用线上向量库**（`src.vector_store`）做检索并统计：
+`eval/questions.json` 是 20 道固定问题（覆盖 3 篇文档）。`eval/run_eval.py`
+**直接调用线上检索路径**（`create_hybrid_retriever`，与 `main.py` 同一个工厂）并统计：
 
 | 指标 | 含义 |
 | --- | --- |
-| Hit@1 | 排第一的块是否包含任意关键词 |
-| Hit@k | 前 k 个块里是否有命中 |
+| Hit@1 | 排第一的块是否被判定为「包含答案」 |
+| Hit@k | 前 k 个块里是否有被判定为「包含答案」的 |
 | MRR | 首个命中块排名的倒数平均值（第 1 位 = 1.0） |
+
+**两套判定口径**，这是 S4 学到的关键一课（见实验 7）：
+
+| 口径 | 做法 | 特点 |
+| --- | --- | --- |
+| 关键词（默认） | 块里是否出现 `expected_keywords` 中任一词 | 便宜、确定、可复现；但**系统性偏袒字面匹配** |
+| 语义（`--judge`） | LLM 判断「这块能否为回答问题提供有用信息」 | 不受用词影响；但慢、要钱、结果需缓存 |
+
+```bash
+python eval/run_eval.py --retriever hybrid            # 关键词口径
+python eval/run_eval.py --retriever hybrid --judge     # 语义口径
+```
+
+**为什么必须两套**：实测同一批检索结果，换判定器后 `vector` 的 Hit@1 从 0.60 变 0.90，
+而算法之间的差距几乎消失。**只跑一套口径，你测到的是判定器，不是检索方法。**
 
 做 chunk 策略对照实验时请固定 `--backend brute`（精确检索 = 真值），
 这样与历史数字同口径；比较向量库/索引类型时才切换后端。
 
 **这个指标的边界（必须说清楚）**：
-- 关键词命中是 Hit Rate 的**廉价代理**，不是人工标注的「标准答案块」，会低估检索质量——
-  模型可能召回了内容正确但用词不同的块。
+- 关键词命中是 Hit Rate 的**廉价代理**，不是人工标注的「标准答案块」。
+  实测它会产生假阴性（正确块没有原样出现关键词），见实验 7。
 - 关键词覆盖率事先统计过（避免出现太普遍的词导致指标失去区分度），但**题目之间难度并不均一**。
-- 因此它**只能用于同一批题、同一套判定下的横向比较**，不能当作绝对分数或对外宣称「准确率」。
+- 语义判定同样不是真值：judge 会被同形异义骗（问「线性判别分析 LDA」时它把
+  「LDA 主题模型」判成相关），也会受长度偏差影响。
+- 因此两套口径都**只能用于同一批题、同一判定下的横向比较**，不能当作绝对分数或对外宣称「准确率」。
+- **当前 Hit@4 在语义口径下已饱和到 1.00**，意味着这批题已经区分不出检索方法的优劣。
 
 ## 实验记录
 
@@ -401,6 +484,163 @@ chunk token 分布: min=15 median=492 max=950 (embedding 模型上限 512)
    原因是它内部用的是 C++ 的 `fopen`，不认 Unicode 路径。
    解法：改用 `faiss.serialize_index()` 只用内存序列化，落盘交给 Python 的 `open()`。
 
+### 实验 7 · 混合检索 + 精排（S4）—— 以及一次被指标骗到的经历
+
+这是本项目到目前为止**最有价值的一次实验**，因为它的结论不是「我的新方法更好」，
+而是「**我的评测方法把结论带偏了**」。
+
+#### 改动清单
+
+| 改动 | 说明 |
+| --- | --- |
+| 自研 BM25 | `src/bm25.py`，零第三方依赖。倒排表 + IDF + 词频饱和 + 长度归一化 |
+| 中文分词 | BM25 是词袋模型，中文不分词就等于把整段文本当一个「词」，直接失效 |
+| RRF 融合 | `src/hybrid_retriever.py`，只看名次不看分数，对分数尺度免疫 |
+| Cross-Encoder 精排 | `src/reranker.py`，`bge-reranker-base`，只对融合后的候选打分 |
+| 统一组装入口 | `create_hybrid_retriever` 同时被 `main.py` 与 `eval/` 调用 |
+| 第二套判定口径 | `eval/judge.py`，LLM-as-Judge + 磁盘缓存 |
+| `use_reranker` 归位 | 从 `RAGPipeline` 移到检索层——它不是「没实现的参数」，是**放错了层** |
+
+#### 为什么这两种检索能互补
+
+| | 向量（稠密） | BM25（稀疏） |
+| --- | --- | --- |
+| 强项 | 同义改写、语义相近 | 专有名词、编号、代码标识符 |
+| 弱项 | 罕见词被「平均」掉 | 换个说法就零分（无字面重叠 = 0） |
+
+两者的**失败集合交集不大**，所以取并集再重排能吃到两边长处。融合用 RRF：
+
+```
+RRF(d) = Σ_channel  w_channel / (k + rank_channel(d))        k 常取 60
+```
+
+为什么不用「加权分数和」：归一化后的余弦 ∈ [-1,1]，BM25 分数无上界，
+直接相加会被量纲大的一方支配。RRF 只看名次，跨模型、跨语料不需要重新调参。
+代价是**丢掉了分数差距信息**——所以它适合融合（求稳），精排交给 Cross-Encoder。
+
+#### (a) 第一套口径：关键词命中（沿用 S2/S3 的判定）
+
+`eval/questions.json` 里每题带 `expected_keywords`，判定方式是「召回块里是否出现任一关键词」。
+
+| 检索策略 | Hit@1 | Hit@4 | MRR | 平均延迟 |
+| --- | --- | --- | --- | --- |
+| `vector`（S3 基线） | 0.6000 | 0.7000 | 0.6417 | 10.8 ms |
+| `bm25` | 0.6500 | **0.9000** | **0.7667** | **1.9 ms** |
+| `hybrid`（RRF k=60, cand=50） | **0.7000** | 0.8000 | 0.7375 | 14.8 ms |
+| `hybrid` + `rerank` | **0.7000** | **0.9000** | 0.7792 | 639.4 ms |
+
+到这一步，很容易写下这样的结论：「**BM25 单独用就吊打向量检索**（Hit@4 0.90 vs 0.70），
+混合检索和精排都是多余的」。我当时差点就这么写了。
+
+#### (b) 转折：这个结论是判定口径的产物
+
+往下翻日志时发现不对。四个被判 MISS 的题，top1 长这样：
+
+| 题 | 期望关键词 | 实际 top1 是什么 | 判定 |
+| --- | --- | --- | --- |
+| q10 什么是正则化，它有什么用 | `正则化项` | 「第 3 周-**正则化**(Regularization) 112 但若 λ 的值太大了…」 | MISS |
+| q11 逻辑回归的代价函数怎么推导 | `对数似然` | 「6.4 **代价函数** 参考视频…」 | MISS |
+| q01 梯度下降的更新公式是什么 | `更新公式` | 「…梯度下降所做的就是反复执行这些**更新**」 | MISS |
+
+**这些块明显是相关的**，只是没有把关键词原样写出来。
+也就是说判定函数产生了**假阴性**，而且这个偏差有方向性：
+
+> 判定函数 = 字面匹配 ⟹ 字面匹配强的检索方法被系统性偏袒。
+> 而 BM25 的优化目标**正是**字面匹配。
+> 拿关键词命中率比较「向量 vs BM25」，等于用 BM25 的评分函数当裁判。
+
+于是加了第二套口径：`--judge`，让 LLM 判断「这块材料能否为回答问题提供有用信息」
+（不看用词，只看内容）。判定结果写入 `results/judge_cache.json`，带 prompt 版本号，
+保证可复现。
+
+| 检索策略 | Hit@1 | Hit@4 | MRR | 平均延迟 |
+| --- | --- | --- | --- | --- |
+| `vector` | 0.9000 | 1.0000 | 0.9417 | 12.2 ms |
+| `bm25` | 0.9000 | 1.0000 | 0.9500 | 2.0 ms |
+| `hybrid` | 0.9000 | 1.0000 | 0.9375 | 16.1 ms |
+| `hybrid` + `rerank` | **1.0000** | 1.0000 | **1.0000** | 643.3 ms |
+
+**结论完全反转**：
+
+1. `vector` 的 Hit@1 从 **0.60 涨到 0.90** —— 关键词口径把它低估了整整 0.30。
+   「BM25 吊打向量」是假象，两者的真实差距在 Hit@1 上是 **0**。
+2. 四种策略的 **Hit@4 全是 1.0000** —— 指标**饱和**了。这说明在「20 题 / 1857 块」这个
+   难度上，**检索根本不是我当前系统的瓶颈**：前 4 名里总能捞到相关内容。
+   真正还有区分度的只剩 Hit@1 和 MRR。
+3. **只有精排是稳健的赢家**：两套口径下 MRR 都最高（0.7792 / 1.0000），
+   语义口径下 Hit@1 达到 1.0000。代价是 **643 ms**，比 hybrid 慢 **40 倍**。
+
+**为什么精排能赢**：Cross-Encoder 把 `[query, doc]` 拼成一个序列过模型，
+query 的每个 token 都能直接看 doc 的每个 token；而向量检索是两边**各自独立**编码后
+比一个整体方向，token 级细节早就在池化时丢了。**这就是「召回用 Bi、精排用 Cross」的原因**：
+一个可预计算（快、粗、可扩展），一个要逐对前向（慢、准、候选数必须小）。
+
+#### (c) 参数敏感性：全是噪声，别当真
+
+三组参数扫描（其余固定，`--top-k 4`，关键词口径）：
+
+| 参数 | 取值 | Hit@1 | Hit@4 | MRR |
+| --- | --- | --- | --- | --- |
+| `RRF k` | 10 / 60 / 200 | 0.70 / 0.70 / 0.70 | 0.85 / 0.80 / 0.80 | 0.7500 / 0.7375 / 0.7375 |
+| 权重 `v,bm25` | `1,2` / `1,3` / `2,1` | 0.75 / 0.75 / 0.65 | 0.80 / 0.80 / 0.75 | 0.7667 / 0.7750 / 0.7000 |
+| `candidate_k` | 10 / 50 / 100 | 0.70 / 0.70 / 0.70 | 0.85 / 0.80 / 0.80 | 0.7542 / 0.7375 / 0.7375 |
+
+看起来「k=10 最好」「权重 1,3 最好」——**但这全是幻觉**：
+
+- 20 题里 **1 题 = 0.05**。0.80 → 0.85 只是**一题之差**。
+- 这个样本量下，单题翻转的概率极高，参数排名在不同 prompt / 不同判定器下就会变。
+- 所以：**这些参数只有方向性参考价值，具体数值不能写进结论，更不能拿去当默认值炫耀。**
+  要定参必须先把评测集扩到 50+ 题并做交叉验证（S5）。
+
+**唯一可信的结论是方向性的**：同一通道质量差距大时，等权融合会拖累强通道
+（`v,bm25 = 2,1` 明显最差，因为它压低了表现更好的 BM25）；
+`candidate_k` 调大并没有改善，说明「候选池越大越好」是错的直觉——
+两路都勉强命中的「弱共识」块反而会挤掉单路强命中的块。
+
+#### (d) 延迟分解（与判定口径无关的硬事实）
+
+| 环节 | 耗时 | 说明 |
+| --- | --- | --- |
+| BM25 检索 | **1.9 ms** | 只遍历 query 词的倒排链，不扫全库，也不需要 embedding 前向 |
+| 向量检索 | 10.8 ms | 其中绝大部分是 **embedding 模型前向**，FAISS 查询本身 < 1 ms |
+| RRF 融合 | +1~4 ms | 只是排序和查表，开销可忽略 |
+| Cross-Encoder 精排（50 候选） | +625 ms | 50 个 (query, 384 token) 对逐个过 base 模型 |
+
+**这条数据是 S4 唯一不受判定口径影响的结论**：BM25 在**延迟**上的优势是真实的
+（5.7 倍），因为稀疏检索不需要神经前向；精排在**精度**上的优势也是真实的，
+代价是 40 倍延迟。**选型取决于你的延迟预算，而不是「哪个更先进」。**
+
+#### 踩坑：CrossEncoder 的「二次 sigmoid」
+
+第一版 `reranker.score()` 里，我拿到 `model.predict()` 的返回值又做了一次 sigmoid，
+理由是「logit 要压到 0~1」。结果无关文档的分数全是 **0.5000**：
+
+```
+第一次: 0.7302 / 0.5000 / 0.5001     ← 错：二次 sigmoid
+修正后: 0.9955 / 0.0001 / 0.0003     ← 对
+```
+
+原因：`sentence-transformers` 的 `CrossEncoder.predict()` **默认已经应用了模型自带的
+激活函数**（bge-reranker 是 Sigmoid），返回的已经是概率。
+
+更隐蔽的危害不是数值偏移，而是**排序信息被压平**：
+原本 0.0001 vs 0.0003 的差距，二次 sigmoid 后变成 0.50000 vs 0.50005，
+几乎不可分——**分数看着都差不多，但顺序已经乱了**。
+
+> 同类教训：**任何「把输出再变换一次」的代码，先打印原始返回值看分布**，
+> 不要凭「它应该是 logit」的想象动手。
+
+#### 这一轮真正的收获
+
+排序一下，哪条最有价值：
+
+1. **判定器比算法更影响结论**。同一批检索结果，换个判定器，`vector` 的 Hit@1 从 0.60 跳到 0.90，
+   而算法之间的差距几乎消失。**没有标注就没有评测，没有两套口径就没有可信的评测。**
+2. **指标饱和是个信号，不是好消息**。Hit@4 全员 1.00 意味着评测集失去了区分能力，
+   下一步该做的是**加难度**（同领域干扰、跨文档多跳），而不是继续调参。
+3. **负面/中性结果同样是结论**。混合检索没有在 Hit@1 上打败纯向量，这件事本身值得写下来。
+4. 在 20 题的样本量上，任何「调参提升 1 题」都不可信——**先问样本量，再问显著性**。
+
 ## 已知限制 / 待办
 
 - [ ] 中文友好分隔符的收益**尚未单独度量**（与解析器修复捆绑在基线之前，见实验 4 备注）
@@ -411,8 +651,14 @@ chunk token 分布: min=15 median=492 max=950 (embedding 模型上限 512)
 - [ ] 索引参数（`M` / `efSearch` / `nlist` / `nprobe`）没有在**真实大规模语料**上调优——
       当前语料只有 1857 块，规模实验用的是复制加噪的合成规模
 - [ ] 未做向量量化（PQ）与内存占用对比；ANN 的另一半代价（内存）还没有量化
-- [ ] 评测集只有 20 题、只覆盖检索层；生成层（答案正确性、忠实度）尚无指标
-- [ ] `RAGPipeline` 的 `use_reranker` 参数已声明但未实现（S4 处理）
+- [ ] **评测集只有 20 题，语义判定下 Hit@4 已饱和到 1.00**（实验 7），
+      失去区分能力。S5 必须扩题并按难度分层：同领域干扰题、跨文档多跳题、无答案题（测拒答）
+- [ ] 生成层（答案正确性、忠实度 / faithfulness）尚无指标
+- [ ] LLM-as-Judge 自身没有校准：没测过它的位置偏差、长度偏差、以及「同一输入是否稳定」。
+      当前只做到「temperature=0 + 缓存 + 每次保存判定理由便于抽查」
+- [ ] 词表级歧义没有处理：q02 问「线性判别分析 LDA」时，检索命中的是「LDA 主题模型」，
+      judge 也被这个词骗了判为相关。这类**语料级同形异义**只能靠人工标注发现
+- [ ] 精排只对融合结果做，没有尝试「直接对 BM25 候选精排」或「省掉融合只做精排」
 
 ## 演进路线
 
@@ -424,6 +670,6 @@ chunk token 分布: min=15 median=492 max=950 (embedding 模型上限 512)
 | S1 | 替换为中文 embedding 模型 | 已完成 |
 | S2 | 切分策略对照实验（中文 token 上限 / 解析器选型 / 段落规整） | 已完成 |
 | S3 | 向量库工程化：FAISS 索引 + L2 归一化 + 阈值分层 + 增量索引/去重 | 已完成 |
-| S4 | 混合检索（BM25）+ RRF 融合 + rerank | 待办 |
-| S5 | 扩充评测集（50 题）+ 生成层指标 | 待办 |
+| S4 | 混合检索（BM25）+ RRF 融合 + Cross-Encoder 精排 + 第二套判定口径 | 已完成 |
+| S5 | 扩充评测集（50 题，按难度分层）+ 生成层指标（忠实度 / 拒答） | 待办 |
 | S6 | Query 改写 / 父子块 / 服务化 | 待办 |
