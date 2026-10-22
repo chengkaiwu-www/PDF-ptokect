@@ -86,4 +86,30 @@ FAISS_EF_SEARCH = int(os.getenv("FAISS_EF_SEARCH", "64"))  # HNSW：查询时候
 FAISS_NLIST = int(os.getenv("FAISS_NLIST", "256"))         # IVF：聚类簇数
 FAISS_NPROBE = int(os.getenv("FAISS_NPROBE", "8"))         # IVF：查询时搜索的簇数
 
+# --- 混合检索与精排（S4）---
+# 召回通道：
+#   'vector' —— 只用稠密向量（S3 的行为，作为基线）
+#   'bm25'   —— 只用 BM25 稀疏检索
+#   'hybrid' —— 两路召回 + RRF 融合（默认）
+RETRIEVAL_MODE = os.getenv("RETRIEVAL_MODE", "hybrid").strip().lower()
+
+# 每路召回的候选数。**必须远大于最终的 top_k**：
+# 「召回宁多勿漏，精排宁准勿滥」—— 召回阶段就卡到 4 条，精排再强也没得选。
+RETRIEVAL_CANDIDATE_K = int(os.getenv("RETRIEVAL_CANDIDATE_K", "50"))
+
+# RRF 的平滑常数 k。越小，头部名次优势越大；60 是论文经验值。
+# RRF 分数只用于排序，与相似度不是一个量纲，不能当阈值。
+RRF_K = int(os.getenv("RRF_K", "60"))
+
+# Cross-Encoder 精排开关。
+# 关闭时（默认）走「向量+BM25+RRF」，打开后对融合候选再精排一遍。
+# 实测：精排能提升 Hit@1，但每次查询要多花几十~几百毫秒（与候选数成正比）。
+RERANK_ENABLED = os.getenv("RERANK_ENABLED", "0") == "1"
+
+# 精排模型。bge-reranker-base 是中文可用的最小 Cross-Encoder（约 1.1GB）。
+RERANKER_MODEL = os.getenv(
+    "RERANKER_MODEL",
+    str(MODELS_DIR / "bge-reranker-base"),
+)
+
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

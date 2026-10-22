@@ -536,7 +536,12 @@ def load_vector_store(
 
 def create_retriever(vector_store: BaseVectorStore, k: int = RETRIEVAL_TOP_K):
     """
-    生成检索函数（保持原有闭包签名，便于 RAGPipeline 注入）。
+    纯向量检索的最小闭包（保留给学习对照 / 外部调用）。
+
+    ⚠️ 线上路径已改为 `src.hybrid_retriever.create_hybrid_retriever`：
+    它支持双通道召回、RRF 融合、Cross-Encoder 精排，以及 candidate_k
+    （召回池 > top_k）。本函数只做「单通道、无精排、无候选池」的最简情形，
+    等价于 `create_hybrid_retriever(store, mode="vector", candidate_k=k, k)`。
 
     Args:
         vector_store: 向量库实例（brute 或 faiss 均可）

@@ -14,5 +14,11 @@ python-dotenv>=1.0.0
 #   OpenMP 同时加载）。1.7.4 的 wheel 不触发该问题，flat / hnsw / ivf 全部可用。
 faiss-cpu==1.7.4
 
+# 中文分词（S4）。BM25 是词袋模型，中文没有空格，必须先分词 ——
+# 不分词就等于把整段文本当一个"词"，BM25 直接失效。
+# 选 jieba 而不是按字 bigram：jieba 的词典能识别「半监督学习」这类领域词，
+# bigram 会把它们拆成无意义的二元组，IDF 统计失去意义。
+jieba>=0.42.1
+
 # 辅助脚本用：create_test_pdf.py 生成英文测试 PDF
 reportlab>=4.0.0

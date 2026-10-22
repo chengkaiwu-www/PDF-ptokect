@@ -7,6 +7,11 @@ from config.config import (
     VECTOR_STORE_DIR,
     VECTOR_BACKEND,
     RETRIEVAL_TOP_K,
+    RETRIEVAL_MODE,
+    RETRIEVAL_CANDIDATE_K,
+    RRF_K,
+    RERANK_ENABLED,
+    RERANKER_MODEL,
     DEEPSEEK_API_KEY,
     DEEPSEEK_MODEL,
     DEEPSEEK_API_BASE,
@@ -21,8 +26,8 @@ from src.vector_store import (
     FAISS_INDEX_FILE,
     create_vector_store,
     load_vector_store,
-    create_retriever,
 )
+from src.hybrid_retriever import create_hybrid_retriever
 from src.vector_utils import file_fingerprint
 from src.rag_pipeline import RAGPipeline
 
@@ -120,22 +125,36 @@ def build_vector_store(embedding_model, recreate: bool = False):
     return vector_store
 
 
-def initialize_rag_system(recreate: bool = False):
+def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE, rerank: bool = RERANK_ENABLED):
     """
     Initialize the RAG system by loading documents and creating vector store.
 
     Args:
         recreate: Whether to rebuild the vector store from scratch
+        mode: 检索模式 vector | bm25 | hybrid
+        rerank: 是否启用 Cross-Encoder 精排
 
     Returns:
         RAGPipeline instance
     """
-    logger.info(f"Initializing RAG system (backend={VECTOR_BACKEND}, top_k={RETRIEVAL_TOP_K})")
+    logger.info(
+        f"Initializing RAG system (backend={VECTOR_BACKEND}, retriever={mode}, "
+        f"rerank={rerank}, top_k={RETRIEVAL_TOP_K}, candidate_k={RETRIEVAL_CANDIDATE_K})"
+    )
 
     embedding_model = get_embedding_model()
     vector_store = build_vector_store(embedding_model, recreate=recreate)
 
-    retriever = create_retriever(vector_store)
+    # 精排属于检索层，不挂在 RAGPipeline 上（见 rag_pipeline 的职责说明）
+    retriever = create_hybrid_retriever(
+        vector_store,
+        mode=mode,
+        candidate_k=RETRIEVAL_CANDIDATE_K,
+        rrf_k=RRF_K,
+        rerank=rerank,
+        reranker_model=RERANKER_MODEL,
+        top_k=RETRIEVAL_TOP_K,
+    )
 
     if DEEPSEEK_API_KEY:
         from langchain_deepseek import ChatDeepSeek
@@ -196,6 +215,12 @@ def main():
                         help="只同步/重建索引后退出，不进入问答")
     parser.add_argument("--chat", action="store_true", help="Start interactive chat mode")
     parser.add_argument("--query", type=str, help="Query to answer")
+    parser.add_argument("--retriever", type=str, default=RETRIEVAL_MODE,
+                        choices=["vector", "bm25", "hybrid"],
+                        help="检索策略：vector | bm25 | hybrid（默认取 RETRIEVAL_MODE）")
+    parser.add_argument("--rerank", action=argparse.BooleanOptionalAction,
+                        default=RERANK_ENABLED,
+                        help="Cross-Encoder 精排（--no-rerank 关闭）")
 
     args = parser.parse_args()
 
@@ -213,7 +238,9 @@ def main():
             )
             return
 
-        rag_pipeline = initialize_rag_system(recreate=args.recreate)
+        rag_pipeline = initialize_rag_system(
+            recreate=args.recreate, mode=args.retriever, rerank=args.rerank
+        )
 
         if args.query:
             result = rag_pipeline.invoke({"question": args.query})
