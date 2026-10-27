@@ -1,0 +1,500 @@
+{
+  "_说明": [
+    "S5 分层评测集：50 题，按「检索难点」分四层，而不是按文档分。",
+    "为什么要分层：S4 发现 20 题/1857 块的评测集已经饱和（语义口径下四策略 Hit@4 全 1.00），",
+    "继续调参只会看到噪声。要恢复区分力，必须让题目覆盖不同的失败模式。",
+    "",
+    "四层定义：",
+    "  single_fact —— 答案明确落在单个文档的少量段落里。测基本召回能力。",
+    "  distractor  —— 核心术语在多个文档中都出现（同领域干扰），但只有标注的那份给出答案。",
+    "                 测「捞到了但捞错书」这种关键词指标看不见的错误，指标是来源命中率。",
+    "  multi_hop   —— 必须同时拿到两份文档的内容才能完整回答。测多来源覆盖。",
+    "  no_answer   —— 语料里根本没有这个知识。正确答案是拒答，测幻觉与拒答。",
+    "",
+    "字段说明：",
+    "  expected_keywords —— 命中判定用关键词（任一命中即算召回成功），仅用于 single_fact / distractor。",
+    "  expected_source   —— 该题答案所在的文档（文件名单一化后的名字），用于计算来源命中率。",
+    "  required_sources  —— multi_hop 必须命中的文档集合，用于计算来源覆盖率。",
+    "  source_hint       —— 人工确认的来源，仅作排查参考。",
+    "",
+    "诚实声明：expected_source / required_sources 是人工标注，不是金标准；",
+    "  这些题只能做同口径横向比较。no_answer 题的判定依赖生成层（是否拒答），",
+    "  不在检索指标里计分——因为对无答案问题，「检索到相似内容」本身不是错误。"
+  ],
+  "questions": [
+    {
+      "id": "s01",
+      "type": "single_fact",
+      "question": "梯度下降的更新公式是什么",
+      "expected_keywords": [
+        "更新公式"
+      ],
+      "expected_source": "pumpkin-book.pdf",
+      "note": "S2 老题沿用，便于与历史基线对照"
+    },
+    {
+      "id": "s02",
+      "type": "single_fact",
+      "question": "感知机的损失函数是怎么定义的",
+      "expected_keywords": [
+        "误分类点"
+      ],
+      "expected_source": "pumpkin-book.pdf"
+    },
+    {
+      "id": "s03",
+      "type": "single_fact",
+      "question": "决策树划分时信息增益怎么计算",
+      "expected_keywords": [
+        "信息增益"
+      ],
+      "expected_source": "pumpkin-book.pdf"
+    },
+    {
+      "id": "s04",
+      "type": "single_fact",
+      "question": "朴素贝叶斯为什么需要做平滑处理",
+      "expected_keywords": [
+        "平滑"
+      ],
+      "expected_source": "pumpkin-book.pdf"
+    },
+    {
+      "id": "s05",
+      "type": "single_fact",
+      "question": "AdaBoost 中基学习器的权重系数是怎么确定的",
+      "expected_keywords": [
+        "权重系数"
+      ],
+      "expected_source": "pumpkin-book.pdf"
+    },
+    {
+      "id": "s06",
+      "type": "single_fact",
+      "question": "高斯混合聚类是怎么用 EM 算法迭代的",
+      "expected_keywords": [
+        "高斯混合"
+      ],
+      "expected_source": "pumpkin-book.pdf"
+    },
+    {
+      "id": "s07",
+      "type": "single_fact",
+      "question": "条件随机场中的势函数和团是什么",
+      "expected_keywords": [
+        "条件随机场",
+        "势函数"
+      ],
+      "expected_source": "pumpkin-book.pdf"
+    },
+    {
+      "id": "s08",
+      "type": "single_fact",
+      "question": "半监督学习中的协同训练是怎么做的",
+      "expected_keywords": [
+        "协同训练"
+      ],
+      "expected_source": "pumpkin-book.pdf"
+    },
+    {
+      "id": "s09",
+      "type": "single_fact",
+      "question": "为什么要做特征缩放",
+      "expected_keywords": [
+        "特征缩放"
+      ],
+      "expected_source": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "s10",
+      "type": "single_fact",
+      "question": "正规方程是怎么求解线性回归参数的",
+      "expected_keywords": [
+        "正规方程"
+      ],
+      "expected_source": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "s11",
+      "type": "single_fact",
+      "question": "逻辑回归的决策边界是什么",
+      "expected_keywords": [
+        "决策边界"
+      ],
+      "expected_source": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "s12",
+      "type": "single_fact",
+      "question": "训练神经网络时怎么做梯度检验",
+      "expected_keywords": [
+        "梯度检验"
+      ],
+      "expected_source": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "s13",
+      "type": "single_fact",
+      "question": "学习曲线怎么用来判断高偏差",
+      "expected_keywords": [
+        "学习曲线"
+      ],
+      "expected_source": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "s14",
+      "type": "single_fact",
+      "question": "异常检测中如何用高斯分布建模",
+      "expected_keywords": [
+        "异常检测"
+      ],
+      "expected_source": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "s15",
+      "type": "single_fact",
+      "question": "推荐系统里的协同过滤是什么意思",
+      "expected_keywords": [
+        "协同过滤"
+      ],
+      "expected_source": "ml-notes-ng.pdf"
+    },
+    {
+      "id": "s16",
+      "type": "single_fact",
+      "question": "RAG 的基本流程是怎样的",
+      "expected_keywords": [
+        "检索增强"
+      ],
+      "expected_source": "llm-universe.pdf"
+    },
+    {
+      "id": "s17",
+      "type": "single_fact",
+      "question": "文档为什么需要先做文本分割",
+      "expected_keywords": [
+        "文本分割"
+      ],
+      "expected_source": "llm-universe.pdf"
+    },
+    {
+      "id": "s18",
+      "type": "single_fact",
+      "question": "向量数据库在 RAG 中承担什么角色",
+      "expected_keywords": [
+        "向量数据库"
+      ],
+      "expected_source": "llm-universe.pdf"
+    },
+    {
+      "id": "s19",
+      "type": "single_fact",
+      "question": "评估 LLM 应用时主观正确性和客观正确性有什么区别",
+      "expected_keywords": [
+        "客观正确性"
+      ],
+      "expected_source": "llm-universe.pdf"
+    },
+    {
+      "id": "s20",
+      "type": "single_fact",
+      "question": "如何用 Streamlit 部署知识库助手",
+      "expected_keywords": [
+        "Streamlit"
+      ],
+      "expected_source": "llm-universe.pdf"
+    },
+    {
+      "id": "d01",
+      "type": "distractor",
+      "question": "逻辑回归里正则化参数过大时会怎样",
+      "expected_keywords": [
+        "正则化"
+      ],
+      "expected_source": "ml-notes-ng.pdf",
+      "note": "「正则化」在三份文档都出现，只有 ml-notes 讲 λ 对逻辑回归的影响"
+    },
+    {
+      "id": "d02",
+      "type": "distractor",
+      "question": "决策树剪枝是为了解决什么问题",
+      "expected_keywords": [
+        "剪枝"
+      ],
+      "expected_source": "pumpkin-book.pdf",
+      "note": "「决策树」在 llm-universe 也作为示例出现，但只讲概念不讲剪枝"
+    },
+    {
+      "id": "d03",
+      "type": "distractor",
+      "question": "神经网络的反向传播算法是怎么工作的",
+      "expected_keywords": [
+        "反向传播"
+      ],
+      "expected_source": "ml-notes-ng.pdf",
+      "note": "「神经网络」三份文档都有，反向传播细节只在 ml-notes"
+    },
+    {
+      "id": "d04",
+      "type": "distractor",
+      "question": "主成分分析 PCA 的降维目标是什么",
+      "expected_keywords": [
+        "PCA"
+      ],
+      "expected_source": "ml-notes-ng.pdf",
+      "note": "南瓜书也提 PCA，但作为降维附录；主推导在 ml-notes"
+    },
+    {
+      "id": "d05",
+      "type": "distractor",
+      "question": "交叉验证集在模型选择中起什么作用",
+      "expected_keywords": [
+        "交叉验证"
+      ],
+      "expected_source": "ml-notes-ng.pdf",
+      "note": "南瓜书也出现「交叉验证」但只一笔带过"
+    },
+    {
+      "id": "d06",
+      "type": "distractor",
+      "question": "高偏差和高方差分别对应什么问题",
+      "expected_keywords": [
+        "偏差和方差"
+      ],
+      "expected_source": "ml-notes-ng.pdf",
+      "note": "「偏差」「方差」是通用词，多份文档都有；成套诊断只在 ml-notes"
+    },
+    {
+      "id": "d07",
+      "type": "distractor",
+      "question": "核函数在支持向量机里起什么作用",
+      "expected_keywords": [
+        "核函数"
+      ],
+      "expected_source": "ml-notes-ng.pdf",
+      "note": "南瓜书也讲核函数，但偏公式推导；直观解释在 ml-notes"
+    },
+    {
+      "id": "d08",
+      "type": "distractor",
+      "question": "拉格朗日乘子法在求解约束优化问题时起什么作用",
+      "expected_keywords": [
+        "拉格朗日乘子"
+      ],
+      "expected_source": "pumpkin-book.pdf",
+      "note": "ml-notes 附录只有 1 处，主推导在南瓜书"
+    },
+    {
+      "id": "d09",
+      "type": "distractor",
+      "question": "朴素贝叶斯的后验概率是怎么算的",
+      "expected_keywords": [
+        "朴素贝叶斯"
+      ],
+      "expected_source": "pumpkin-book.pdf",
+      "note": "「贝叶斯」在 ml-notes 也有（朴素贝叶斯是另一种上下文），易混"
+    },
+    {
+      "id": "d10",
+      "type": "distractor",
+      "question": "高斯混合聚类和 K 均值聚类有什么关系",
+      "expected_keywords": [
+        "高斯混合"
+      ],
+      "expected_source": "pumpkin-book.pdf",
+      "note": "K 均值在 ml-notes 也讲，容易只捞到 K 均值那一侧"
+    },
+    {
+      "id": "d11",
+      "type": "distractor",
+      "question": "RAG 和微调相比有什么优势",
+      "expected_keywords": [
+        "微调"
+      ],
+      "expected_source": "llm-universe.pdf",
+      "note": "「微调」在 ml-notes 有 1 处误命中，构成干扰"
+    },
+    {
+      "id": "d12",
+      "type": "distractor",
+      "question": "提示词设计有哪些常用技巧",
+      "expected_keywords": [
+        "提示词"
+      ],
+      "expected_source": "llm-universe.pdf"
+    },
+    {
+      "id": "d13",
+      "type": "distractor",
+      "question": "文本分割时 chunk_size 应该怎么选",
+      "expected_keywords": [
+        "文本分割"
+      ],
+      "expected_source": "llm-universe.pdf"
+    },
+    {
+      "id": "d14",
+      "type": "distractor",
+      "question": "LangChain 有哪些核心组件",
+      "expected_keywords": [
+        "核心组件"
+      ],
+      "expected_source": "llm-universe.pdf",
+      "note": "与 s01-s15 的机器学习术语无关，用于测跨领域干扰"
+    },
+    {
+      "id": "d15",
+      "type": "distractor",
+      "question": "Embedding 在个人知识库中起什么作用",
+      "expected_keywords": [
+        "Embedding"
+      ],
+      "expected_source": "llm-universe.pdf",
+      "note": "「embedding」在 ml-notes 也可能出现（词向量），构成跨领域干扰"
+    },
+    {
+      "id": "m01",
+      "type": "multi_hop",
+      "question": "梯度下降和反向传播分别解决什么问题，训练神经网络时如何配合",
+      "required_sources": [
+        "pumpkin-book.pdf",
+        "ml-notes-ng.pdf"
+      ],
+      "note": "梯度下降的公式在南瓜书，反向传播的直观解释在 ml-notes"
+    },
+    {
+      "id": "m02",
+      "type": "multi_hop",
+      "question": "逻辑回归和支持向量机在分类边界和损失函数上有什么区别",
+      "required_sources": [
+        "ml-notes-ng.pdf",
+        "pumpkin-book.pdf"
+      ],
+      "note": "逻辑回归在 ml-notes，SVM 的间隔与对偶在南瓜书"
+    },
+    {
+      "id": "m03",
+      "type": "multi_hop",
+      "question": "PCA 和 LDA 都用于降维，它们的优化目标有什么不同",
+      "required_sources": [
+        "ml-notes-ng.pdf",
+        "pumpkin-book.pdf"
+      ],
+      "note": "PCA 在 ml-notes，LDA 的广义瑞利商在南瓜书"
+    },
+    {
+      "id": "m04",
+      "type": "multi_hop",
+      "question": "交叉验证和正则化分别是怎样缓解过拟合的",
+      "required_sources": [
+        "ml-notes-ng.pdf",
+        "pumpkin-book.pdf"
+      ],
+      "note": "交叉验证在 ml-notes，正则化的偏差方差分析两份都有"
+    },
+    {
+      "id": "m05",
+      "type": "multi_hop",
+      "question": "异常检测和高斯混合聚类都用到高斯分布，它们的区别是什么",
+      "required_sources": [
+        "ml-notes-ng.pdf",
+        "pumpkin-book.pdf"
+      ],
+      "note": "异常检测在 ml-notes，高斯混合的 EM 在南瓜书"
+    },
+    {
+      "id": "m06",
+      "type": "multi_hop",
+      "question": "朴素贝叶斯的平滑处理和逻辑回归的正则化，共同目的是什么",
+      "required_sources": [
+        "pumpkin-book.pdf",
+        "ml-notes-ng.pdf"
+      ],
+      "note": "平滑在南瓜书，正则化的偏差方差分析在 ml-notes"
+    },
+    {
+      "id": "m07",
+      "type": "multi_hop",
+      "question": "机器学习里划分验证集评估模型，和 RAG 的检索评测有什么相通之处",
+      "required_sources": [
+        "ml-notes-ng.pdf",
+        "llm-universe.pdf"
+      ],
+      "note": "模型选择在 ml-notes，LLM 应用的评估方法在 llm-universe"
+    },
+    {
+      "id": "m08",
+      "type": "multi_hop",
+      "question": "推荐系统的协同过滤和 K 均值聚类都用到相似度，它们的用法有什么不同",
+      "required_sources": [
+        "ml-notes-ng.pdf",
+        "pumpkin-book.pdf"
+      ],
+      "note": "协同过滤在 ml-notes，K 均值与距离度量在南瓜书"
+    },
+    {
+      "id": "n01",
+      "type": "no_answer",
+      "question": "FlashAttention 是怎么降低显存占用的",
+      "note": "语料中 0 处出现，正确答案是拒答",
+      "absent_terms": [
+        "FlashAttention"
+      ]
+    },
+    {
+      "id": "n02",
+      "type": "no_answer",
+      "question": "SimCLR 的对比学习损失函数是什么",
+      "note": "语料中 0 处出现",
+      "absent_terms": [
+        "SimCLR"
+      ]
+    },
+    {
+      "id": "n03",
+      "type": "no_answer",
+      "question": "图神经网络 GCN 的传播公式是什么",
+      "note": "语料中 0 处出现",
+      "absent_terms": [
+        "GCN",
+        "图神经网络"
+      ]
+    },
+    {
+      "id": "n04",
+      "type": "no_answer",
+      "question": "卷积神经网络的池化层有什么作用",
+      "note": "语料只提过「卷积」3 次（数学语境），没有池化层内容",
+      "absent_terms": [
+        "池化"
+      ]
+    },
+    {
+      "id": "n05",
+      "type": "no_answer",
+      "question": "Milvus 支持哪些索引类型",
+      "note": "语料提到 Chroma / Qdrant，但完全没有 Milvus",
+      "absent_terms": [
+        "Milvus"
+      ]
+    },
+    {
+      "id": "n06",
+      "type": "no_answer",
+      "question": "BM25 的 k1 和 b 参数如何影响检索效果",
+      "note": "RAG 领域词汇，但语料没有 BM25——测「用先验知识作答」的倾向",
+      "absent_terms": [
+        "BM25"
+      ]
+    },
+    {
+      "id": "n07",
+      "type": "no_answer",
+      "question": "HNSW 索引的 M 参数应该怎么设置",
+      "note": "同上，向量库章节讲了选型但没讲 HNSW",
+      "absent_terms": [
+        "HNSW"
+      ]
+    }
+  ]
+}

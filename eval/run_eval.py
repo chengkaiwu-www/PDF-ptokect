@@ -24,17 +24,26 @@ S4 改动：检索策略可切换，用于「混合检索 + 精排」的单变�
 注意：关键词命中是 Hit Rate 的廉价实现（不需要人工标注「哪一块是标准答案」）。
 它是代理指标，不是真值；结论只能横向比较（同一批题、同一套判定），不能当绝对分数。
 
+S5 改动：支持分层题库（eval/questions_v2.json），按「检索难点」而不是按文档分层：
+  single_fact  答案在单文档少量段落 —— 基本召回（Hit/MRR）
+  distractor   术语跨文档出现但只有一个文档给答案 —— 来源命中率（关键词指标看不见）
+  multi_hop    必须同时拿到两份文档 —— 来源覆盖率（required_sources）
+  no_answer    语料没有该知识 —— 不计入检索指标，交给生成层测拒答
+老题库 questions.json 没有 type 字段，按 single_fact 处理，保证历史数字可比。
+
 用法：
   D:\\anaconda\\python.exe eval/run_eval.py --top-k 4
   D:\\anaconda\\python.exe eval/run_eval.py --backend faiss --faiss-index-type hnsw
   D:\\anaconda\\python.exe eval/run_eval.py --retriever hybrid --candidate-k 50
   D:\\anaconda\\python.exe eval/run_eval.py --retriever hybrid --rerank
+  D:\\anaconda\\python.exe eval/run_eval.py --questions eval/questions_v2.json --retriever hybrid
 """
 
 import argparse
 import json
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -145,6 +154,11 @@ def evaluate(
     hit_at_1 = hit_at_k = 0
     rr_sum = 0.0
     valid_count = 0
+    distractor_count = source_hit_count = source_at1_count = 0
+    hop_count = 0
+    hop_cov_sum = 0.0
+    hop_full = 0
+    na_count = 0
     t0 = time.time()
     retrieve_sec = 0.0
 
@@ -152,20 +166,31 @@ def evaluate(
         qid = q.get("id", "-")
         question = q["question"]
         keywords = q.get("expected_keywords", [])
+        # v2 题库带 type；老题库没有，按 single_fact 处理，保证历史数据可比
+        qtype = q.get("type", "single_fact")
+        expected_source = q.get("expected_source")
+        required_sources = q.get("required_sources") or []
 
         # 两套判定口径，二选一：
         #   keyword —— any(关键词 in 块文本)。便宜、确定，但系统性偏袒字面匹配（见 judge.py 说明）
         #   judge   —— LLM 语义判定。贵、慢，但不受用词影响
-        if judge is not None:
+        # 多跳题与无答案题不走关键词判定：
+        #   前者没有单一关键词（答案要靠两处拼），后者本来就没有答案。
+        use_keyword = qtype in ("single_fact", "distractor")
+
+        if judge is not None and use_keyword:
             coverage = -1   # judge 模式无法（也不该）对全库算覆盖率
 
             def is_hit(text, _q=question):
                 return judge.is_relevant(_q, text)
-        else:
+        elif use_keyword:
             coverage = corpus_keyword_coverage(documents, keywords) if keywords else 0
 
             def is_hit(text, _kw=keywords):
                 return bool(_kw) and any(k in text for k in _kw)
+        else:
+            coverage = -1
+            is_hit = None
 
         # 走线上检索路径。return_debug 只做几个 dict 拼装，开销可忽略，
         # 但能让我们看清「这块是向量捞上来的还是 BM25 捞上来的」。
@@ -177,15 +202,35 @@ def evaluate(
 
         ranked = [(doc, 0.0) for doc in out["documents"]]
         rows = out.get("debug", {}).get("rows", [])
+        # 本次召回覆盖到哪些文档：多跳题与来源判定都基于它
+        sources_in_topk = {Path(d.get("metadata", {}).get("source", "?")).name for d, _ in ranked}
 
         first_hit_rank = None
-        for rank, (doc, _score) in enumerate(ranked, start=1):
-            text = doc.get("page_content", "")
-            if is_hit(text):
-                first_hit_rank = rank
-                break
+        if is_hit is not None:
+            for rank, (doc, _score) in enumerate(ranked, start=1):
+                if is_hit(doc.get("page_content", "")):
+                    first_hit_rank = rank
+                    break
 
-        if coverage == 0:
+        # 多跳：要求 top-k 同时覆盖所有 required_sources
+        hop_coverage = None
+        if qtype == "multi_hop" and required_sources:
+            hop_coverage = len(set(required_sources) & sources_in_topk) / len(required_sources)
+
+        source_hit = expected_source in sources_in_topk if expected_source else None
+        top1_doc, _ = ranked[0] if ranked else (None, None)
+        top1_src = (
+            Path(top1_doc.get("metadata", {}).get("source", "?")).name
+            if top1_doc is not None else "-"
+        )
+        source_at1 = (top1_src == expected_source) if expected_source else None
+
+        if qtype == "no_answer":
+            # 无答案题在检索层不计分：对「语料没有的东西」，捞到相似内容不算错
+            status = "NO_ANSWER"
+        elif qtype == "multi_hop":
+            status = "HOP_ALL" if hop_coverage == 1.0 else f"HOP_{hop_coverage:.2f}"
+        elif coverage == 0:
             status = "INVALID"      # 库里根本没有答案，题目无效
         elif first_hit_rank == 1:
             status = "HIT@1"
@@ -194,17 +239,21 @@ def evaluate(
         else:
             status = "MISS"
 
-        if status != "INVALID":
+        if qtype == "no_answer":
+            na_count += 1
+        elif qtype == "multi_hop":
+            hop_count += 1
+            hop_cov_sum += hop_coverage or 0.0
+            hop_full += 1 if hop_coverage == 1.0 else 0
+        elif status != "INVALID":
             valid_count += 1
             hit_at_k += 1 if first_hit_rank else 0
             hit_at_1 += 1 if first_hit_rank == 1 else 0
             rr_sum += (1.0 / first_hit_rank) if first_hit_rank else 0.0
-
-        top1_doc, _ = ranked[0] if ranked else (None, 0.0)
-        top1_src = (
-            Path(top1_doc.get("metadata", {}).get("source", "?")).name
-            if top1_doc is not None else "-"
-        )
+            if qtype == "distractor":
+                distractor_count += 1
+                source_hit_count += 1 if source_hit else 0
+                source_at1_count += 1 if source_at1 else 0
         score_kind = out.get("debug", {}).get("score_kind", "score")
         top1_row = rows[0] if rows else {}
         top1_score = top1_row.get("rerank") if top1_row.get("rerank") is not None \
@@ -212,10 +261,16 @@ def evaluate(
 
         per_question.append({
             "id": qid,
+            "type": qtype,
             "question": question,
             "status": status,
             "first_hit_rank": first_hit_rank,
             "corpus_coverage": coverage,
+            "sources_in_topk": sorted(sources_in_topk),
+            "required_sources": required_sources,
+            "source_hit": source_hit,
+            "source_at1": source_at1,
+            "hop_coverage": hop_coverage,
             "top1_source": top1_src,
             "top1_score": round(float(top1_score or 0.0), 4),
             "score_kind": score_kind,
@@ -223,18 +278,27 @@ def evaluate(
         })
 
         if detail:
-            print(f"\n[{qid}] {status}  题目: {question}")
-            print(f"      库中含关键词的块数: {coverage}   首个命中排名: {first_hit_rank}")
+            print(f"\n[{qid}] {status}  ({qtype})  题目: {question}")
+            extra = ""
+            if qtype == "multi_hop":
+                extra = f"  需要 {required_sources}  覆盖 {hop_coverage:.2f}"
+            elif expected_source:
+                extra = f"  期望来源 {expected_source}  来源命中={source_hit}"
+            print(f"      库中含关键词的块数: {coverage}   首个命中排名: {first_hit_rank}{extra}")
             for rank, (doc, _) in enumerate(ranked, start=1):
                 meta = doc.get("metadata", {})
                 src = Path(meta.get("source", "?")).name
                 page = meta.get("page_label", meta.get("page", "?"))
                 snippet = doc.get("page_content", "").replace("\n", " ")[:60]
-                if judge is not None:
+                if judge is not None and is_hit is not None:
                     hit, reason = judge.explain(question, doc.get("page_content", ""))
                     reason_txt = f"  ⟵判定: {reason}"
-                else:
+                elif is_hit is not None:
                     hit = is_hit(doc.get("page_content", ""))
+                    reason_txt = ""
+                else:
+                    # 多跳/无答案题没有关键词判定，只标出来源
+                    hit = src in (required_sources or [])
                     reason_txt = ""
                 row = rows[rank - 1] if rank - 1 < len(rows) else {}
                 # 每路名次：能看清「这块是向量捞的、BM25 捞的，还是被精排顶上来的」
@@ -247,6 +311,7 @@ def evaluate(
                 print(f"      {'*' if hit else ' '} #{rank} {score_txt} [{rk_txt}]  {src} p{page}  {snippet}{reason_txt}")
 
     elapsed = time.time() - t0
+    type_counts = Counter(p["type"] for p in per_question)
     summary = {
         "backend": store.backend_name,
         "index_type": live_type,
@@ -256,22 +321,45 @@ def evaluate(
         "dim": dim,
         "top_k": top_k,
         "questions_total": len(questions),
+        "type_counts": dict(type_counts),
         "questions_valid": valid_count,
         "hit_at_1": hit_at_1,
         "hit_at_k": hit_at_k,
         "hit_rate_at_1": round(hit_at_1 / valid_count, 4) if valid_count else 0.0,
         "hit_rate_at_k": round(hit_at_k / valid_count, 4) if valid_count else 0.0,
         "mrr": round(rr_sum / valid_count, 4) if valid_count else 0.0,
+        # 干扰题：答案所在文档是否出现在 top-k / top-1。关键词命中看不见「捞错书」
+        "distractor_n": distractor_count,
+        "source_hit_at_k": source_hit_count,
+        "source_accuracy_at_k": round(source_hit_count / distractor_count, 4) if distractor_count else None,
+        "source_accuracy_at_1": round(source_at1_count / distractor_count, 4) if distractor_count else None,
+        # 多跳题：required_sources 的平均覆盖率与「全覆盖率」
+        "multihop_n": hop_count,
+        "multihop_coverage": round(hop_cov_sum / hop_count, 4) if hop_count else None,
+        "multihop_full_rate": round(hop_full / hop_count, 4) if hop_count else None,
+        "no_answer_n": na_count,
         # 平均单题检索延迟：混合检索与精排的代价就体现在这个数上
         "avg_retrieve_ms": round(retrieve_sec * 1000 / len(questions), 1) if questions else 0.0,
         "elapsed_sec": round(elapsed, 1),
     }
 
     print("\n" + "=" * 78)
-    print(f"有效题目: {valid_count}/{len(questions)}   总耗时: {elapsed:.1f}s")
+    print(f"分层: {dict(type_counts)}   总耗时: {elapsed:.1f}s")
+    print(f"可回答题: {valid_count}（Hit/MRR 只在这部分上算）  无答案题: {na_count}（不计入检索指标）")
     print(f"Hit@{1}  = {summary['hit_rate_at_1']:.4f}   ({hit_at_1}/{valid_count})")
     print(f"Hit@{top_k}  = {summary['hit_rate_at_k']:.4f}   ({hit_at_k}/{valid_count})")
     print(f"MRR    = {summary['mrr']:.4f}    平均检索延迟 = {summary['avg_retrieve_ms']:.1f} ms/题")
+    if distractor_count:
+        print(
+            f"干扰题来源命中: @{top_k} = {summary['source_accuracy_at_k']:.4f} "
+            f"({source_hit_count}/{distractor_count})   @1 = {summary['source_accuracy_at_1']:.4f} "
+            f"({source_at1_count}/{distractor_count})"
+        )
+    if hop_count:
+        print(
+            f"多跳来源覆盖 = {summary['multihop_coverage']:.4f}  全覆盖率 = "
+            f"{summary['multihop_full_rate']:.4f}  ({hop_full}/{hop_count})"
+        )
     print("=" * 78)
 
     # 未命中题目单独列出，方便定位
@@ -286,6 +374,14 @@ def evaluate(
         print("\n无效题目（语料中找不到关键词，需检查题目或语料）:")
         for p in invalids:
             print(f"  [{p['id']}] {p['question']}")
+
+    hop_partial = [p for p in per_question
+                   if p["type"] == "multi_hop" and (p["hop_coverage"] or 0) < 1.0]
+    if hop_partial:
+        print("\n多跳未全覆盖（缺哪份文档）:")
+        for p in hop_partial:
+            missing = sorted(set(p.get("required_sources") or []) - set(p["sources_in_topk"]))
+            print(f"  [{p['id']}] 覆盖={p['hop_coverage']:.2f} 缺={missing}  {p['question'][:40]}")
 
     return {"summary": summary, "per_question": per_question}
 
