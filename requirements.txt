@@ -22,3 +22,9 @@ jieba>=0.42.1
 
 # 辅助脚本用：create_test_pdf.py 生成英文测试 PDF
 reportlab>=4.0.0
+
+# Web 前端（S6 前置）。只有 server/ + web/ 需要，纯 CLI / 评测不用装。
+# 不引入 sse-starlette：SSE 就是「一个不结束的 HTTP 响应」，
+# 用 FastAPI 自带的 StreamingResponse 就够，少一个依赖少一处版本冲突。
+fastapi>=0.110
+uvicorn>=0.27

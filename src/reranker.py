@@ -69,6 +69,16 @@ class CrossEncoderReranker:
             )
         return self._model
 
+    def warmup(self) -> None:
+        """
+        显式触发模型加载。
+
+        为什么需要这个：常驻服务里「第一次请求顺便加载」意味着第一个用户要等十几秒，
+        而且并发时两个请求可能同时走进 `_ensure_model()` 各加载一份。
+        调用方可以在自己的锁里先 warmup()，把「只加载一次」这件事变确定。
+        """
+        self._ensure_model()
+
     def score(self, query: str, texts: Sequence[str]) -> List[float]:
         """
         给 (query, text) 对打分，返回 (0,1) 之间的相关度，越大越相关。
