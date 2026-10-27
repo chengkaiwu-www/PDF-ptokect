@@ -27,3 +27,6 @@ models/
 # 用 scripts/download_corpus.py 一键获取；test_document.pdf 是本项目自带的英文测试样例，保留入库
 data/pdfs/*.pdf
 !data/pdfs/test_document.pdf
+
+# 排查用的临时产物：服务日志、SSE 抓包、临时请求体
+.tmp_*
