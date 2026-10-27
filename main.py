@@ -245,6 +245,14 @@ def main():
         if args.query:
             result = rag_pipeline.invoke({"question": args.query})
             print(f"\nAnswer: {result['answer']}")
+
+            cite = result.get("citations") or {}
+            if cite.get("count"):
+                flag = "" if cite["valid"] == cite["count"] else f"  ⚠ 其中 {cite['count'] - cite['valid']} 处页码不在召回结果里"
+                print(f"\n引用: {cite['valid']}/{cite['count']} 合法，来源 {cite.get('cited_sources')}{flag}")
+            elif not result.get("refused"):
+                print("\n引用: 无（答案未标注来源，不可溯源）")
+
             print(f"\nContext:\n{result['context']}")
 
         if args.chat:

@@ -1,5 +1,13 @@
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from prompts.qa_prompt import (
+    PROMPT_VARIANTS,
+    REFUSAL_SENTINEL,
+    REFUSAL_TEXT,
+    build_prompt_variant,
+)
+from src.citation import validate_citations
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -7,13 +15,18 @@ logger = setup_logger(__name__)
 
 class RAGPipeline:
     """
-    RAG 编排：检索 -> 组装 context -> 调 LLM 生成。
+    RAG 编排：检索 -> 组装 context -> 调 LLM 生成 -> 校验引用。
 
     **职责边界（S4 明确）**：本类不关心「怎么检索」——那是 retriever 的事。
     S0~S3 这里曾挂着一个 `use_reranker` 参数，声明了却从未生效，
     因为它把「检索策略」和「生成编排」混在了一层。
     S4 把精排移到检索层（`HybridRetriever(reranker=...)`），本类只负责编排。
-    这样做的实际好处：做检索 A/B 时不用碰生成代码，反之亦然。
+
+    **S5 新增的职责**：生成不是「把 context 丢给模型」就完事，
+    还要保证输出**可溯源**。所以本类在生成后做两件事：
+      1. 识别拒答哨兵，换成给人看的自然语言；
+      2. 解析引用标记并与本次召回块比对，把「引用合法率」作为返回值带出去。
+    第 2 步刻意不用 LLM —— 它是确定性问题，用模型判断反而引入不确定性。
     """
 
     def __init__(
@@ -22,6 +35,7 @@ class RAGPipeline:
         retriever,
         embedding_model,
         top_k: Optional[int] = None,
+        prompt_variant: str = "full",
     ):
         """
         Args:
@@ -29,38 +43,41 @@ class RAGPipeline:
             retriever: 可调用对象，签名 (query, embedding_model) -> List[dict]
             embedding_model: embedding 模型实例
             top_k: 传给 retriever 的召回条数；None 表示用 retriever 自身默认值
+            prompt_variant: full | no_refusal | no_cite，仅供消融实验使用
         """
         self.llm = llm
         self.retriever = retriever
         self.embedding_model = embedding_model
         self.top_k = top_k
+        self.prompt_variant = prompt_variant
+        # 版本号跟着变体走：评测结果里带版本号，不同 prompt 的数字才不会混表
+        self.prompt_version = PROMPT_VARIANTS[prompt_variant][1]
 
     def _format_context(self, documents: List[Dict[str, Any]]) -> str:
         """
-        Format retrieved documents into context string.
+        把召回的块拼成 context。
 
-        Args:
-            documents: List of retrieved documents
-
-        Returns:
-            Formatted context string
+        给模型的 Source 必须是**文件名**而不是完整路径：
+          1. 路径里的反斜杠、盘符与中文目录会干扰模型复述引用格式；
+          2. 校验时也要按文件名比对，两边用同一个键才不会出现「模型照抄了
+             完整路径，校验却只认文件名」的假不匹配。
+        Page 用 1 基的 page_label（loader 提供），缺失时回退 page + 1。
         """
-        context_parts = []
+        parts = []
         for i, doc in enumerate(documents, 1):
             metadata = doc.get("metadata", {})
-            source = metadata.get("source", "unknown")
+            source = Path(metadata.get("source", "unknown")).name
             content = doc.get("page_content", "")
 
-            # 展示给人和 LLM 的页码必须是 1 基的。loader 提供的 page_label
-            # 正好是这个语义（PDF 第 1 页 -> "1"），优先使用；若某个 loader 不带该
-            # 字段，则回退到 0 基的 page + 1，避免出现 "Page: 0" 这种误读。
             page = metadata.get("page_label")
             if page is None:
                 raw_page = metadata.get("page")
                 page = raw_page + 1 if isinstance(raw_page, int) else "unknown"
 
-            context_parts.append(f"[Document {i}]\nSource: {source}\nPage: {page}\nContent:\n{content}\n")
-        return "\n".join(context_parts)
+            parts.append(
+                f"[Document {i}]\nSource: {source}\nPage: {page}\nContent:\n{content}\n"
+            )
+        return "\n".join(parts)
 
     def _retrieve(self, question: str) -> List[Dict[str, Any]]:
         if self.top_k is None:
@@ -71,19 +88,44 @@ class RAGPipeline:
             # 兼容只有两个参数的旧闭包（vector_store.create_retriever）
             return self.retriever(question, self.embedding_model)
 
+    @staticmethod
+    def _is_refusal(text: str) -> bool:
+        """
+        判定是否拒答。
+
+        只看开头 40 个字符：模型偶尔会在哨兵前后加一句客套话，
+        这时仍应算作拒答；但如果哨兵出现在答案末尾，说明它**先答了再拒**，
+        那是矛盾输出，不能算合格拒答。
+        """
+        return REFUSAL_SENTINEL in (text or "")[:40].upper()
+
     def invoke(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Run the RAG pipeline.
-
-        Args:
-            inputs: Dictionary containing 'question' key
+        跑完整流程。
 
         Returns:
-            Dictionary with 'answer', 'context', and 'source_documents'
+            {
+              "answer": 展示用答案（拒答已被替换成自然语言）,
+              "raw_answer": 模型原始输出（排查用）,
+              "refused": 是否判定为拒答,
+              "context": 拼好的上下文,
+              "source_documents": 召回块,
+              "citations": 引用校验结果（见 src/citation.py）,
+              "prompt_version": prompt 版本号,
+            }
         """
         question = inputs.get("question", "")
+        empty = {
+            "answer": "Please provide a question.",
+            "raw_answer": "",
+            "refused": True,
+            "context": "",
+            "source_documents": [],
+            "citations": validate_citations("", []),
+            "prompt_version": self.prompt_version,
+        }
         if not question:
-            return {"answer": "Please provide a question.", "context": "", "source_documents": []}
+            return empty
 
         logger.info(f"Processing question: {question[:50]}...")
 
@@ -91,32 +133,48 @@ class RAGPipeline:
 
         if not retrieved_docs:
             logger.warning("No documents retrieved")
-            if self.llm:
-                answer = self.llm.invoke(question).content
-                return {"answer": answer, "context": "", "source_documents": []}
-            else:
-                return {"answer": "No relevant documents found. Please try a different question.", "context": "", "source_documents": []}
+            # 没有召回就**不该**调 LLM 硬答：那等于让模型凭参数记忆回答，
+            # 而这正是 RAG 要避免的幻觉来源。直接拒答，且不花 token。
+            return {
+                "answer": REFUSAL_TEXT,
+                "raw_answer": REFUSAL_SENTINEL,
+                "refused": True,
+                "context": "",
+                "source_documents": [],
+                "citations": validate_citations("", []),
+                "prompt_version": self.prompt_version,
+            }
 
         context = self._format_context(retrieved_docs)
 
-        if self.llm:
-            prompt = f"""
-            基于以下上下文信息回答问题。如果上下文没有相关信息，请回答"无法从提供的文档中找到答案"。
+        if not self.llm:
+            # 没有 LLM 时退化为「只展示召回片段」，此时不存在生成层指标
+            return {
+                "answer": "LLM not configured. Here are the relevant document snippets:\n\n" + context,
+                "raw_answer": "",
+                "refused": False,
+                "context": context,
+                "source_documents": retrieved_docs,
+                "citations": {"count": 0, "valid": 0, "invalid": [], "validity": None,
+                              "has_citation": False, "cited_sources": []},
+                "prompt_version": self.prompt_version,
+            }
 
-            上下文:
-            {context}
+        prompt, version = build_prompt_variant(question, context, self.prompt_variant)
+        logger.info(f"Generating answer using LLM (prompt={version})")
+        response = self.llm.invoke(prompt)
+        raw_answer = response.content if hasattr(response, "content") else str(response)
+        raw_answer = (raw_answer or "").strip()
 
-            问题: {question}
-            """
-
-            logger.info("Generating answer using LLM")
-            response = self.llm.invoke(prompt)
-            answer = response.content if hasattr(response, 'content') else str(response)
-        else:
-            answer = "LLM not configured. Here are the relevant document snippets:\n\n" + context
+        refused = self._is_refusal(raw_answer)
+        citations = validate_citations("" if refused else raw_answer, retrieved_docs)
 
         return {
-            "answer": answer,
+            "answer": REFUSAL_TEXT if refused else raw_answer,
+            "raw_answer": raw_answer,
+            "refused": refused,
             "context": context,
-            "source_documents": retrieved_docs
+            "source_documents": retrieved_docs,
+            "citations": citations,
+            "prompt_version": self.prompt_version,
         }

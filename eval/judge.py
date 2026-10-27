@@ -72,6 +72,37 @@ PROMPT_TEMPLATE = """你要判断一段文档材料能否为回答给定问题�
   否 | 讲的是别的内容"""
 
 
+# ---------------------------------------------------------------------------
+# 忠实度（faithfulness）判定 prompt
+#
+# 与上面的「相关性判定」是两件事，不要混：
+#   相关性判定 —— 输入的块能不能回答问题（检索层）
+#   忠实度判定 —— 输出的答案有没有超出资料（生成层）
+# 混用会导致「检索很好但答案乱编」和「检索很差但答案老实」两种情况都无法区分。
+#
+# 版本号独立于 PROMPT_VERSION：改其中一种口径不应让另一种的缓存失效。
+# ---------------------------------------------------------------------------
+FAITH_PROMPT_VERSION = "f1"
+
+FAITH_PROMPT_TEMPLATE = """你是答案忠实度审查员。给定【资料】和【答案】，把答案拆成事实性断言，逐个判断是否被资料支持。
+
+判断规则：
+- 只拆「可被证伪的事实陈述」；连接词、礼貌用语、结构性表述不算断言。
+- 「被支持」指资料中有明确文字或等价表述，能直接推出该断言。
+- 需要资料之外的知识才能判断的，一律算不支持。
+- 不要因为断言「可能是对的」就判支持，只看资料里有没有依据。
+
+【资料】
+{context}
+
+【答案】
+{answer}
+
+只输出 JSON，不要解释，不要 markdown 代码块：
+{{"claims": [{{"claim": "断言原文", "supported": true, "reason": "十个字以内"}}]}}
+若答案没有任何事实性断言（例如拒答），输出 {{"claims": []}}"""
+
+
 def _parse_verdict(answer: str) -> tuple:
     """
     解析 judge 输出，返回 (是否相关, 理由)。
@@ -90,6 +121,25 @@ def _parse_verdict(answer: str) -> tuple:
         reason = text[1:].lstrip("：:，, ").strip()
     verdict = first in ("是", "Y", "y", "1") or text.lower().startswith(("yes", "true"))
     return verdict, reason[:40]
+
+
+def _extract_json(text: str) -> dict:
+    """
+    从模型输出里抠出 JSON 对象。
+
+    为什么要容错：即使明确要求「只输出 JSON」，模型仍可能包一层 ```json 代码块，
+    或在前面加一句"好的"。直接 json.loads 会失败，而失败会被误读成
+    「模型不忠实」——所以这里以**第一个 { 到最后一个 }** 为界重试一次。
+    """
+    text = (text or "").strip()
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    start, end = text.find("{"), text.rfind("}")
+    if start != -1 and end > start:
+        return json.loads(text[start : end + 1])
+    raise ValueError(f"无法解析 JSON: {text[:80]}")
 
 
 class LLMJudge:
@@ -121,8 +171,11 @@ class LLMJudge:
         self.cache_path = Path(cache_path) if cache_path else None
         self.cache: Dict[str, Any] = {}
         self._llm = None
+        self._faith_llm = None
         self.calls = 0
         self.hits = 0
+        self.faith_calls = 0
+        self.faith_parse_fail = 0
 
         if self.cache_path and self.cache_path.exists():
             try:
@@ -199,5 +252,80 @@ class LLMJudge:
         """判断 text 是否能为 question 提供有用信息。"""
         return self.explain(question, text)[0]
 
+    # ------------------------------------------------------- 忠实度（生成层）
+
+    def _ensure_faith_llm(self):
+        """
+        忠实度判定需要输出 JSON（几十~几百 token），
+        而相关性判定只输出一行（32 token）。两个用途的 max_tokens 差一个量级，
+        共用一个模型实例会让 JSON 被截断，所以分开建。
+        """
+        if self._faith_llm is None:
+            from langchain_deepseek import ChatDeepSeek
+
+            self._faith_llm = ChatDeepSeek(
+                model=self.model_name,
+                api_key=self.api_key,
+                base_url=self.api_base,
+                temperature=0,
+                max_tokens=800,
+            )
+        return self._faith_llm
+
+    def faithfulness(self, answer: str, context: str) -> Dict[str, Any]:
+        """
+        判定答案是否完全由 context 支撑。
+
+        Returns:
+            {"claims": [...], "total": n, "supported": k,
+             "score": k/n 或 None, "parse_failed": bool}
+
+        为什么 score 可能是 None 而不是 0：
+            解析失败说明**判定过程**坏了，不是答案坏了。用 0 分代替会把
+            「judge 出故障」伪装成「模型在幻觉」，是最典型的假指标。宁可留空。
+        """
+        key = hashlib.sha1(
+            f"{self.model_name}\x00{FAITH_PROMPT_VERSION}\x00{answer}\x00{context}".encode("utf-8")
+        ).hexdigest()[:20]
+
+        cached = self.cache.get(key)
+        if cached is not None:
+            self.hits += 1
+            return cached["v"]
+
+        prompt = FAITH_PROMPT_TEMPLATE.format(
+            context=context[:6000], answer=answer[:2000]
+        )
+        try:
+            resp = self._ensure_faith_llm().invoke(prompt)
+            raw = resp.content or ""
+            parsed = _extract_json(raw)
+            claims = parsed.get("claims") or []
+            claims = [c for c in claims if isinstance(c, dict)]
+            supported = sum(1 for c in claims if c.get("supported") is True)
+            result = {
+                "claims": claims,
+                "total": len(claims),
+                "supported": supported,
+                "score": (supported / len(claims)) if claims else None,
+                "parse_failed": False,
+            }
+        except Exception as e:
+            logger.error(f"faithfulness 判定失败: {e}")
+            self.faith_parse_fail += 1
+            result = {"claims": [], "total": 0, "supported": 0,
+                      "score": None, "parse_failed": True}
+            raw = ""
+
+        self.faith_calls += 1
+        self.cache[key] = {"v": result, "a": (raw or "")[:200]}
+        return result
+
     def stats(self) -> Dict[str, int]:
-        return {"calls": self.calls, "cache_hits": self.hits, "cached_total": len(self.cache)}
+        return {
+            "calls": self.calls,
+            "cache_hits": self.hits,
+            "cached_total": len(self.cache),
+            "faith_calls": self.faith_calls,
+            "faith_parse_fail": self.faith_parse_fail,
+        }
