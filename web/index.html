@@ -237,6 +237,11 @@
 </style>
 </head>
 <body>
+<div id="filemode-bar" hidden style="position:sticky;top:0;z-index:99;padding:10px 18px;font-size:13px;line-height:1.65;color:#7a4a00;background:#fff7e0;border-bottom:1px solid #f0d79a">
+  <b>你正在用 file:// 直接打开这个文件。</b>
+  接口已自动指向本机服务 <code>http://127.0.0.1:8000</code>，所以需要服务在运行才能用；
+  但有 CORS、缓存、刷新等一堆坑，<b>推荐直接访问 <a href="http://127.0.0.1:8000/" style="color:#a85f00">http://127.0.0.1:8000</a></b>。
+</div>
 <div class="app">
   <aside class="side">
     <div class="brand">
@@ -345,6 +350,17 @@
 (function () {
   "use strict";
 
+  // 页面有两种打开方式：
+  //   1) http://127.0.0.1:8000  —— 服务托管，接口用同源相对路径（推荐）
+  //   2) 直接双击文件（file://）—— 相对路径会变成 file:///api/... 必然失败，
+  //      所以这里把接口指回本机服务。前提是服务在跑，且服务端放行了 null origin。
+  const FILE_MODE = location.protocol === "file:";
+  const API_BASE = FILE_MODE ? "http://127.0.0.1:8000" : "";
+  if (FILE_MODE) {
+    const bar = document.getElementById("filemode-bar");
+    if (bar) bar.hidden = false;
+  }
+
   const EXAMPLES = [
     "梯度下降的更新公式是什么",
     "交叉验证和正则化分别是怎样缓解过拟合的",
@@ -414,7 +430,7 @@
   // ---------------------------------------------------------------- status
   async function pollStatus() {
     try {
-      const r = await fetch("/api/status");
+      const r = await fetch(API_BASE + "/api/status");
       const d = await r.json();
       if (!d.ready) {
         $("chips").innerHTML = '<span class="chip warn">' + esc(d.error || d.message || "加载中…") + "</span>";
@@ -643,7 +659,7 @@
     handle.showCursor(true);
 
     try {
-      const resp = await fetch("/api/chat", {
+      const resp = await fetch(API_BASE + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(Object.assign({ question: question }, state.settings))
@@ -707,7 +723,7 @@
     const out = $("dbg-out");
     out.innerHTML = '<div class="legend">检索中…</div>';
     try {
-      const resp = await fetch("/api/search", {
+      const resp = await fetch(API_BASE + "/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(Object.assign({ query: q }, state.settings))

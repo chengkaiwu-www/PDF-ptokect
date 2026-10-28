@@ -55,6 +55,7 @@ if str(ROOT) not in sys.path:
 
 import uvicorn  # noqa: E402
 from fastapi import FastAPI, HTTPException  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
@@ -301,6 +302,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# 放行「直接用浏览器打开 web/index.html」这种 file:// 用法。
+# file:// 页面的 Origin 是字符串 "null"，同源策略会把它的 fetch 全部拦掉，
+# 表现就是「页面能显示，但徽章不亮、一点就报错」。
+# 这里只放行 null 与本机回环地址 —— 不要图省事写 allow_origins=["*"]：
+# 本服务无鉴权且每次问答都花 LLM token，放行任意来源等于给所有网页开后门。
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["null"],
+    allow_origin_regex=r"^http://(127\.0\.0\.1|localhost)(:\d+)?$",
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 def index():
@@ -440,5 +455,9 @@ def chat(req: ChatRequest):
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
-    logger.info(f"打开 http://127.0.0.1:{port} 查看前端")
-    uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
+    # 默认只绑回环地址：本机开发不需要暴露到局域网。
+    # 但排查「浏览器连不上」时要能改，所以留一个开关：
+    #   HOST=0.0.0.0  -> 监听本机所有 IPv4 网卡（局域网 IP 也能访问，注意本服务无鉴权）
+    host = os.getenv("HOST", "127.0.0.1")
+    logger.info(f"打开 http://127.0.0.1:{port} 查看前端（监听 {host}）")
+    uvicorn.run(app, host=host, port=port, log_level="warning")
