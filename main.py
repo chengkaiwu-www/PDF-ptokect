@@ -15,6 +15,7 @@ from config.config import (
     DEEPSEEK_API_KEY,
     DEEPSEEK_MODEL,
     DEEPSEEK_API_BASE,
+    QUERY_REWRITE,
 )
 from utils.logger import setup_logger
 from src.document_loader import load_pdf_file
@@ -125,7 +126,8 @@ def build_vector_store(embedding_model, recreate: bool = False):
     return vector_store
 
 
-def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE, rerank: bool = RERANK_ENABLED):
+def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE,
+                          rerank: bool = RERANK_ENABLED, rewrite: str = QUERY_REWRITE):
     """
     Initialize the RAG system by loading documents and creating vector store.
 
@@ -133,31 +135,23 @@ def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE, re
         recreate: Whether to rebuild the vector store from scratch
         mode: 检索模式 vector | bm25 | hybrid
         rerank: 是否启用 Cross-Encoder 精排
+        rewrite: query 改写 off | multi_query | hyde
 
     Returns:
         RAGPipeline instance
     """
     logger.info(
         f"Initializing RAG system (backend={VECTOR_BACKEND}, retriever={mode}, "
-        f"rerank={rerank}, top_k={RETRIEVAL_TOP_K}, candidate_k={RETRIEVAL_CANDIDATE_K})"
+        f"rewrite={rewrite}, rerank={rerank}, top_k={RETRIEVAL_TOP_K}, "
+        f"candidate_k={RETRIEVAL_CANDIDATE_K})"
     )
 
     embedding_model = get_embedding_model()
     vector_store = build_vector_store(embedding_model, recreate=recreate)
 
-    # 精排属于检索层，不挂在 RAGPipeline 上（见 rag_pipeline 的职责说明）
-    retriever = create_hybrid_retriever(
-        vector_store,
-        mode=mode,
-        candidate_k=RETRIEVAL_CANDIDATE_K,
-        rrf_k=RRF_K,
-        rerank=rerank,
-        reranker_model=RERANKER_MODEL,
-        top_k=RETRIEVAL_TOP_K,
-    )
-
     if DEEPSEEK_API_KEY:
         from langchain_deepseek import ChatDeepSeek
+        # 生成用的 LLM：temperature=0，同一问题同一答案，便于比对与评测
         llm = ChatDeepSeek(
             model=DEEPSEEK_MODEL,
             api_key=DEEPSEEK_API_KEY,
@@ -169,6 +163,33 @@ def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE, re
         logger.warning("DEEPSEEK_API_KEY not found. Please set it in the .env file to enable LLM generation.")
         logger.info("You can still use the retrieval functionality.")
         llm = None
+
+    # 改写用的 LLM 要和生成用的**分开建**：改写要的是多样性（temperature 高），
+    # 生成要的是稳定（temperature 0）。共用一个实例必然把其中一个调错。
+    rewrite_llm = None
+    if rewrite not in ("", "off") and llm is not None:
+        from langchain_deepseek import ChatDeepSeek
+
+        rewrite_llm = ChatDeepSeek(
+            model=DEEPSEEK_MODEL,
+            api_key=DEEPSEEK_API_KEY,
+            base_url=DEEPSEEK_API_BASE,
+            temperature=0.7,
+            max_tokens=320,
+        )
+
+    # 精排属于检索层，不挂在 RAGPipeline 上（见 rag_pipeline 的职责说明）
+    retriever = create_hybrid_retriever(
+        vector_store,
+        mode=mode,
+        candidate_k=RETRIEVAL_CANDIDATE_K,
+        rrf_k=RRF_K,
+        rerank=rerank,
+        reranker_model=RERANKER_MODEL,
+        rewrite=rewrite,
+        llm=rewrite_llm,
+        top_k=RETRIEVAL_TOP_K,
+    )
 
     rag_pipeline = RAGPipeline(llm=llm, retriever=retriever, embedding_model=embedding_model)
 
@@ -221,6 +242,10 @@ def main():
     parser.add_argument("--rerank", action=argparse.BooleanOptionalAction,
                         default=RERANK_ENABLED,
                         help="Cross-Encoder 精排（--no-rerank 关闭）")
+    parser.add_argument("--rewrite", type=str, default=QUERY_REWRITE,
+                        choices=["off", "multi_query", "hyde"],
+                        help="query 改写：off | multi_query | hyde（默认取 QUERY_REWRITE）。"
+                             "注意：hyde 与精排的收益高度重叠，同时开启通常没有额外提升（见 README 实验 9）")
 
     args = parser.parse_args()
 
@@ -239,7 +264,8 @@ def main():
             return
 
         rag_pipeline = initialize_rag_system(
-            recreate=args.recreate, mode=args.retriever, rerank=args.rerank
+            recreate=args.recreate, mode=args.retriever, rerank=args.rerank,
+            rewrite=args.rewrite,
         )
 
         if args.query:
@@ -257,6 +283,12 @@ def main():
 
         if args.chat:
             chat_mode(rag_pipeline)
+
+        # 改写缓存落盘：CLI 每次重启都是新进程，不落盘就等于每次都重新付一次
+        # LLM 费用（而且同一问题两次跑出的改写还不一样，无法复现）。
+        _rw = getattr(rag_pipeline.retriever, "rewriter", None)
+        if _rw is not None:
+            _rw.save()
 
     except Exception as e:
         logger.error(f"Error: {str(e)}")

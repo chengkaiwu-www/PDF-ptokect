@@ -113,3 +113,20 @@ RERANKER_MODEL = os.getenv(
 )
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+# --- Query 改写（S6-b）---
+# 检索前把 1 个查询扩成多个（见 src/query_rewriter.py 的模块文档）。
+#   'off'         —— 不改写（默认；改写要花 LLM 调用，不该默认开着）
+#   'multi_query' —— 让 LLM 生成 N 个不同表述，各自检索后一起融合
+#   'hyde'        —— 让 LLM 先写一段假想答案，用答案去检索
+QUERY_REWRITE = os.getenv("QUERY_REWRITE", "off").strip().lower()
+
+# 生成几条改写。HyDE 恒为 1（只生成一段假想答案）。
+REWRITE_N = int(os.getenv("REWRITE_N", "3"))
+
+# 改写查询在 RRF 里的权重。原 query 恒为 1.0 —— 改写权重低于它，
+# 相当于「以原意为主、改写为辅」，改写跑偏时只会变成噪声而不是主导结果。
+REWRITE_WEIGHT = float(os.getenv("REWRITE_WEIGHT", "0.7"))
+
+# 改写结果缓存。评测必须落盘，否则每次重跑都要重新调模型，且结果不可复现。
+REWRITE_CACHE = str(BASE_DIR / "results" / "rewrite_cache.json")

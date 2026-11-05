@@ -90,6 +90,7 @@ class HybridRetriever:
         rrf_k: int = 60,
         candidate_k: int = 50,
         reranker=None,
+        rewriter=None,
         top_k: int = 4,
         channel_weights: Optional[Dict[str, float]] = None,
     ):
@@ -99,6 +100,9 @@ class HybridRetriever:
         self.rrf_k = rrf_k
         self.candidate_k = candidate_k
         self.reranker = reranker
+        # 改写器（S6-b）。放在检索层而不是生成层：
+        # 它改变的是「检索什么」，属于召回策略，改的是本类关心的事。
+        self.rewriter = rewriter
         self.top_k = top_k
         # 各通道融合权重，默认等权。等权是 RRF 的卖点（无需调参），
         # 但当两个通道质量差距明显时，等权会把强通道拖下来 ——
@@ -158,27 +162,51 @@ class HybridRetriever:
 
         candidate_k = max(self.candidate_k, top_k)
 
-        channels: List[Tuple[str, List[Tuple[int, float]]]] = []
-        if self.use_vector:
-            channels.append(("vector", self._vector_recall(query, embedding_model, candidate_k)))
-        if self.use_bm25:
-            channels.append(("bm25", self._bm25_recall(query, candidate_k)))
+        # ---- ① 改写：把 1 个查询变成多个检索请求
+        # plan[0] 恒为原 query、权重 1.0（这个约定由 QueryRewriter.expand 保证）。
+        plan: List[Tuple[str, float]] = [(query, 1.0)]
+        if self.rewriter is not None:
+            plan = self.rewriter.expand(query)
 
-        if not channels:
+        # ---- ② 每个查询各自跑一遍召回通道
+        # 通道命名：原 query 沿用 "vector"/"bm25"（前端调试台按这两个键取值，别改）；
+        # 改写出来的通道加 "rw{i}:" 前缀，debug 里就能看清是谁把这块捞上来的。
+        # 融合权重 = 查询权重 × 通道权重，两个维度正交、可分别标定。
+        sources: List[Tuple[str, str, List[Tuple[int, float]], float]] = []
+        for qi, (q_text, q_weight) in enumerate(plan):
+            prefix = "" if qi == 0 else f"rw{qi}:"
+            if self.use_vector:
+                sources.append((
+                    f"{prefix}vector", "vector",
+                    self._vector_recall(q_text, embedding_model, candidate_k), q_weight,
+                ))
+            if self.use_bm25:
+                sources.append((
+                    f"{prefix}bm25", "bm25",
+                    self._bm25_recall(q_text, candidate_k), q_weight,
+                ))
+
+        if not sources:
             raise ValueError("至少需要启用一个召回通道（use_vector / use_bm25）")
 
         # 单通道时不走 RRF：RRF 会丢掉分数，而单通道的原始分数是有意义的
         # （余弦相似度可比、BM25 可看相对大小）。这是「不要为了统一而统一」的例子。
-        if len(channels) == 1:
-            name, scored = channels[0]
+        # 判定要按 sources 的总数，而不是原始通道数 ——
+        # 一旦开了改写，即使原本只有一路，这里也已经是多路，必须走融合。
+        if len(sources) == 1:
+            _, base, scored, _ = sources[0]
             ordered = list(scored)
             fused_scores: Dict[int, float] = dict(scored)
-            score_kind = "cosine" if name == "vector" else "bm25"
+            score_kind = "cosine" if base == "vector" else "bm25"
+            name = base
         else:
             ordered = reciprocal_rank_fusion(
-                [[doc_idx for doc_idx, _ in ranked] for _, ranked in channels],
+                [[doc_idx for doc_idx, _ in ranked] for _, _, ranked, _ in sources],
                 k=self.rrf_k,
-                weights=[self.channel_weights.get(ch, 1.0) for ch, _ in channels],
+                weights=[
+                    q_weight * self.channel_weights.get(base, 1.0)
+                    for _, base, _, q_weight in sources
+                ],
             )
             fused_scores = dict(ordered)
             score_kind = "rrf"
@@ -187,6 +215,9 @@ class HybridRetriever:
         docs = self.vector_store.documents
 
         # ---- 精排：只对融合后的前 candidate_k 个候选做，不是全库
+        # 注意这里用的是**原 query** 而不是改写后的查询：
+        # Cross-Encoder 判的是「这块内容是否真的回答了用户的问题」，
+        # 而改写出来的查询是「为了捞到它而编的拐杖」，拿拐杖去打分等于自问自答。
         rerank_scores: Dict[int, float] = {}
         if self.reranker is not None and ordered:
             pool = [doc_idx for doc_idx, _ in ordered[:candidate_k]]
@@ -200,10 +231,13 @@ class HybridRetriever:
         if return_debug:
             rank_maps = {
                 ch_name: {doc_idx: r for r, (doc_idx, _) in enumerate(ranked, start=1)}
-                for ch_name, ranked in channels
+                for ch_name, _, ranked, _ in sources
             }
             debug = {
-                "channels": {ch: len(ranked) for ch, ranked in channels},
+                "channels": {ch: len(ranked) for ch, _, ranked, _ in sources},
+                # 把改写计划也带出去：调参时要能回答「改写到底生成了什么、
+                # 是不是把问题改偏了」——只看最终指标永远查不出这种问题。
+                "rewrites": [{"query": q, "weight": w} for q, w in plan],
                 "score_kind": "rerank" if rerank_scores else score_kind,
                 "rows": [
                     {
@@ -233,17 +267,28 @@ def create_hybrid_retriever(
     rrf_k: Optional[int] = None,
     rerank: Optional[bool] = None,
     reranker_model: Optional[str] = None,
+    rewrite: Optional[str] = None,
+    rewriter=None,
+    llm=None,
+    rewrite_n: Optional[int] = None,
+    rewrite_weight: Optional[float] = None,
     top_k: Optional[int] = None,
     channel_weights: Optional[Dict[str, float]] = None,
 ) -> HybridRetriever:
     """
-    统一工厂：main.py 与 eval/run_eval.py 都走这里。
+    统一工厂：main.py / eval/run_eval.py / server 都走这里。
 
-    为什么要一个统一工厂：检索器有两种召回通道、一个融合参数、一个可选精排，
-    组装逻辑一旦在 CLI 和评测脚本里各写一份，就会「评测的配置和线上跑的不一样」
-    —— 这是 RAG 项目最常见、也最难发现的评测失真。
+    为什么要一个统一工厂：检索器有两种召回通道、一个融合参数、一个可选精排、
+    一个可选改写，组装逻辑一旦在 CLI 和评测脚本里各写一份，就会
+    「评测的配置和线上跑的不一样」—— 这是 RAG 项目最常见、也最难发现的评测失真。
+
+    Args:
+        rewrite: off | multi_query | hyde。开启时必须同时给 llm，
+                 否则会抛错而不是静默降级（「以为开了其实没开」会让实验完全失真）。
+        rewriter: 直接注入改写器实例（服务层复用时避免重复建缓存对象）
     """
     from config.config import (
+        DEEPSEEK_MODEL,
         RERANKER_MODEL,
         RERANK_ENABLED,
         RETRIEVAL_CANDIDATE_K,
@@ -267,6 +312,17 @@ def create_hybrid_retriever(
 
         reranker = CrossEncoderReranker(reranker_model or RERANKER_MODEL)
 
+    if rewriter is None and rewrite is not None:
+        from src.query_rewriter import create_rewriter
+
+        rewriter = create_rewriter(
+            rewrite,
+            llm=llm,
+            n=rewrite_n,
+            weight=rewrite_weight,
+            model_name=DEEPSEEK_MODEL,
+        )
+
     return HybridRetriever(
         vector_store,
         use_vector=(mode in ("vector", "hybrid")),
@@ -274,6 +330,7 @@ def create_hybrid_retriever(
         rrf_k=rrf_k,
         candidate_k=candidate_k,
         reranker=reranker,
+        rewriter=rewriter,
         top_k=top_k,
         channel_weights=channel_weights,
     )

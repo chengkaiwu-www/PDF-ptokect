@@ -54,6 +54,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(EVAL_DIR))
 
 from config.config import (  # noqa: E402
+    DEEPSEEK_API_BASE,
+    DEEPSEEK_API_KEY,
+    DEEPSEEK_MODEL,
     RERANK_ENABLED,
     RETRIEVAL_CANDIDATE_K,
     RETRIEVAL_TOP_K,
@@ -65,11 +68,44 @@ from src.embedding import get_embedding_model  # noqa: E402
 from src.vector_store import load_vector_store  # noqa: E402
 
 
+def _build_rewriter(mode: str, n, weight):
+    """
+    按需构造改写器（以及它需要的 LLM）。
+
+    两个刻意的选择：
+      1. temperature=0.7 而不是 0 —— 改写要的是**多样性**，
+         温度 0 会让 3 条改写彼此高度相似，等于花钱做了一次同义反复。
+         （注意这和判定器相反：判定要确定性，所以那边是 0。）
+      2. 没有 API key 时直接报错退出，而不是静默降级成「不改写」——
+         否则你会拿着一份「改写」的实验结果，其实是 baseline。
+    """
+    if not mode or mode == "off":
+        return None
+    if not DEEPSEEK_API_KEY:
+        print("[ERROR] --rewrite 需要 DEEPSEEK_API_KEY（在 .env 中配置）")
+        sys.exit(1)
+
+    from langchain_deepseek import ChatDeepSeek
+
+    from src.query_rewriter import create_rewriter
+
+    llm = ChatDeepSeek(
+        model=DEEPSEEK_MODEL,
+        api_key=DEEPSEEK_API_KEY,
+        base_url=DEEPSEEK_API_BASE,
+        temperature=0.7,
+        max_tokens=320,
+    )
+    return create_rewriter(mode, llm=llm, n=n, weight=weight, model_name=DEEPSEEK_MODEL)
+
+
 def build_retriever(store, mode: str, candidate_k: int, rrf_k: int, rerank: bool,
-                    weights: str = ""):
+                    weights: str = "", rewrite: str = "off",
+                    rewrite_n=None, rewrite_weight=None):
     """
     组装检索器。四种策略只在「开了哪几路召回 + 要不要精排」上不同，
     其余（向量库、embedding 模型、候选数、评测题）全部固定 —— 单变量。
+    S6-b 之后多了第五个变量：要不要做 query 改写。
 
     实际组装交给 src.hybrid_retriever.create_hybrid_retriever，
     与 main.py 走同一份代码，避免评测口径与线上不一致。
@@ -77,6 +113,7 @@ def build_retriever(store, mode: str, candidate_k: int, rrf_k: int, rerank: bool
     Args:
         weights: 形如 "1,2" -> vector:1.0, bm25:2.0；空串表示等权。
                  只影响多通道（hybrid）情形。
+        rewrite: off | multi_query | hyde
 
     Returns:
         (retriever, label)
@@ -94,11 +131,16 @@ def build_retriever(store, mode: str, candidate_k: int, rrf_k: int, rerank: bool
             raise ValueError(f"--rrf-weight 需要 {len(keys)} 个数（对应 {keys}），收到 {len(parts)}")
         channel_weights = dict(zip(keys, parts))
 
+    rewriter = _build_rewriter(rewrite, rewrite_n, rewrite_weight)
+
     retriever = create_hybrid_retriever(
         store, mode=mode, candidate_k=candidate_k, rrf_k=rrf_k, rerank=rerank,
+        rewriter=rewriter,
         channel_weights=channel_weights,
     )
     label = mode + ("+rerank" if rerank else "")
+    if rewriter is not None:
+        label += f"+{rewrite}(n={rewriter.n},w={rewriter.weight:g})"
     if channel_weights:
         label += "(" + ",".join(f"{k}={v:g}" for k, v in channel_weights.items()) + ")"
     return retriever, label
@@ -408,6 +450,15 @@ def main():
                         help="各通道 RRF 权重，如 \"1,2\"（vector:1, bm25:2）；默认等权")
     parser.add_argument("--rerank", action="store_true",
                         help="对融合候选做 Cross-Encoder 精排")
+    parser.add_argument("--rewrite", type=str, default="off",
+                        choices=["off", "multi_query", "hyde"],
+                        help="query 改写：off（默认）| multi_query（生成 N 个不同表述）"
+                             "| hyde（先生成假想答案再检索）。需要 DEEPSEEK_API_KEY")
+    parser.add_argument("--rewrite-n", type=int, default=None,
+                        help="生成几条改写（默认取 config.REWRITE_N=3；hyde 恒为 1）")
+    parser.add_argument("--rewrite-weight", type=float, default=None,
+                        help="改写查询在 RRF 里的权重（默认取 config.REWRITE_WEIGHT=0.7，"
+                             "原 query 恒为 1.0）")
     parser.add_argument("--judge", action="store_true",
                         help="用 LLM 做语义判定替代关键词判定（第二套口径，需 API key）")
     parser.add_argument("--judge-cache", type=str,
@@ -432,7 +483,8 @@ def main():
 
     rerank = args.rerank or RERANK_ENABLED
     retriever, label = build_retriever(
-        store, args.retriever, args.candidate_k, args.rrf_k, rerank, args.rrf_weight
+        store, args.retriever, args.candidate_k, args.rrf_k, rerank, args.rrf_weight,
+        rewrite=args.rewrite, rewrite_n=args.rewrite_n, rewrite_weight=args.rewrite_weight,
     )
 
     # 预热：首次调用会触发 reranker 模型加载（数百 MB，数秒）与 BM25 建索引
@@ -455,6 +507,16 @@ def main():
     if judge is not None:
         judge.save()
         print(f"LLM 判定统计: {judge.stats()}")
+
+    # 改写缓存必须落盘：第一次跑花的是真金白银（每题 1 次 LLM 调用），
+    # 落盘后重跑同一配置是 0 成本，而且两次跑出来的结果能对得上。
+    if getattr(retriever, "rewriter", None) is not None:
+        rw = retriever.rewriter
+        rw.save()
+        print(
+            f"改写统计: 调用 {rw.n_calls} 次 / 命中缓存 {rw.n_hits} 次 / "
+            f"失败 {rw.n_failures} 次（缓存: {rw.cache_path}）"
+        )
 
     if args.save:
         out = Path(args.save)
