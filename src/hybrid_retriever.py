@@ -31,6 +31,7 @@
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from src.bm25 import BM25Index
+from src.parent_expander import ParentExpander, describe
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -93,6 +94,8 @@ class HybridRetriever:
         rewriter=None,
         top_k: int = 4,
         channel_weights: Optional[Dict[str, float]] = None,
+        parent_expand: bool = False,
+        parent_window: int = 3,
     ):
         self.vector_store = vector_store
         self.use_bm25 = use_bm25
@@ -109,9 +112,28 @@ class HybridRetriever:
         # 这时加权 RRF 是补救手段，权重本身必须用评测集标定。
         self.channel_weights = channel_weights or {}
 
+        # 父子块（S6-c）：用子块检索、用父块喂模型。
+        # 注意它与精排的顺序 —— 精排**仍然打子块**，展开放在最后一步：
+        # 小块的语义更聚焦，Cross-Encoder 判「这块是否回答了问题」更准；
+        # 若先展开再精排，等于让模型在一个混杂了 3 个主题的长块上打分，精度会掉。
+        self.parent_expand = parent_expand
+        self.parent_window = max(1, int(parent_window))
+        self._expander = None
+        self._expander_n = -1
+
         self.bm25: Optional[BM25Index] = None
         if use_bm25:
             self._ensure_bm25()
+
+    def _ensure_expander(self):
+        """懒建父块展开器；语料规模变化时自动重建（与 BM25 的策略一致）。"""
+        n = len(self.vector_store.documents)
+        if self._expander is None or self._expander_n != n:
+            from src.parent_expander import ParentExpander
+
+            self._expander = ParentExpander(self.vector_store.documents, self.parent_window)
+            self._expander_n = n
+        return self._expander
 
     # ------------------------------------------------------------------ 检索
 
@@ -228,6 +250,17 @@ class HybridRetriever:
 
         selected = ordered[:top_k]
 
+        # ---- 父块展开（可选）：子块决定「取哪几处」，父块决定「给多少上下文」。
+        # 这里刻意不在 debug 里打乱 rows 的语义 —— rows 永远描述子块排名，
+        # 展开后的父块信息单独放在 debug["parent"]，两者不混。
+        parent_stats = None
+        if self.parent_expand:
+            parents = self._ensure_expander().expand(selected)
+            parent_stats = describe(parents)
+            documents_out = parents
+        else:
+            documents_out = [docs[i] for i, _ in selected]
+
         if return_debug:
             rank_maps = {
                 ch_name: {doc_idx: r for r, (doc_idx, _) in enumerate(ranked, start=1)}
@@ -249,10 +282,14 @@ class HybridRetriever:
                     }
                     for doc_idx, _ in selected
                 ],
+                # 父块统计：chars 是这套方案真正的成本项（上下文变长 = token 变多），
+                # 优化上下文完整性时不度量它，等于只看收益不看账单。
+                "parent": parent_stats,
+                "child_indices": [doc_idx for doc_idx, _ in selected],
             }
-            return {"documents": [docs[i] for i, _ in selected], "debug": debug, "mode": name}
+            return {"documents": documents_out, "debug": debug, "mode": name}
 
-        return [docs[i] for i, _ in selected]
+        return documents_out
 
     # 兼容 create_retriever 的闭包签名
     def __call__(self, query: str, embedding_model, top_k: Optional[int] = None):
@@ -274,6 +311,8 @@ def create_hybrid_retriever(
     rewrite_weight: Optional[float] = None,
     top_k: Optional[int] = None,
     channel_weights: Optional[Dict[str, float]] = None,
+    parent_expand: Optional[bool] = None,
+    parent_window: Optional[int] = None,
 ) -> HybridRetriever:
     """
     统一工厂：main.py / eval/run_eval.py / server 都走这里。
@@ -289,6 +328,8 @@ def create_hybrid_retriever(
     """
     from config.config import (
         DEEPSEEK_MODEL,
+        PARENT_EXPAND,
+        PARENT_WINDOW,
         RERANKER_MODEL,
         RERANK_ENABLED,
         RETRIEVAL_CANDIDATE_K,
@@ -305,6 +346,8 @@ def create_hybrid_retriever(
     rrf_k = RRF_K if rrf_k is None else rrf_k
     top_k = RETRIEVAL_TOP_K if top_k is None else top_k
     rerank = RERANK_ENABLED if rerank is None else rerank
+    parent_expand = PARENT_EXPAND if parent_expand is None else parent_expand
+    parent_window = PARENT_WINDOW if parent_window is None else parent_window
 
     reranker = None
     if rerank:
@@ -333,4 +376,6 @@ def create_hybrid_retriever(
         rewriter=rewriter,
         top_k=top_k,
         channel_weights=channel_weights,
+        parent_expand=parent_expand,
+        parent_window=parent_window,
     )

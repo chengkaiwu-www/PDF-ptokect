@@ -50,6 +50,7 @@ from config.config import (  # noqa: E402
     DEEPSEEK_API_BASE,
     DEEPSEEK_API_KEY,
     DEEPSEEK_MODEL,
+    PARENT_WINDOW,
     RERANK_ENABLED,
     RERANKER_MODEL,
     RETRIEVAL_CANDIDATE_K,
@@ -185,6 +186,10 @@ def evaluate(
             "faith_claims": faith["total"] if faith else 0,
             "faith_parse_failed": bool(faith and faith["parse_failed"]),
             "answer_chars": len(raw_answer),
+            # 上下文长度：父子块方案唯一的成本项。不量它，就只能看到收益看不到账单。
+            # 用字符数而不是 token 数：分词器换了口径就断，字符数是稳定量具。
+            "context_chars": len(out.get("context") or ""),
+            "context_blocks": len(out.get("source_documents") or []),
             "answer": out["answer"],
         }
         rows.append(row)
@@ -219,6 +224,10 @@ def evaluate(
     multi = [r for r in answerable if r["type"] == "multi_hop" and not r["refused"]]
     multi_ok = [r for r in multi if len(r["cited_sources"]) >= 2]
 
+    # 上下文成本：只统计真正送给模型的（作答行），拒答行的 context 可能是空串
+    ctx = [r["context_chars"] for r in rows if r["context_chars"] > 0]
+    ctx_blocks = [r["context_blocks"] for r in rows if r["context_blocks"] > 0]
+
     summary = {
         "prompt_version": pipeline.prompt_version,
         "prompt_variant": pipeline.prompt_variant,
@@ -252,6 +261,10 @@ def evaluate(
         "multi_hop_questions": len(multi),
         "multi_hop_multi_source": len(multi_ok),
         "multi_hop_multi_source_rate": pct(len(multi_ok), len(multi)),
+        # 上下文成本（父子块的账单）
+        "context_chars_avg": round(sum(ctx) / len(ctx)) if ctx else 0,
+        "context_chars_max": max(ctx) if ctx else 0,
+        "context_blocks_avg": round(sum(ctx_blocks) / len(ctx_blocks), 2) if ctx_blocks else 0,
         "avg_gen_ms": round(gen_sec * 1000 / len(rows), 1) if rows else 0.0,
     }
 
@@ -287,6 +300,10 @@ def main():
     ap.add_argument("--judge-cache", default=str(PROJECT_ROOT / "results" / "judge_cache.json"))
     ap.add_argument("--limit", type=int, default=0, help="只跑前 N 题（调试用）")
     ap.add_argument("--only-type", default="", help="只跑某一层：single_fact/distractor/multi_hop/no_answer")
+    ap.add_argument("--parent-expand", action="store_true",
+                    help="父子块：用子块检索、把同页父块喂给模型（S6-c）")
+    ap.add_argument("--parent-window", type=int, default=PARENT_WINDOW,
+                    help=f"父块包含的子块数（默认 {PARENT_WINDOW}）")
     ap.add_argument("--prompt-variant", default="full", choices=["full", "no_refusal", "no_cite"],
                     help="prompt 消融变体（full 为正式配置）")
     ap.add_argument("--detail", action="store_true")
@@ -319,8 +336,12 @@ def main():
         rerank=args.rerank,
         reranker_model=RERANKER_MODEL,
         top_k=args.top_k,
+        parent_expand=args.parent_expand,
+        parent_window=args.parent_window,
     )
     retriever.label = args.retriever + ("+rerank" if args.rerank else "")
+    if args.parent_expand:
+        retriever.label += f"+parent(w={args.parent_window})"
 
     pipeline = RAGPipeline(
         llm=build_llm(), retriever=retriever, embedding_model=embedding_model,
@@ -358,6 +379,8 @@ def main():
     if s["multi_hop_questions"]:
         print(f"多跳多来源引用 = {s['multi_hop_multi_source_rate']:.4f}   ({s['multi_hop_multi_source']}/{s['multi_hop_questions']})")
     print(f"平均生成延迟   = {s['avg_gen_ms']:.0f} ms/题")
+    print(f"上下文成本     = 平均 {s['context_chars_avg']} 字符（最多 {s['context_chars_max']}），"
+          f"平均 {s['context_blocks_avg']} 个块")
     if s["sentinel_disagreements"]:
         print(f"⚠ 哨兵与评测侧拒答判定分歧: {s['sentinel_disagreements']} 题（口径需人工确认）")
     print("=" * 78)

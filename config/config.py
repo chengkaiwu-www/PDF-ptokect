@@ -130,3 +130,13 @@ REWRITE_WEIGHT = float(os.getenv("REWRITE_WEIGHT", "0.7"))
 
 # 改写结果缓存。评测必须落盘，否则每次重跑都要重新调模型，且结果不可复现。
 REWRITE_CACHE = str(BASE_DIR / "results" / "rewrite_cache.json")
+
+# --- 父子块（S6-c）---
+# 用子块检索（准）、用父块喂模型（全）。见 src/parent_expander.py 的模块文档。
+# 默认关闭：它不提升检索指标，只改善「送给 LLM 的上下文完整性」，
+# 所以它的收益只能在生成层量出来，且要同时报告上下文长度（成本）。
+PARENT_EXPAND = os.getenv("PARENT_EXPAND", "0") == "1"
+
+# 父块包含的子块数。窗口越大上下文越全、token 越贵；
+# 1 等价于关闭（父块 == 子块），便于做同一条代码路径的单变量对照。
+PARENT_WINDOW = int(os.getenv("PARENT_WINDOW", "3"))

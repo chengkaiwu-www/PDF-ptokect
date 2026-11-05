@@ -57,6 +57,7 @@ from config.config import (  # noqa: E402
     DEEPSEEK_API_BASE,
     DEEPSEEK_API_KEY,
     DEEPSEEK_MODEL,
+    PARENT_WINDOW,
     RERANK_ENABLED,
     RETRIEVAL_CANDIDATE_K,
     RETRIEVAL_TOP_K,
@@ -101,7 +102,8 @@ def _build_rewriter(mode: str, n, weight):
 
 def build_retriever(store, mode: str, candidate_k: int, rrf_k: int, rerank: bool,
                     weights: str = "", rewrite: str = "off",
-                    rewrite_n=None, rewrite_weight=None):
+                    rewrite_n=None, rewrite_weight=None,
+                    parent_expand: bool = False, parent_window: int = 3):
     """
     组装检索器。四种策略只在「开了哪几路召回 + 要不要精排」上不同，
     其余（向量库、embedding 模型、候选数、评测题）全部固定 —— 单变量。
@@ -137,10 +139,14 @@ def build_retriever(store, mode: str, candidate_k: int, rrf_k: int, rerank: bool
         store, mode=mode, candidate_k=candidate_k, rrf_k=rrf_k, rerank=rerank,
         rewriter=rewriter,
         channel_weights=channel_weights,
+        parent_expand=parent_expand,
+        parent_window=parent_window,
     )
     label = mode + ("+rerank" if rerank else "")
     if rewriter is not None:
         label += f"+{rewrite}(n={rewriter.n},w={rewriter.weight:g})"
+    if parent_expand:
+        label += f"+parent(w={parent_window})"
     if channel_weights:
         label += "(" + ",".join(f"{k}={v:g}" for k, v in channel_weights.items()) + ")"
     return retriever, label
@@ -459,6 +465,11 @@ def main():
     parser.add_argument("--rewrite-weight", type=float, default=None,
                         help="改写查询在 RRF 里的权重（默认取 config.REWRITE_WEIGHT=0.7，"
                              "原 query 恒为 1.0）")
+    parser.add_argument("--parent-expand", action="store_true",
+                        help="父子块：命中子块后展开为同页父块（注意：开启后 Hit@k 的"
+                             "判定文本变长，数字**不可**与基线直接比较，只用于看上下文成本）")
+    parser.add_argument("--parent-window", type=int, default=PARENT_WINDOW,
+                        help=f"父块包含的子块数（默认 {PARENT_WINDOW}）")
     parser.add_argument("--judge", action="store_true",
                         help="用 LLM 做语义判定替代关键词判定（第二套口径，需 API key）")
     parser.add_argument("--judge-cache", type=str,
@@ -485,6 +496,7 @@ def main():
     retriever, label = build_retriever(
         store, args.retriever, args.candidate_k, args.rrf_k, rerank, args.rrf_weight,
         rewrite=args.rewrite, rewrite_n=args.rewrite_n, rewrite_weight=args.rewrite_weight,
+        parent_expand=args.parent_expand, parent_window=args.parent_window,
     )
 
     # 预热：首次调用会触发 reranker 模型加载（数百 MB，数秒）与 BM25 建索引
