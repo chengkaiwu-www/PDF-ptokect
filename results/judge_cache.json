@@ -10057,5 +10057,3931 @@
    "parse_failed": false
   },
   "a": "{\"claims\": [{\"claim\": \"两者都用验证集来评估并支撑优化\", \"supported\": true, \"reason\": \"资料多处提及验证集评估\"}, {\"claim\": \"两者都面临验证集体量扩大后人工评估不可行、需要自动评估的问题\", \"supported\": true, \"reason\": \"资料128页明确表述\"}, {\"claim\": \"机器学习中先用留出法划分出验证"
+ },
+ "8000dc6a64acab5f45cd": {
+  "v": {
+   "claims": [
+    {
+     "claim": "损失函数为 L(w, θ) = Σ_{xi∈M} (ŷi − yi)(wTxi − θ)，其中 M ⊆ T 为误分类样本集合",
+     "supported": true,
+     "reason": "资料原文明确给出"
+    },
+    {
+     "claim": "该损失函数是非负的",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "如果没有误分类点，则损失函数值为 0",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "误分类点越少、误分类点离超平面越近，损失函数值就越小",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "给定数据集 T，损失函数 L(w, θ) 是关于 w, θ 的连续可导函数",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"损失函数为 L(w, θ) = Σ_{xi∈M} (ŷi − yi)(wTxi − θ)，其中 M ⊆ T 为误分类样本集合\", \"supported\": true, \"reason\": \"资料原文明确给出\"}, {\"claim\": \"该损失函数是非负的\", \"supported\": true, \"reason\": \"资料原文明确说明\"}, {\"cla"
+ },
+ "1f7eaafe3697209d336d": {
+  "v": {
+   "claims": [
+    {
+     "claim": "信息增益是对数据集 D 和属性子集 A，假设根据 A 的取值将 D 分为了 V 个子集 D1, D2, …, DV，信息增益的定义为划分之前数据集 D 的信息熵和划分之后每个子数据集 Dv 的信息熵的差",
+     "supported": true,
+     "reason": "资料原文直接表述"
+    },
+    {
+     "claim": "信息熵用来衡量一个系统的混乱程度",
+     "supported": true,
+     "reason": "资料原文直接表述"
+    },
+    {
+     "claim": "划分前和划分后信息熵的差越大，表示划分越有效，划分带来的“信息增益”越大",
+     "supported": true,
+     "reason": "资料原文直接表述"
+    },
+    {
+     "claim": "信息熵的定义式为 Ent(D) = −Σ_{i=1}^{|Y|} pk log2 pk",
+     "supported": true,
+     "reason": "资料给出该定义式"
+    },
+    {
+     "claim": "pk, k = 1, 2, …, |Y| 表示 D 中第 i 类样本所占的比例",
+     "supported": true,
+     "reason": "资料原文直接表述"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"信息增益是对数据集 D 和属性子集 A，假设根据 A 的取值将 D 分为了 V 个子集 D1, D2, …, DV，信息增益的定义为划分之前数据集 D 的信息熵和划分之后每个子数据集 Dv 的信息熵的差\", \"supported\": true, \"reason\": \"资料原文直接表述\"}, {\"claim\": \"信息熵用来衡量一个系统的混乱程度\", \""
+ },
+ "252af71918a5f2b9b3ff": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高斯混合聚类与 k 均值算法整体上都应用了期望最大化算法（EM 算法）",
+     "supported": true,
+     "reason": "资料1明确表述"
+    },
+    {
+     "claim": "其迭代过程中有两组变量 γji 和 (αi, µi, Σi)",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "两组变量之间相互影响但都是未知的",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "先初始化其中一组变量 (αi, µi, Σi)，然后计算 γji",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "再根据 γji 根据最大似然推导出的公式更新 (αi, µi, Σi)",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "反复迭代，直到满足停止条件",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "假设已知后验概率，即可通过相应公式知道 m 个样本归到底属于哪个簇",
+     "supported": true,
+     "reason": "资料1明确表述"
+    },
+    {
+     "claim": "再来求解参数 {(αi, µi, Σi) | 1 ⩽ i ⩽ k}",
+     "supported": true,
+     "reason": "资料1明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高斯混合聚类与 k 均值算法整体上都应用了期望最大化算法（EM 算法）\", \"supported\": true, \"reason\": \"资料1明确表述\"}, {\"claim\": \"其迭代过程中有两组变量 γji 和 (αi, µi, Σi)\", \"supported\": true, \"reason\": \"资料2明确表述\"}, {\"claim\": \"两组"
+ },
+ "0974abcdb0daebc20578": {
+  "v": {
+   "claims": [
+    {
+     "claim": "势函数被写作指数函数的形式",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "指数函数满足非负性且便于求导",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "势函数的定义式是定义在变量 xQ 上的函数 HQ(·) 的定义式",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "第二项考虑单节点",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "第一项考虑每一对节点之间的关系",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "资料中未提及“团”的定义",
+     "supported": false,
+     "reason": "资料提及最大团"
+    }
+   ],
+   "total": 6,
+   "supported": 5,
+   "score": 0.8333333333333334,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"势函数被写作指数函数的形式\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"指数函数满足非负性且便于求导\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"势函数的定义式是定义在变量 xQ 上的函数 HQ(·) 的定义式\", \"su"
+ },
+ "a876d48e19eb2c2eaea1": {
+  "v": {
+   "claims": [
+    {
+     "claim": "做特征缩放是为了帮助梯度下降算法更快地收敛",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "面对多维特征问题时，保证这些特征都具有相近的尺度，将帮助梯度下降算法更快地收敛",
+     "supported": true,
+     "reason": "第48页原文"
+    },
+    {
+     "claim": "特征缩放可以提高梯度下降的收敛速度",
+     "supported": true,
+     "reason": "第109页原文"
+    },
+    {
+     "claim": "在运行梯度下降算法之前，进行特征缩放依旧是非常必要的",
+     "supported": true,
+     "reason": "第105页原文"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"做特征缩放是为了帮助梯度下降算法更快地收敛\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"面对多维特征问题时，保证这些特征都具有相近的尺度，将帮助梯度下降算法更快地收敛\", \"supported\": true, \"reason\": \"第48页原文\"}, {\"claim\": \"特征缩放可以提高梯"
+ },
+ "11453f2fde54aa582542": {
+  "v": {
+   "claims": [
+    {
+     "claim": "正规方程通过求解 𝜕/𝜕θⱼ J(θⱼ) = 0 来找出使得代价函数最小的参数",
+     "supported": true,
+     "reason": "文档1原文明确表述"
+    },
+    {
+     "claim": "假设训练集特征矩阵为 X（包含 x₀ = 1）、训练集结果为向量 y，则利用正规方程解出向量 θ = (XᵀX)⁻¹Xᵀy",
+     "supported": true,
+     "reason": "文档1原文明确表述"
+    },
+    {
+     "claim": "上标 T 代表矩阵转置，上标 -1 代表矩阵的逆",
+     "supported": true,
+     "reason": "文档1原文明确表述"
+    },
+    {
+     "claim": "在 Octave 中，正规方程写作 pinv(X'*X)*X'*y",
+     "supported": true,
+     "reason": "文档4原文明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"正规方程通过求解 𝜕/𝜕θⱼ J(θⱼ) = 0 来找出使得代价函数最小的参数\", \"supported\": true, \"reason\": \"文档1原文明确表述\"}, {\"claim\": \"假设训练集特征矩阵为 X（包含 x₀ = 1）、训练集结果为向量 y，则利用正规方程解出向量 θ = (XᵀX)⁻¹Xᵀy\", \"supported\": true"
+ },
+ "51828a6bde10ce8c0e6e": {
+  "v": {
+   "claims": [
+    {
+     "claim": "决策边界是模型的分界线，将预测为 1 的区域和预测为 0 的区域分隔开。",
+     "supported": true,
+     "reason": "资料原文有此表述"
+    },
+    {
+     "claim": "在逻辑回归中，当 𝜃ᵀ𝑥 ≥ 0 时预测 𝑦 = 1。",
+     "supported": true,
+     "reason": "资料明确写出"
+    },
+    {
+     "claim": "在逻辑回归中，当 𝜃ᵀ𝑥 < 0 时预测 𝑦 = 0。",
+     "supported": true,
+     "reason": "资料明确写出"
+    },
+    {
+     "claim": "参数 𝜃 为向量 [-3 1 1] 时，当 −3 + 𝑥1 + 𝑥2 ≥ 0，即 𝑥1 + 𝑥2 ≥ 3 时模型预测 𝑦 = 1。",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "直线 𝑥1 + 𝑥2 = 3 是该模型的决策边界。",
+     "supported": true,
+     "reason": "资料称其为分界线"
+    },
+    {
+     "claim": "若数据需要用曲线分隔，则需要二次方特征。",
+     "supported": true,
+     "reason": "资料原文有此表述"
+    },
+    {
+     "claim": "特征为 [-1 0 0 1 1] 时，得到的判定边界是圆点在原点且半径为 1 的圆形。",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "可以用非常复杂的模型来适应非常复杂形状的判定边界。",
+     "supported": true,
+     "reason": "资料原文有此表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"决策边界是模型的分界线，将预测为 1 的区域和预测为 0 的区域分隔开。\", \"supported\": true, \"reason\": \"资料原文有此表述\"}, {\"claim\": \"在逻辑回归中，当 𝜃ᵀ𝑥 ≥ 0 时预测 𝑦 = 1。\", \"supported\": true, \"reason\": \"资料明确写出\"}, {\"claim\": \"在逻辑回"
+ },
+ "b69625375dcd5cd57cb7": {
+  "v": {
+   "claims": [
+    {
+     "claim": "训练神经网络时，利用数值检验方法检验反向传播计算出的所有偏导数",
+     "supported": true,
+     "reason": "第151页步骤5明确"
+    },
+    {
+     "claim": "梯度检验采用梯度的数值检验方法，通过估计梯度值来检验计算的导数值是否真的是所要求的",
+     "supported": true,
+     "reason": "第148页原文表述"
+    },
+    {
+     "claim": "对梯度的估计是在代价函数上沿着切线方向选择离两个非常近的点，计算两个点的平均值用以估计梯度",
+     "supported": true,
+     "reason": "第148页原文表述"
+    },
+    {
+     "claim": "对于某个特定的𝜃，计算出在𝜃-𝜀处和𝜃+𝜀处的代价值（𝜀是非常小的值，通常选取0.001），然后求两个代价的平均，用以估计在𝜃处的代价值",
+     "supported": true,
+     "reason": "第148页原文表述"
+    },
+    {
+     "claim": "Octave中代码为：gradApprox = (J(theta + eps) – J(theta - eps)) / (2*eps)",
+     "supported": true,
+     "reason": "第148页代码一致"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"训练神经网络时，利用数值检验方法检验反向传播计算出的所有偏导数\", \"supported\": true, \"reason\": \"第151页步骤5明确\"}, {\"claim\": \"梯度检验采用梯度的数值检验方法，通过估计梯度值来检验计算的导数值是否真的是所要求的\", \"supported\": true, \"reason\": \"第148页原文表述\"}, {"
+ },
+ "e52915cc6b10cdfe939e": {
+  "v": {
+   "claims": [
+    {
+     "claim": "学习曲线是将训练集误差和交叉验证集误差作为训练集实例数量（𝑚）的函数绘制的图表",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在高偏差/欠拟合的情况下，增加数据到训练集不一定能有帮助",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "用一条直线来适应数据时，无论训练集有多么大误差都不会有太大改观",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 3,
+   "supported": 3,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"学习曲线是将训练集误差和交叉验证集误差作为训练集实例数量（𝑚）的函数绘制的图表\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"在高偏差/欠拟合的情况下，增加数据到训练集不一定能有帮助\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\":"
+ },
+ "a6ad34578dd255120d64": {
+  "v": {
+   "claims": [
+    {
+     "claim": "一般的高斯分布模型通过分别计算每个特征对应的几率然后将其累乘起来计算 𝑝(𝑥)",
+     "supported": true,
+     "reason": "资料1原文明确表述"
+    },
+    {
+     "claim": "多元高斯分布模型构建特征的协方差矩阵，用所有的特征一起来计算 𝑝(𝑥)",
+     "supported": true,
+     "reason": "资料1原文明确表述"
+    },
+    {
+     "claim": "多元高斯分布有两个参数：𝜇（𝑛维向量）和 𝛴（𝑛 × 𝑛的协方差矩阵）",
+     "supported": true,
+     "reason": "资料2原文明确表述"
+    },
+    {
+     "claim": "异常检测假设特征符合高斯分布",
+     "supported": true,
+     "reason": "资料3原文明确表述"
+    },
+    {
+     "claim": "如果数据的分布不是高斯分布，最好将数据转换成高斯分布",
+     "supported": true,
+     "reason": "资料3原文明确表述"
+    },
+    {
+     "claim": "可以使用对数函数 𝑥 = 𝑙𝑜𝑔(𝑥 + 𝑐)（𝑐为非负常数）转换数据",
+     "supported": true,
+     "reason": "资料3原文明确表述"
+    },
+    {
+     "claim": "可以使用 𝑥 = 𝑥^𝑐（𝑐为0-1之间的一个分数）转换数据",
+     "supported": true,
+     "reason": "资料3原文明确表述"
+    },
+    {
+     "claim": "如果特征之间在某种程度上存在相互关联的情况，可以通过构造新特征的方法来捕捉这些相关性",
+     "supported": true,
+     "reason": "资料4原文明确表述"
+    },
+    {
+     "claim": "如果训练集不是太大，并且没有太多的特征，可以使用多元高斯分布模型",
+     "supported": true,
+     "reason": "资料4原文明确表述"
+    }
+   ],
+   "total": 9,
+   "supported": 9,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"一般的高斯分布模型通过分别计算每个特征对应的几率然后将其累乘起来计算 𝑝(𝑥)\", \"supported\": true, \"reason\": \"资料1原文明确表述\"}, {\"claim\": \"多元高斯分布模型构建特征的协方差矩阵，用所有的特征一起来计算 𝑝(𝑥)\", \"supported\": true, \"reason\": \"资料1原文明确表述\"}, "
+ },
+ "e8354589fe58d38e55fc": {
+  "v": {
+   "claims": [
+    {
+     "claim": "协同过滤是指在既没有用户的参数、也没有电影的特征时，协同过滤算法可以同时学习这两者",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "协同过滤的优化目标改为同时针对𝑥和𝜃进行",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "协同过滤的优化目标为同时最小化𝑥(1),...,𝑥(nm)和𝜃(1),...,𝜃(nu)",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "其代价函数包含对评分预测误差的平方和",
+     "supported": true,
+     "reason": "公式含误差平方和"
+    },
+    {
+     "claim": "其代价函数包含对𝑥和𝜃的正则化项",
+     "supported": true,
+     "reason": "公式含正则化项"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"协同过滤是指在既没有用户的参数、也没有电影的特征时，协同过滤算法可以同时学习这两者\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"协同过滤的优化目标改为同时针对𝑥和𝜃进行\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"协同过滤"
+ },
+ "c4e44b789461c526283f": {
+  "v": {
+   "claims": [
+    {
+     "claim": "RAG 的工作流程可以简单地分为数据处理、检索、增强和生成四个阶段",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "数据处理阶段包括对原始数据进行清洗和处理",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "数据处理阶段包括将处理后的数据转化为检索模型可以使用的格式",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "数据处理阶段包括将处理后的数据存储在对应的数据库中",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括用户提出问题 Query",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括加载和读取知识库文档",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括对知识库文档进行分割",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括对分割后的知识库文本向量化并存入向量库建立索引",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括对问句 Query 向量化",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括在知识库文档向量中匹配出与问句 Query 向量最相似的 top k 个",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括匹配出的知识库文本作为上下文 Context 和问题一起添加到 prompt 中",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "整个 RAG 过程包括提交给 LLM 生成回答 Answer",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "RAG 过程可以大致分为索引、检索和生成三个阶段",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 13,
+   "supported": 13,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"RAG 的工作流程可以简单地分为数据处理、检索、增强和生成四个阶段\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"数据处理阶段包括对原始数据进行清洗和处理\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"数据处理阶段包括将处理后"
+ },
+ "52918666cd2a0870ca9e": {
+  "v": {
+   "claims": [
+    {
+     "claim": "文本分割用于将载入的知识库文本按 token 长度或语义模型进行分割",
+     "supported": true,
+     "reason": "资料明确提及"
+    },
+    {
+     "claim": "通过 chunk_size 和 chunk_overlap 进行分割",
+     "supported": true,
+     "reason": "资料明确提及"
+    },
+    {
+     "claim": "chunk_overlap 用于保持上下文的连贯性，避免分割丢失上下文信息",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "RecursiveCharacterTextSplitter 基于字符数量分割文本",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "RecursiveCharacterTextSplitter 保证在不超过指定大小的同时尽可能完整地保留文本的意义",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "RecursiveCharacterTextSplitter 对处理大文档特别有用",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "可针对性构建更合适的分割规则",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "可训练专用文本分割模型实现根据语义和主题的 chunk 切分",
+     "supported": true,
+     "reason": "资料原文表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"文本分割用于将载入的知识库文本按 token 长度或语义模型进行分割\", \"supported\": true, \"reason\": \"资料明确提及\"}, {\"claim\": \"通过 chunk_size 和 chunk_overlap 进行分割\", \"supported\": true, \"reason\": \"资料明确提及\"}, {\"claim\": \"c"
+ },
+ "04731dd8b375854731dc": {
+  "v": {
+   "claims": [
+    {
+     "claim": "向量数据库是用于高效计算和管理大量向量数据的解决方案",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库是一种专门用于存储和检索向量数据（embedding）的数据库系统",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库主要关注向量数据的特性和相似性",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在RAG的检索和生成阶段，对问句Query向量化后，在知识库文档向量中匹配出与问句Query向量最相似的top k个片段",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "匹配出的知识库文本作为上下文Context和问题一起添加到prompt中，然后提交给LLM生成回答Answer",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库是一种用于有效搜索大规模高维向量空间中相似度的库",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库能够在大规模数据集中快速找到与给定query向量最相似的向量",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库使用高效的索引和查询算法来加速向量数据的存储和检索过程",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"向量数据库是用于高效计算和管理大量向量数据的解决方案\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"向量数据库是一种专门用于存储和检索向量数据（embedding）的数据库系统\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"向"
+ },
+ "8a42787ad93b9163bec1": {
+  "v": {
+   "claims": [
+    {
+     "claim": "客观正确性针对有固定正确答案的问题",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "客观正确性可通过构造客观题的方式进行模型评估",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "主观正确性针对没有固定正确答案的主观问题",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "主观正确性评估模型能否给出正确、全面的回答",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "主观正确性可选取部分案例使用大模型评估的方式进行",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"客观正确性针对有固定正确答案的问题\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"客观正确性可通过构造客观题的方式进行模型评估\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"主观正确性针对没有固定正确答案的主观问题\", \"su"
+ },
+ "17a87284d7921e14eff8": {
+  "v": {
+   "claims": [
+    {
+     "claim": "创建并保存 streamlit_app.py 文件到工作目录根目录",
+     "supported": true,
+     "reason": "第110页明确说明"
+    },
+    {
+     "claim": "导入必要的 Python 库（如 streamlit、langchain_openai）",
+     "supported": true,
+     "reason": "第110页有导入代码"
+    },
+    {
+     "claim": "用 st.title 创建应用标题",
+     "supported": true,
+     "reason": "第110页明确说明"
+    },
+    {
+     "claim": "用 st.sidebar.text_input 添加 OpenAI API 密钥输入框",
+     "supported": true,
+     "reason": "第110页有对应代码"
+    },
+    {
+     "claim": "定义 generate_response 函数调用 ChatOpenAI 并用 st.info 显示响应",
+     "supported": true,
+     "reason": "第110页明确说明"
+    },
+    {
+     "claim": "用 st.form() 和 st.text_area() 创建输入框，点击 Submit 时调用该函数",
+     "supported": true,
+     "reason": "第110页明确说明"
+    },
+    {
+     "claim": "进入页面后先输入 OPEN_API_KEY（默认）",
+     "supported": true,
+     "reason": "第114页明确说明"
+    },
+    {
+     "claim": "点击单选按钮选择问答模式",
+     "supported": true,
+     "reason": "第114页明确说明"
+    },
+    {
+     "claim": "在输入框输入问题并按回车",
+     "supported": true,
+     "reason": "第114页明确说明"
+    },
+    {
+     "claim": "创建 GitHub 存储库，包含 streamlit_app.py 和 requirements.txt 两个文件",
+     "supported": true,
+     "reason": "第114页明确说明"
+    },
+    {
+     "claim": "转到 Streamlit Community Cloud，点击工作区中的 New app 按钮，指定存储库、分支和主文件路径",
+     "supported": true,
+     "reason": "第114页明确说明"
+    },
+    {
+     "claim": "可通过选择自定义子域来自定义应用 URL",
+     "supported": true,
+     "reason": "第114页明确说明"
+    },
+    {
+     "claim": "点击 Deploy! 按钮",
+     "supported": true,
+     "reason": "第114页明确说明"
+    }
+   ],
+   "total": 13,
+   "supported": 13,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"创建并保存 streamlit_app.py 文件到工作目录根目录\", \"supported\": true, \"reason\": \"第110页明确说明\"}, {\"claim\": \"导入必要的 Python 库（如 streamlit、langchain_openai）\", \"supported\": true, \"reason\": \"第110页有导入代码"
+ },
+ "5d905487151d856e87dd": {
+  "v": {
+   "claims": [
+    {
+     "claim": "为了计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)，需要采用反向传播算法",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "误差是激活单元的预测（a_k^(4)）与实际值（𝑦_𝑘）之间的差异",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "从最后一层的误差开始计算",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"为了计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)，需要采用反向传播算法\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层\", \"supported\": true, \"reason\": \"资料原文明确表述"
+ },
+ "47a7cd6b55f75f4870c0": {
+  "v": {
+   "claims": [
+    {
+     "claim": "交叉验证集用于帮助选择模型",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "用训练集训练出多个模型后，分别对交叉验证集计算交叉验证误差（代价函数的值）",
+     "supported": true,
+     "reason": "资料步骤一致"
+    },
+    {
+     "claim": "选取代价函数值最小的模型",
+     "supported": true,
+     "reason": "资料步骤一致"
+    },
+    {
+     "claim": "选择正则化参数 λ 时同样如此",
+     "supported": true,
+     "reason": "资料有类似流程"
+    },
+    {
+     "claim": "用训练集训练出多个不同程度正则化的模型",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "分别对交叉验证集计算交叉验证误差",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "选择交叉验证误差最小的模型",
+     "supported": true,
+     "reason": "资料明确说明"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"交叉验证集用于帮助选择模型\", \"supported\": true, \"reason\": \"资料明确说明\"}, {\"claim\": \"用训练集训练出多个模型后，分别对交叉验证集计算交叉验证误差（代价函数的值）\", \"supported\": true, \"reason\": \"资料步骤一致\"}, {\"claim\": \"选取代价函数值最小的模型\", \"sup"
+ },
+ "5fbe8b4acbdd6e5121d8": {
+  "v": {
+   "claims": [
+    {
+     "claim": "核函数用于支持向量机中实现新特性：给定𝑥，计算新特征𝑓，当𝜃^𝑇𝑓 >= 0 时，预测 𝑦 = 1，否则反之。",
+     "supported": true,
+     "reason": "资料3原文明确表述"
+    },
+    {
+     "claim": "使用核函数时，通常根据训练集的数量选择地标的数量，即如果训练集中有𝑚个实例，则选取𝑚个地标，并令𝑙(1)=𝑥(1), 𝑙(2)=𝑥(2), …, 𝑙(𝑚)=𝑥(𝑚)。",
+     "supported": true,
+     "reason": "资料3原文明确表述"
+    },
+    {
+     "claim": "这样得到的新特征是建立在原有特征与训练集中所有其他特征之间距离的基础之上的。",
+     "supported": true,
+     "reason": "资料3原文明确表述"
+    },
+    {
+     "claim": "在计算正则化项时，用𝜃^𝑇𝑀𝜃代替𝜃^𝑇𝜃，其中𝑀是根据所选核函数而不同的一个矩阵，这样做是为了简化计算。",
+     "supported": true,
+     "reason": "资料1原文明确表述"
+    },
+    {
+     "claim": "使用现有软件包最小化代价函数之前，通常需要编写核函数。",
+     "supported": true,
+     "reason": "资料1原文明确表述"
+    },
+    {
+     "claim": "如果使用高斯核函数，那么在使用之前进行特征缩放是非常必要的。",
+     "supported": true,
+     "reason": "资料1原文明确表述"
+    },
+    {
+     "claim": "支持向量机也可以不使用核函数，不使用核函数又称为线性核函数(linear kernel)。",
+     "supported": true,
+     "reason": "资料1原文明确表述"
+    },
+    {
+     "claim": "当不采用非常复杂的函数，或者训练集特征非常多而实例非常少的时候，可以采用这种不带核函数的支持向量机。",
+     "supported": true,
+     "reason": "资料1原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"核函数用于支持向量机中实现新特性：给定𝑥，计算新特征𝑓，当𝜃^𝑇𝑓 >= 0 时，预测 𝑦 = 1，否则反之。\", \"supported\": true, \"reason\": \"资料3原文明确表述\"}, {\"claim\": \"使用核函数时，通常根据训练集的数量选择地标的数量，即如果训练集中有𝑚个实例，则选取𝑚个地标，并令𝑙(1)=𝑥(1), 𝑙(2)=𝑥"
+ },
+ "fbc6144423863d81fcce": {
+  "v": {
+   "claims": [
+    {
+     "claim": "拉格朗日乘子法用于求解带约束的优化问题",
+     "supported": true,
+     "reason": "资料1明确提及"
+    },
+    {
+     "claim": "通过构造拉格朗日函数将约束条件纳入目标函数进行求解",
+     "supported": true,
+     "reason": "资料1有等价表述"
+    },
+    {
+     "claim": "对于等式约束优化问题，拉格朗日函数包含目标函数与拉格朗日乘子同约束的组合",
+     "supported": true,
+     "reason": "资料2有等价表述"
+    },
+    {
+     "claim": "要使某点成为最优解，拉格朗日函数在该点的梯度必须为零",
+     "supported": true,
+     "reason": "资料2明确说明"
+    },
+    {
+     "claim": "对拉格朗日函数求偏导并令其等于0可进行求解",
+     "supported": true,
+     "reason": "资料1明确说明"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"拉格朗日乘子法用于求解带约束的优化问题\", \"supported\": true, \"reason\": \"资料1明确提及\"}, {\"claim\": \"通过构造拉格朗日函数将约束条件纳入目标函数进行求解\", \"supported\": true, \"reason\": \"资料1有等价表述\"}, {\"claim\": \"对于等式约束优化问题，拉格朗日函数包含目标函"
+ },
+ "cf011211d23ca08bdd2c": {
+  "v": {
+   "claims": [
+    {
+     "claim": "设总体概率质量函数为 P(x|θ)",
+     "supported": true,
+     "reason": "资料原文明确给出"
+    },
+    {
+     "claim": "从总体抽取 n 个独立同分布样本构成样本集 D = {x1, x2, · · · , xn}",
+     "supported": true,
+     "reason": "资料原文明确给出"
+    },
+    {
+     "claim": "根据贝叶斯式可得，在给定样本集 D 的条件下，θ 的条件概率为 P(θ|D) = P(D|θ)P(θ) / P(D) = P(D|θ)P(θ) / Σ_θ P(D|θ)P(θ)",
+     "supported": true,
+     "reason": "资料原文公式一致"
+    },
+    {
+     "claim": "P(D|θ) 为似然函数",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "由于样本集 D 中的样本是独立同分布的，所以似然函数可以进一步展开为 P(θ|D) = ∏_{i=1}^{n} P(xi|θ)P(θ) / Σ_θ ∏_{i=1}^{n} P(xi|θ)P(θ)",
+     "supported": true,
+     "reason": "资料原文公式一致"
+    },
+    {
+     "claim": "此条件概率代表了在已知样本集 D 后对 θ 产生的新的认识",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "它综合了对 θ 主观预设的先验概率 P(θ) 和样本集 D 带来的信息",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "通常称其为 θ 的后验概率",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"设总体概率质量函数为 P(x|θ)\", \"supported\": true, \"reason\": \"资料原文明确给出\"}, {\"claim\": \"从总体抽取 n 个独立同分布样本构成样本集 D = {x1, x2, · · · , xn}\", \"supported\": true, \"reason\": \"资料原文明确给出\"}, {\"claim\": \"根据"
+ },
+ "a1c823a864111b1f3b21": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高斯混合聚类与 k 均值算法类似：开始时既不知道 k 个簇的均值向量，也不知道 m 个样本到底属于哪个簇",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "最后采用贪心策略，通过迭代优化来近似求解",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "两者只是具体问题具体解法不同",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "从整体上来说，它们都应用了期望最大化算法（EM 算法）",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高斯混合聚类与 k 均值算法类似：开始时既不知道 k 个簇的均值向量，也不知道 m 个样本到底属于哪个簇\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"最后采用贪心策略，通过迭代优化来近似求解\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"cl"
+ },
+ "1401e6e34f7593f6fcbe": {
+  "v": {
+   "claims": [
+    {
+     "claim": "使用分隔符，防止提示词注入（Prompt Rejection），避免用户输入中与预设 Prompt 相冲突的内容“注入”并操纵语言模型，导致输出不正确或造成安全风险。",
+     "supported": true,
+     "reason": "第65页明确表述"
+    },
+    {
+     "claim": "寻求结构化的输出，即按照某种格式（如 JSON、HTML 等）组织内容，而不仅仅是连续的文本。",
+     "supported": true,
+     "reason": "第65页明确表述"
+    },
+    {
+     "claim": "在 Prompt 中添加逐步推理的要求，引导语言模型深入思考，要求其先列出对问题的各种看法、说明推理依据，然后再得出最终结论，让模型投入更多时间逻辑思维，输出更可靠准确。",
+     "supported": true,
+     "reason": "第69页明确表述"
+    },
+    {
+     "claim": "指定完成任务所需的步骤，通过给出完成复杂任务的一系列步骤来展示该策略的效果。",
+     "supported": true,
+     "reason": "第69页明确表述"
+    },
+    {
+     "claim": "要求对有几点答案进行分点标号，让答案清晰具体；答案比较长时酌情进行分段，以提高阅读体验。",
+     "supported": true,
+     "reason": "第120页明确表述"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"使用分隔符，防止提示词注入（Prompt Rejection），避免用户输入中与预设 Prompt 相冲突的内容“注入”并操纵语言模型，导致输出不正确或造成安全风险。\", \"supported\": true, \"reason\": \"第65页明确表述\"}, {\"claim\": \"寻求结构化的输出，即按照某种格式（如 JSON、HTML 等）组织内容，而不"
+ },
+ "8a75ceca042b6690feb8": {
+  "v": {
+   "claims": [
+    {
+     "claim": "Embedding 用于将分割后的文档进行向量化，使语义相似的文本片段具有接近的向量表示",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量化后存入向量数据库，完成索引的创建",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "利用向量数据库对各文档片段进行索引，实现快速检索",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "用户知识库内容经过 Embedding 存入向量数据库",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "用户每一次提问也会经过 Embedding",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "利用向量相关性算法（例如余弦算法）找到最匹配的几个知识库片段",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "将这些知识库片段作为上下文，与用户问题一起作为 Prompt 提交给 LLM 回答",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "读取本地文档并通过 Embedding 方法将本地文档的内容转化为词向量来构建向量数据库",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"Embedding 用于将分割后的文档进行向量化，使语义相似的文本片段具有接近的向量表示\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"向量化后存入向量数据库，完成索引的创建\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"利用"
+ },
+ "65f8e7d313f7b603c6b7": {
+  "v": {
+   "claims": [
+    {
+     "claim": "反向传播算法用于计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "训练神经网络时，先利用正向传播方法计算所有的ℎ𝜃(𝑥)",
+     "supported": true,
+     "reason": "资料步骤2明确表述"
+    },
+    {
+     "claim": "训练神经网络时，编写计算代价函数 𝐽 的代码",
+     "supported": true,
+     "reason": "资料步骤3明确表述"
+    },
+    {
+     "claim": "训练神经网络时，利用反向传播方法计算所有偏导数",
+     "supported": true,
+     "reason": "资料步骤4明确表述"
+    },
+    {
+     "claim": "训练神经网络时，利用数值检验方法检验这些偏导数",
+     "supported": true,
+     "reason": "资料步骤5明确表述"
+    },
+    {
+     "claim": "训练神经网络时，最后使用优化算法来最小化代价函数",
+     "supported": true,
+     "reason": "资料步骤6明确表述"
+    },
+    {
+     "claim": "资料中未明确说明梯度下降所解决的问题",
+     "supported": true,
+     "reason": "资料未提及梯度下降"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"反向传播算法用于计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {"
+ },
+ "ed6f08263dd1ca2ef57c": {
+  "v": {
+   "claims": [
+    {
+     "claim": "逻辑回归与不带核函数的SVM通常做相似的事情并给出相似结果",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "实现情况不同时其中一个可能更有效",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在其中一个算法应用的地方，另一个也很有可能有效",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "逻辑回归输出概率",
+     "supported": true,
+     "reason": "资料称有别于逻辑回归输出的概率"
+    },
+    {
+     "claim": "SVM直接预测𝑦等于1还是0，不输出概率",
+     "supported": true,
+     "reason": "资料称SVM直接预测y值"
+    },
+    {
+     "claim": "SVM的假设函数形式为：当𝜃ᵀ𝑥大于或等于0时预测1",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "若使用对率损失函数ℓlog替代式(6.29)中的0/1损失函数，则几乎得到对率回归模型(3.27)",
+     "supported": true,
+     "reason": "资料原文引用表述"
+    },
+    {
+     "claim": "式(6.29)与式(3.27)形式上相差甚远",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"逻辑回归与不带核函数的SVM通常做相似的事情并给出相似结果\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"实现情况不同时其中一个可能更有效\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"在其中一个算法应用的地方，另一个也很有可"
+ },
+ "8b847c5b539cf5143f22": {
+  "v": {
+   "claims": [
+    {
+     "claim": "资料只讨论了RAG系统自身的评估与优化",
+     "supported": true,
+     "reason": "资料均为RAG评估优化"
+    },
+    {
+     "claim": "资料包括构造验证集",
+     "supported": true,
+     "reason": "第116页提及验证集"
+    },
+    {
+     "claim": "资料包括人工评估与自动评估",
+     "supported": true,
+     "reason": "第128页提及两种评估"
+    },
+    {
+     "claim": "资料包括检索部分和生成部分的分别评估",
+     "supported": true,
+     "reason": "第117页提及两部分"
+    },
+    {
+     "claim": "资料没有提及机器学习中划分验证集评估模型的做法",
+     "supported": false,
+     "reason": "资料未明确排除"
+    },
+    {
+     "claim": "无法说明二者的相通之处",
+     "supported": false,
+     "reason": "资料未涉及此比较"
+    }
+   ],
+   "total": 6,
+   "supported": 4,
+   "score": 0.6666666666666666,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"资料只讨论了RAG系统自身的评估与优化\", \"supported\": true, \"reason\": \"资料均为RAG评估优化\"}, {\"claim\": \"资料包括构造验证集\", \"supported\": true, \"reason\": \"第116页提及验证集\"}, {\"claim\": \"资料包括人工评估与自动评估\", \"supported\": tru"
+ },
+ "937aceecbe1bc96bad85": {
+  "v": {
+   "claims": [
+    {
+     "claim": "𝜃𝑗 := 𝜃𝑗 − 𝛼 ∂/∂𝜃𝑗 𝐽(𝜃)",
+     "supported": true,
+     "reason": "资料2明确给出该公式"
+    }
+   ],
+   "total": 1,
+   "supported": 1,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"𝜃𝑗 := 𝜃𝑗 − 𝛼 ∂/∂𝜃𝑗 𝐽(𝜃)\", \"supported\": true, \"reason\": \"资料2明确给出该公式\"}]}"
+ },
+ "5858c3d17d4e6de36f72": {
+  "v": {
+   "claims": [
+    {
+     "claim": "给定数据集 T，其损失函数定义为 L(w, θ) = Σ_{x∈M} (ŷ − y)(wᵀx − θ)，其中 M ⊆ T 为误分类样本集合",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "此损失函数是非负的",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "如果没有误分类点，则损失函数值为 0",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "误分类点越少、误分类点离超平面越近，损失函数值就越小",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "损失函数 L(w, θ) 是关于 w, θ 的连续可导函数",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "若将阈值 θ 看作一个固定输入为 −1 的“哑节点”，可将极小化问题进一步简化为 min_w L(w) = min_w Σ_{xi∈M} (ŷi − yi)wᵀxi",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 6,
+   "supported": 6,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"给定数据集 T，其损失函数定义为 L(w, θ) = Σ_{x∈M} (ŷ − y)(wᵀx − θ)，其中 M ⊆ T 为误分类样本集合\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"此损失函数是非负的\", \"supported\": true, \"reason\": \"资料明确说明\"}, {\""
+ },
+ "1ed34aff2a9d1c90ad45": {
+  "v": {
+   "claims": [
+    {
+     "claim": "信息增益定义为划分之前数据集 D 的信息熵和划分之后每个子数据集 Dv 的信息熵的差",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "对数据集 D 和属性子集 A，假设根据 A 的取值将 D 分为了 V 个子集 D1, D2, …, DV",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "信息熵的定义式为 Ent(D) = −Σ_{k=1}^{|Y|} p_k log₂ p_k",
+     "supported": true,
+     "reason": "资料给出该公式"
+    },
+    {
+     "claim": "p_k 表示 D 中第 k 类样本所占的比例",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"信息增益定义为划分之前数据集 D 的信息熵和划分之后每个子数据集 Dv 的信息熵的差\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"对数据集 D 和属性子集 A，假设根据 A 的取值将 D 分为了 V 个子集 D1, D2, …, DV\", \"supported\": true, \"reas"
+ },
+ "40193928a805adb9f64f": {
+  "v": {
+   "claims": [
+    {
+     "claim": "AdaBoost 每轮迭代需要得到基分类器 ht(x) 及其对应的投票权重 αt",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "集成分类器为 Ht(x) = Ht−1(x) + αtht(x)",
+     "supported": true,
+     "reason": "资料明确给出公式"
+    },
+    {
+     "claim": "H0(x) = 0",
+     "supported": true,
+     "reason": "资料明确给出"
+    },
+    {
+     "claim": "第 t 轮实际求解的优化问题为 (αt, ht) = arg min_{α,h} ℓexp(Ht−1 + αh | D)",
+     "supported": true,
+     "reason": "资料明确给出公式"
+    },
+    {
+     "claim": "得到的基分类器 ht(x) 和对应权重 αt 是最小化集成分类器在数据集 D 上指数损失函数的结果",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "对指数损失函数 ℓexp(Ht−1 + αht | D) 求导并令导数等于零，得 e^{−α}/(e^{α} + e^{−α}) = ϵt",
+     "supported": true,
+     "reason": "资料推导明确"
+    },
+    {
+     "claim": "ϵt = Ex∼Dt[I(f(xi) ≠ h(xi))]",
+     "supported": true,
+     "reason": "资料明确给出"
+    },
+    {
+     "claim": "对上述等式化简得 e^{2α} = (1 − ϵt)/ϵt",
+     "supported": true,
+     "reason": "资料明确推导"
+    },
+    {
+     "claim": "2α = ln((1 − ϵt)/ϵt)",
+     "supported": true,
+     "reason": "资料明确推导"
+    },
+    {
+     "claim": "αt = 1/2 · ln((1 − ϵt)/ϵt)",
+     "supported": true,
+     "reason": "资料明确推导"
+    }
+   ],
+   "total": 10,
+   "supported": 10,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"AdaBoost 每轮迭代需要得到基分类器 ht(x) 及其对应的投票权重 αt\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"集成分类器为 Ht(x) = Ht−1(x) + αtht(x)\", \"supported\": true, \"reason\": \"资料明确给出公式\"}, {\"clai"
+ },
+ "bf81881f34e7f1a7ec8d": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高斯混合聚类与 k 均值算法整体上都应用了期望最大化算法（EM 算法）",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "具体迭代方式为：初始化其中一组变量 (αi, µi, Σi)，然后计算 γji",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "再根据 γji 根据最大似然推导出的公式更新 (αi, µi, Σi)，反复迭代，直到满足停止条件",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "第 2~12 行就是一个 EM 算法的具体使用例子",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "此例中有两组变量，分别是 γji 和 (αi, µi, Σi)",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "它们之间相互影响，但都是未知的",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 6,
+   "supported": 6,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高斯混合聚类与 k 均值算法整体上都应用了期望最大化算法（EM 算法）\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"具体迭代方式为：初始化其中一组变量 (αi, µi, Σi)，然后计算 γji\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\""
+ },
+ "53bc26675d873366ba47": {
+  "v": {
+   "claims": [
+    {
+     "claim": "保证这些特征都具有相近的尺度，将帮助梯度下降算法更快地收敛",
+     "supported": true,
+     "reason": "第48页原文一致"
+    },
+    {
+     "claim": "特征缩放可以提高梯度下降的收敛速度",
+     "supported": true,
+     "reason": "第109页有等价表述"
+    },
+    {
+     "claim": "如果特征范围差距很大，应用特征缩放可以让逻辑回归中梯度下降收敛更快",
+     "supported": true,
+     "reason": "第109页原文一致"
+    },
+    {
+     "claim": "在运行梯度下降算法之前，进行特征缩放依旧是非常必要的",
+     "supported": true,
+     "reason": "第105页原文一致"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"保证这些特征都具有相近的尺度，将帮助梯度下降算法更快地收敛\", \"supported\": true, \"reason\": \"第48页原文一致\"}, {\"claim\": \"特征缩放可以提高梯度下降的收敛速度\", \"supported\": true, \"reason\": \"第109页有等价表述\"}, {\"claim\": \"如果特征范围差距很大，应用特征缩放"
+ },
+ "5ae44fb13413badddcae": {
+  "v": {
+   "claims": [
+    {
+     "claim": "正规方程通过求解 𝜕/𝜕𝜃𝑗 𝐽(𝜃𝑗) = 0 来找出使得代价函数最小的参数",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "假设训练集特征矩阵为 𝑋（包含 𝑥0 = 1），训练集结果为向量 𝑦，则利用正规方程解出向量 𝜃 = (𝑋𝑇𝑋)−1𝑋𝑇𝑦",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在 Octave 中，正规方程写作 pinv(X'*X)*X'*y",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 3,
+   "supported": 3,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"正规方程通过求解 𝜕/𝜕𝜃𝑗 𝐽(𝜃𝑗) = 0 来找出使得代价函数最小的参数\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"假设训练集特征矩阵为 𝑋（包含 𝑥0 = 1），训练集结果为向量 𝑦，则利用正规方程解出向量 𝜃 = (𝑋𝑇𝑋)−1𝑋𝑇𝑦\", \"supported\": true,"
+ },
+ "ffa449bd51c17c7d04cf": {
+  "v": {
+   "claims": [
+    {
+     "claim": "决策边界是模型的分界线，将预测为 1 的区域和预测为 0 的区域分隔开。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在逻辑回归中，当 𝜃ᵀ𝑥 ≥ 0 时预测 𝑦 = 1。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在逻辑回归中，当 𝜃ᵀ𝑥 < 0 时预测 𝑦 = 0。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "参数 𝜃 为向量 [-3 1 1] 时，当 −3 + 𝑥1 + 𝑥2 ≥ 0，即 𝑥1 + 𝑥2 ≥ 3 时模型预测 𝑦 = 1。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "直线 𝑥1 + 𝑥2 = 3 是该模型的分界线。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "若数据需要用曲线才能分隔 𝑦 = 0 和 𝑦 = 1 的区域，则需要二次方特征。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "特征为 [-1 0 0 1 1] 时，得到的判定边界是圆点在原点且半径为 1 的圆形。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "可以用非常复杂的模型来适应非常复杂形状的判定边界。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"决策边界是模型的分界线，将预测为 1 的区域和预测为 0 的区域分隔开。\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"在逻辑回归中，当 𝜃ᵀ𝑥 ≥ 0 时预测 𝑦 = 1。\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"在逻"
+ },
+ "2fad9b0f808896b6fd98": {
+  "v": {
+   "claims": [
+    {
+     "claim": "对梯度的估计采用在代价函数上沿着切线方向选择离得非常近的两个点，计算两个点的平均值用以估计梯度",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "对于某个特定的𝜃，计算在𝜃-𝜀处和𝜃+𝜀处的代价值（𝜀通常选取0.001），然后求两个代价的平均，用以估计在𝜃处的代价值",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "Octave代码为gradApprox = (J(theta + eps) – J(theta - eps)) / (2*eps)",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "当𝜃是向量时，需要对偏导数进行检验",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "代价函数的偏导数检验只针对一个参数的改变进行检验",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "最后还需要对通过反向传播方法计算出的偏导数进行检验",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "计算出的偏导数存储在矩阵𝐷𝑖𝑗(𝑙)中",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "检验时将该矩阵展开成为向量，同时将𝜃矩阵展开为向量",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "针对每一个𝜃都计算一个近似的梯度值，将这些值存储于一个近似梯度矩阵中",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "最终将得出的这个矩阵同𝐷𝑖𝑗(𝑙)进行比较",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "训练神经网络步骤中，利用数值检验方法检验这些偏导数",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 11,
+   "supported": 11,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"对梯度的估计采用在代价函数上沿着切线方向选择离得非常近的两个点，计算两个点的平均值用以估计梯度\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"对于某个特定的𝜃，计算在𝜃-𝜀处和𝜃+𝜀处的代价值（𝜀通常选取0.001），然后求两个代价的平均，用以估计在𝜃处的代价值\", \"supported\": "
+ },
+ "46b125ee1e90c143d456": {
+  "v": {
+   "claims": [
+    {
+     "claim": "学习曲线是将训练集误差和交叉验证集误差作为训练集实例数量（m）的函数绘制的图表",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在高偏差/欠拟合的情况下，增加数据到训练集不一定能有帮助",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 2,
+   "supported": 2,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"学习曲线是将训练集误差和交叉验证集误差作为训练集实例数量（m）的函数绘制的图表\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"在高偏差/欠拟合的情况下，增加数据到训练集不一定能有帮助\", \"supported\": true, \"reason\": \"资料原文明确表述\"}]}"
+ },
+ "a1c92ef53fcc26600dfc": {
+  "v": {
+   "claims": [
+    {
+     "claim": "在一般的高斯分布模型中，计算 p(x) 的方法是通过分别计算每个特征对应的几率然后将其累乘起来",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在多元高斯分布模型中，构建特征的协方差矩阵，用所有的特征一起来计算 p(x)",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "一般高斯分布模型的计算公式为 p(x) = ∏_{j=1}^{n} p(x_j; μ, σ_j^2) = ∏_{j=1}^{n} (1/(√2πσ_j)) exp(−(x_j − μ_j)^2/(2σ_j^2))",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "多元高斯分布中，首先计算所有特征的平均值 μ = (1/m)∑_{i=1}^{m} x^{(i)}",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "再计算协方差矩阵 Σ = (1/m)∑_{i=1}^{m}(x^{(i)} − μ)(x^{(i)} − μ)^T = (1/m)(X − μ)^T(X − μ)",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "最后计算多元高斯分布的 p(x)：p(x) = 1/((2π)^{n/2}|Σ|^{1/2}) exp(−(1/2)(x − μ)^TΣ^{−1}(x − μ))",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "多元高斯分布有两个参数 μ 和 Σ",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "μ 是 n 维向量",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "Σ 是 n × n 的协方差矩阵",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "参数估计时，设置 μ 为训练样本的平均值 μ = (1/m)∑_{i=1}^{m}x^{(i)}",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "并设置 Σ = (1/m)∑_{i=1}^{m}(x^{(i)} − μ)(x^{(i)} − μ)^T",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "异常检测假设特征符合高斯分布",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "如果数据的分布不是高斯分布，异常检测算法也能够工作",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "最好还是将数据转换成高斯分布",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "可以使用对数函数 x = log(x + c)（c 为非负常数）转换数据",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "或者使用 x = x^c（c 为 0-1 之间的一个分数）等方法转换数据",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "如果特征之间在某种程度上存在相互关联的情况，可以通过构造新特征的方法来捕捉这些相关性",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "如果训练集不是太大，并且没有太多的特征，可以使用多元高斯分布模型",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 18,
+   "supported": 18,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"在一般的高斯分布模型中，计算 p(x) 的方法是通过分别计算每个特征对应的几率然后将其累乘起来\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"在多元高斯分布模型中，构建特征的协方差矩阵，用所有的特征一起来计算 p(x)\", \"supported\": true, \"reason\": \"资料原"
+ },
+ "95d280b1cbf30df41fb8": {
+  "v": {
+   "claims": [
+    {
+     "claim": "协同过滤是指在既没有用户参数、也没有电影特征、基于内容的推荐系统方法都不可行时，可以同时学习用户参数和电影特征两者的算法",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "其优化目标改为同时针对x和θ进行",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "代价函数同时包含对x和θ的正则化项",
+     "supported": true,
+     "reason": "代价函数含两项正则化"
+    },
+    {
+     "claim": "协同过滤算法使用步骤1：初始x(1), x(1), . . . x(nm), θ(1), θ(2), . . . , θ(nu)为一些随机小值",
+     "supported": true,
+     "reason": "资料步骤1原文"
+    },
+    {
+     "claim": "协同过滤算法使用步骤2：使用梯度下降算法最小化代价函数",
+     "supported": true,
+     "reason": "资料步骤2原文"
+    },
+    {
+     "claim": "协同过滤算法使用步骤3：在训练完算法后，预测(θ(j))Tx(i)为用户j给电影i的评分",
+     "supported": true,
+     "reason": "资料步骤3原文"
+    }
+   ],
+   "total": 6,
+   "supported": 6,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"协同过滤是指在既没有用户参数、也没有电影特征、基于内容的推荐系统方法都不可行时，可以同时学习用户参数和电影特征两者的算法\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"其优化目标改为同时针对x和θ进行\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, "
+ },
+ "8093064a02b0b069a711": {
+  "v": {
+   "claims": [
+    {
+     "claim": "RAG 的工作流程分为数据处理、检索、增强和生成四个阶段",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "数据处理阶段包括对原始数据进行清洗和处理",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "数据处理阶段包括将处理后的数据转化为检索模型可以使用的格式",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "数据处理阶段包括将处理后的数据存储在对应的数据库中",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "检索阶段将用户的问题输入到检索系统中，从数据库中检索相关信息",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "增强阶段对检索到的信息进行处理和增强，以便生成模型可以更好地理解和使用",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "生成阶段将增强后的信息输入到生成模型中，生成模型根据这些信息生成答案",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "另一种表述将 RAG 过程大致分为索引、检索和生成三个阶段",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括用户提出问题 Query",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括加载和读取知识库文档",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括对知识库文档进行分割",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括对分割后的知识库文本向量化并存入向量库建立索引",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括对问句 Query 向量化",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括在知识库文档向量中匹配出与问句 Query 向量最相似的 top k 个",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括匹配出的知识库文本作为上下文 Context 和问题一起添加到 prompt 中",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "具体操作包括提交给 LLM 生成回答 Answer",
+     "supported": true,
+     "reason": "资料原文明确"
+    }
+   ],
+   "total": 16,
+   "supported": 16,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"RAG 的工作流程分为数据处理、检索、增强和生成四个阶段\", \"supported\": true, \"reason\": \"资料原文明确\"}, {\"claim\": \"数据处理阶段包括对原始数据进行清洗和处理\", \"supported\": true, \"reason\": \"资料原文明确\"}, {\"claim\": \"数据处理阶段包括将处理后的数据转化为检索模"
+ },
+ "2ac8753249766b2ae322": {
+  "v": {
+   "claims": [
+    {
+     "claim": "文本分割和向量化在整个 RAG 流程中是必不可少的",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "需要将载入的知识库文本按长度进行分割，或进行语义模型分割",
+     "supported": true,
+     "reason": "资料原文有等价表述"
+    },
+    {
+     "claim": "分割时设置 chunk_overlap 用于保持上下文的连贯性，避免分割丢失上下文信息",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "片段与片段之间的一些重叠内容，能保证检索的时候能够检索到相关的文档片段",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "原始分割方式往往不能照顾到文本语义，容易造成同一主题的强相关上下文被切分到两个 chunk 中",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "导致检索到的知识片段将正确答案分割开、不能形成完整合理的答案",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "使用 RecursiveCharacterTextSplitter 基于字符数量分割文本，可在不超过指定大小的同时尽可能完整地保留文本的意义，对处理大文档特别有用",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"文本分割和向量化在整个 RAG 流程中是必不可少的\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"需要将载入的知识库文本按长度进行分割，或进行语义模型分割\", \"supported\": true, \"reason\": \"资料原文有等价表述\"}, {\"claim\": \"分割时设置 chunk"
+ },
+ "7d473bde9657cd4d76aa": {
+  "v": {
+   "claims": [
+    {
+     "claim": "向量数据库是用于高效计算和管理大量向量数据的解决方案",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库是专门用于存储和检索向量数据（embedding）的数据库系统",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库主要关注向量数据的特性和相似性",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在向量数据库中，数据被表示为向量形式，每个向量代表一个数据项",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库使用高效的索引和查询算法来加速向量数据的存储和检索过程",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在RAG的检索和生成阶段，对问句Query向量化后在知识库文档向量中匹配出与问句Query向量最相似的top k个片段",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "匹配出的知识库文本作为上下文Context和问题一起添加到prompt中，然后提交给LLM生成回答Answer",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库是一种用于有效搜索大规模高维向量空间中相似度的库",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量数据库能够在大规模数据集中快速找到与给定query向量最相似的向量",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 9,
+   "supported": 9,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"向量数据库是用于高效计算和管理大量向量数据的解决方案\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"向量数据库是专门用于存储和检索向量数据（embedding）的数据库系统\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"向量数"
+ },
+ "b297f7a6d68d4ea7ec49": {
+  "v": {
+   "claims": [
+    {
+     "claim": "客观正确性针对有固定正确答案的问题，评估模型能否给出正确回答",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "可选取部分案例用构造客观题的方式进行评估",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "主观正确性针对没有固定正确答案的主观问题，评估模型能否给出正确、全面的回答",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "可选取部分案例使用大模型评估的方式进行评估",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"客观正确性针对有固定正确答案的问题，评估模型能否给出正确回答\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"可选取部分案例用构造客观题的方式进行评估\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"主观正确性针对没有固定正确答案的主观问"
+ },
+ "7a999435d21824f4bc8f": {
+  "v": {
+   "claims": [
+    {
+     "claim": "创建并保存 streamlit_app.py 文件到工作目录根目录",
+     "supported": true,
+     "reason": "文档4明确说明"
+    },
+    {
+     "claim": "导入必要库如 streamlit as st、ChatOpenAI",
+     "supported": true,
+     "reason": "文档4有导入代码"
+    },
+    {
+     "claim": "用 st.title 创建标题",
+     "supported": true,
+     "reason": "文档4步骤2"
+    },
+    {
+     "claim": "用 st.sidebar.text_input 添加 OpenAI API 密钥输入框",
+     "supported": true,
+     "reason": "文档4步骤3"
+    },
+    {
+     "claim": "定义 generate_response 函数调用 ChatOpenAI 并用 st.info 显示响应",
+     "supported": true,
+     "reason": "文档4步骤4"
+    },
+    {
+     "claim": "用 st.form() 和 st.text_area() 创建输入框，点击 Submit 时调用该函数",
+     "supported": true,
+     "reason": "文档4步骤5"
+    },
+    {
+     "claim": "终端运行 streamlit run streamlit_app.py",
+     "supported": true,
+     "reason": "文档4步骤7"
+    },
+    {
+     "claim": "部署到 Streamlit Cloud 需创建 GitHub 存储库，包含 streamlit_app.py 和 requirements.txt",
+     "supported": true,
+     "reason": "文档2步骤1"
+    },
+    {
+     "claim": "转到 Streamlit Community Cloud，点击 New app 并指定存储库、分支和主文件路径，可自定义子域",
+     "supported": true,
+     "reason": "文档2步骤2"
+    },
+    {
+     "claim": "点击 Deploy 按钮完成部署",
+     "supported": true,
+     "reason": "文档2步骤3"
+    }
+   ],
+   "total": 10,
+   "supported": 10,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"创建并保存 streamlit_app.py 文件到工作目录根目录\", \"supported\": true, \"reason\": \"文档4明确说明\"}, {\"claim\": \"导入必要库如 streamlit as st、ChatOpenAI\", \"supported\": true, \"reason\": \"文档4有导入代码\"}, {\"claim\": \""
+ },
+ "0949ae0212be414123b4": {
+  "v": {
+   "claims": [
+    {
+     "claim": "若 λ 的值太大了，那么 θ（不包括 θ₀）都会趋近于 0",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "这样所得到的只能是一条平行于 x 轴的直线",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 2,
+   "supported": 2,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"若 λ 的值太大了，那么 θ（不包括 θ₀）都会趋近于 0\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"这样所得到的只能是一条平行于 x 轴的直线\", \"supported\": true, \"reason\": \"资料原文明确表述\"}]}"
+ },
+ "69f1cf132ed76de5fcb0": {
+  "v": {
+   "claims": [
+    {
+     "claim": "为了计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)，需要采用反向传播算法",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "误差是激活单元的预测（a_k(4)）与实际值（y_k）之间的差异",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "从最后一层的误差开始计算",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"为了计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)，需要采用反向传播算法\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层\", \"supported\": true, \"reason\": \"资料原文明确表述"
+ },
+ "2427423ddbd5d17312be": {
+  "v": {
+   "claims": [
+    {
+     "claim": "将𝑛维数据降至𝑘维，目标是找到向量𝑢(1),𝑢(2),...,𝑢(𝑘)使得总的投射误差最小。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 1,
+   "supported": 1,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"将𝑛维数据降至𝑘维，目标是找到向量𝑢(1),𝑢(2),...,𝑢(𝑘)使得总的投射误差最小。\", \"supported\": true, \"reason\": \"资料原文明确表述\"}]}"
+ },
+ "e4a8e8050d98b91fe943": {
+  "v": {
+   "claims": [
+    {
+     "claim": "交叉验证集用于帮助选择模型",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "用训练集训练出多个模型后，分别对交叉验证集计算交叉验证误差（代价函数的值）",
+     "supported": true,
+     "reason": "资料步骤一致"
+    },
+    {
+     "claim": "选取代价函数值最小的模型",
+     "supported": true,
+     "reason": "资料步骤一致"
+    },
+    {
+     "claim": "选择正则化参数 λ 时同样使用交叉验证集",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "用训练集训练出多个不同程度正则化的模型",
+     "supported": true,
+     "reason": "资料步骤一致"
+    },
+    {
+     "claim": "分别对交叉验证集计算交叉验证误差",
+     "supported": true,
+     "reason": "资料步骤一致"
+    },
+    {
+     "claim": "选择交叉验证误差最小的模型",
+     "supported": true,
+     "reason": "资料步骤一致"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"交叉验证集用于帮助选择模型\", \"supported\": true, \"reason\": \"资料明确说明\"}, {\"claim\": \"用训练集训练出多个模型后，分别对交叉验证集计算交叉验证误差（代价函数的值）\", \"supported\": true, \"reason\": \"资料步骤一致\"}, {\"claim\": \"选取代价函数值最小的模型\", \"sup"
+ },
+ "ac5b99ab5c343d7e9368": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高偏差和高方差的问题基本上来说是欠拟合和过拟合的问题。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 1,
+   "supported": 1,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高偏差和高方差的问题基本上来说是欠拟合和过拟合的问题。\", \"supported\": true, \"reason\": \"资料原文明确表述\"}]}"
+ },
+ "4e533fde4c864220e25d": {
+  "v": {
+   "claims": [
+    {
+     "claim": "核函数用于支持向量机中构造新特征：给定𝑥，计算新特征𝑓，当𝜃^𝑇𝑓 >= 0 时预测 𝑦 = 1，否则反之；并相应修改代价函数。",
+     "supported": true,
+     "reason": "资料3明确表述"
+    },
+    {
+     "claim": "使用核函数时，通常根据训练集实例数量选择地标数量，若有𝑚个实例则选取𝑚个地标，并令𝑙^(1)=𝑥^(1), 𝑙^(2)=𝑥^(2), …, 𝑙^(𝑚)=𝑥^(𝑚)。",
+     "supported": true,
+     "reason": "资料3明确表述"
+    },
+    {
+     "claim": "得到的新特征建立在原有特征与训练集中所有其他特征之间距离的基础之上。",
+     "supported": true,
+     "reason": "资料3明确表述"
+    },
+    {
+     "claim": "在计算正则化项时，用𝜃^𝑇𝑀𝜃代替𝜃^𝑇𝜃，其中𝑀是根据所选核函数而不同的一个矩阵，这样做是为了简化计算。",
+     "supported": true,
+     "reason": "资料1明确表述"
+    },
+    {
+     "claim": "使用现有软件包最小化代价函数之前，通常需要编写核函数。",
+     "supported": true,
+     "reason": "资料1明确表述"
+    },
+    {
+     "claim": "如果使用高斯核函数，使用之前进行特征缩放是非常必要的。",
+     "supported": true,
+     "reason": "资料1明确表述"
+    },
+    {
+     "claim": "支持向量机也可以不使用核函数，即线性核函数。",
+     "supported": true,
+     "reason": "资料1明确表述"
+    },
+    {
+     "claim": "当不采用非常复杂的函数，或者训练集特征非常多而实例非常少时，可以采用这种不带核函数的支持向量机。",
+     "supported": true,
+     "reason": "资料1明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"核函数用于支持向量机中构造新特征：给定𝑥，计算新特征𝑓，当𝜃^𝑇𝑓 >= 0 时预测 𝑦 = 1，否则反之；并相应修改代价函数。\", \"supported\": true, \"reason\": \"资料3明确表述\"}, {\"claim\": \"使用核函数时，通常根据训练集实例数量选择地标数量，若有𝑚个实例则选取𝑚个地标，并令𝑙^(1)=𝑥^(1), 𝑙^(2"
+ },
+ "e10cf5e23632314d2131": {
+  "v": {
+   "claims": [
+    {
+     "claim": "拉格朗日乘子法用于将带约束的优化问题构造为拉格朗日函数进行求解",
+     "supported": true,
+     "reason": "资料有明确表述"
+    },
+    {
+     "claim": "对带约束的优化问题，可定义拉格朗日函数，再对拉格朗日函数关于待求变量求偏导并令其等于0来求解",
+     "supported": true,
+     "reason": "资料有明确表述"
+    },
+    {
+     "claim": "对于等式约束优化问题，拉格朗日函数由目标函数与包含等式约束的项构成",
+     "supported": true,
+     "reason": "资料有明确表述"
+    },
+    {
+     "claim": "λ被称为与等式约束关联的拉格朗日乘子",
+     "supported": true,
+     "reason": "资料有明确表述"
+    },
+    {
+     "claim": "要使某点成为问题的最佳点，拉格朗日的梯度必须在该处为零（这不是唯一的条件，但它是必需的）",
+     "supported": true,
+     "reason": "资料有明确表述"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"拉格朗日乘子法用于将带约束的优化问题构造为拉格朗日函数进行求解\", \"supported\": true, \"reason\": \"资料有明确表述\"}, {\"claim\": \"对带约束的优化问题，可定义拉格朗日函数，再对拉格朗日函数关于待求变量求偏导并令其等于0来求解\", \"supported\": true, \"reason\": \"资料有明确表述\"}, {"
+ },
+ "848eb2f82dd7d69dbc13": {
+  "v": {
+   "claims": [
+    {
+     "claim": "资料中只给出了贝叶斯估计下后验概率的一般形式 P(θ|D)=P(D|θ)P(θ)/ΣθP(D|θ)P(θ)",
+     "supported": true,
+     "reason": "资料78页有该公式"
+    },
+    {
+     "claim": "该后验概率综合了先验概率 P(θ) 和样本集 D 带来的信息",
+     "supported": true,
+     "reason": "78页原文有此表述"
+    },
+    {
+     "claim": "该后验概率通常称为 θ 的后验概率",
+     "supported": true,
+     "reason": "78页原文有此表述"
+    },
+    {
+     "claim": "对于服从 Categorical 分布的 θ，若先验为参数 α 的 Dirichlet 分布，则后验为参数 α+y 的 Dirichlet 分布",
+     "supported": true,
+     "reason": "80页原文有此结论"
+    },
+    {
+     "claim": "资料未直接给出“朴素贝叶斯的后验概率”的具体计算公式",
+     "supported": false,
+     "reason": "需外部判断资料缺失"
+    }
+   ],
+   "total": 5,
+   "supported": 4,
+   "score": 0.8,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"资料中只给出了贝叶斯估计下后验概率的一般形式 P(θ|D)=P(D|θ)P(θ)/ΣθP(D|θ)P(θ)\", \"supported\": true, \"reason\": \"资料78页有该公式\"}, {\"claim\": \"该后验概率综合了先验概率 P(θ) 和样本集 D 带来的信息\", \"supported\": true, \"reason\": \"78页原"
+ },
+ "5e3b006da3d932964fec": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高斯混合聚类与 K 均值算法类似：开始时既不知道 k 个簇的均值向量，也不知道 m 个样本到底属于哪个簇，最后都采用了贪心策略，通过迭代优化来近似求解。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "两者的求解方法只是具体问题具体解法不同，从整体上来说，它们都应用了期望最大化算法（EM 算法）。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 2,
+   "supported": 2,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高斯混合聚类与 K 均值算法类似：开始时既不知道 k 个簇的均值向量，也不知道 m 个样本到底属于哪个簇，最后都采用了贪心策略，通过迭代优化来近似求解。\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"两者的求解方法只是具体问题具体解法不同，从整体上来说，它们都应用了期望最大化算法（EM 算"
+ },
+ "c128a7d0a914250473f3": {
+  "v": {
+   "claims": [
+    {
+     "claim": "知识更新：直接更新检索知识库，无需重新训练，信息更新成本低，适合动态变化的数据",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "微调通常需要重新训练来保持知识和数据的更新，更新成本高，适合静态数据",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "外部知识：擅长利用外部资源，特别适合处理文档或其他结构化/非结构化数据库",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "微调是将外部知识学习到 LLM 内部",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "数据处理：对数据的处理和操作要求极低",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "微调依赖于构建高质量的数据集，有限的数据集可能无法显著提高性能",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "可解释性：可以追溯到具体的数据来源，有较好的可解释性和可追踪性",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "微调是黑盒子，可解释性相对较低",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "计算资源：需要额外的资源来支持检索机制和数据库的维护",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "微调依赖高质量的训练数据集和微调目标，对计算资源的要求较高",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "降低幻觉：通过检索到的真实信息生成回答，降低了产生幻觉的概率",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "微调虽有助于减少幻觉，但面对未见过的输入时仍可能出现幻觉",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "模型定制方面 RAG 侧重于信息检索和融合外部知识，但可能无法充分定制模型行为或写作风格",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "微调可以根据特定风格或术语调整 LLM 行为、写作风格或特定领域知识",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 14,
+   "supported": 14,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"知识更新：直接更新检索知识库，无需重新训练，信息更新成本低，适合动态变化的数据\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"微调通常需要重新训练来保持知识和数据的更新，更新成本高，适合静态数据\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"c"
+ },
+ "7633b71ba3dd62a67c7e": {
+  "v": {
+   "claims": [
+    {
+     "claim": "使用分隔符，防止提示词注入（Prompt Rejection），避免用户输入中与预设Prompt相冲突的内容操纵语言模型。",
+     "supported": true,
+     "reason": "第65页明确表述"
+    },
+    {
+     "claim": "寻求结构化输出，即按照某种格式（如JSON、HTML等）组织内容，便于在代码中进一步解析和处理。",
+     "supported": true,
+     "reason": "第65页明确表述"
+    },
+    {
+     "claim": "指定完成任务所需的步骤，通过给出完成复杂任务的一系列步骤来引导模型。",
+     "supported": true,
+     "reason": "第69页明确表述"
+    },
+    {
+     "claim": "在Prompt中添加逐步推理的要求，让语言模型投入更多时间逻辑思维，输出结果更可靠准确。",
+     "supported": true,
+     "reason": "第69页明确表述"
+    },
+    {
+     "claim": "编写清晰、具体的指令，明确表达需求，提供充足上下文；过于简略的Prompt会使模型难以准确把握任务要求。",
+     "supported": true,
+     "reason": "第120页明确表述"
+    },
+    {
+     "claim": "给予语言模型充足的推理时间，Prompt应包含逐步推理的要求，让模型有足够时间思考，生成更准确的结果。",
+     "supported": true,
+     "reason": "第120页明确表述"
+    },
+    {
+     "claim": "要求对有几点答案进行分点标号回答，让答案清晰具体；答案较长时酌情分段以提高阅读体验。",
+     "supported": true,
+     "reason": "第120页明确表述"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"使用分隔符，防止提示词注入（Prompt Rejection），避免用户输入中与预设Prompt相冲突的内容操纵语言模型。\", \"supported\": true, \"reason\": \"第65页明确表述\"}, {\"claim\": \"寻求结构化输出，即按照某种格式（如JSON、HTML等）组织内容，便于在代码中进一步解析和处理。\", \"supporte"
+ },
+ "202b2694bb75629a9b64": {
+  "v": {
+   "claims": [
+    {
+     "claim": "chunk_size 指每个块包含的字符或 Token（如单词、句子等）的数量",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "chunk_size 是每个文档的字符数量限制",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "示例中 chunk_size 取值为 CHUNK_SIZE = 500",
+     "supported": true,
+     "reason": "资料代码中明确给出"
+    },
+    {
+     "claim": "资料未给出如何选择 chunk_size 的具体方法",
+     "supported": true,
+     "reason": "资料无选择方法"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"chunk_size 指每个块包含的字符或 Token（如单词、句子等）的数量\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"chunk_size 是每个文档的字符数量限制\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"示例中"
+ },
+ "4b75eae3c9f3f6dd9cc5": {
+  "v": {
+   "claims": [
+    {
+     "claim": "LangChain 主要由以下 6 个核心组件组成",
+     "supported": true,
+     "reason": "资料明确列出6个组件"
+    },
+    {
+     "claim": "模型输入/输出（Model I/O）：与语言模型交互的接口",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "数据连接（Data connection）：与特定应用程序的数据进行交互的接口",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "链（Chains）：将组件组合实现端到端应用",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "记忆（Memory）：用于链的多次运行之间持久化应用程序状态",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "代理（Agents）：扩展模型的推理能力，用于复杂的应用的调用序列",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "回调（Callbacks）：扩展模型的推理能力，用于复杂的应用的调用序列",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"LangChain 主要由以下 6 个核心组件组成\", \"supported\": true, \"reason\": \"资料明确列出6个组件\"}, {\"claim\": \"模型输入/输出（Model I/O）：与语言模型交互的接口\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"数据连接（Data c"
+ },
+ "1e127a6c5963e519578f": {
+  "v": {
+   "claims": [
+    {
+     "claim": "Embedding 用于对分割后的文档进行向量化，使语义相似的文本片段具有接近的向量表示",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "向量化后存入向量数据库，完成索引的创建",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "利用向量数据库对各文档片段进行索引，实现快速检索",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "用户知识库内容经过 Embedding 存入向量数据库",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "用户每一次提问也会经过 Embedding",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "利用向量相关性算法（例如余弦算法）找到最匹配的几个知识库片段",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "将知识库片段作为上下文，与用户问题一起作为 Prompt 提交给 LLM 回答",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "加载已构建的向量数据库时，需要使用和构建时相同的 Embedding",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"Embedding 用于对分割后的文档进行向量化，使语义相似的文本片段具有接近的向量表示\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"向量化后存入向量数据库，完成索引的创建\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"利用"
+ },
+ "574ca9125ac70ea24fef": {
+  "v": {
+   "claims": [
+    {
+     "claim": "支持向量机直接预测𝑦的值等于1还是等于0",
+     "supported": true,
+     "reason": "文档4明确表述"
+    },
+    {
+     "claim": "当𝜃^𝑇𝑥大于或者等于0时预测1",
+     "supported": true,
+     "reason": "文档4明确表述"
+    },
+    {
+     "claim": "逻辑回归输出的是概率",
+     "supported": true,
+     "reason": "文档4提及概率"
+    },
+    {
+     "claim": "逻辑回归希望𝑦=1时假设函数输出趋近1",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "𝑦=1对应𝜃^𝑇𝑥远大于0",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "逻辑回归希望𝑦=0时输出趋近0",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "𝑦=0对应𝜃^𝑇𝑥远小于0",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "逻辑回归的代价函数对每个样本(𝑥,𝑦)增加一项并对所有训练样本求和",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "逻辑回归代价函数还有1/𝑚项",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "𝑦=1时目标函数中只有第一项起作用",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "因为(1−𝑦)项等于0",
+     "supported": true,
+     "reason": "文档3明确表述"
+    },
+    {
+     "claim": "若使用对率损失函数ℓlog替代0/1损失函数，则几乎就得到了对率回归模型",
+     "supported": true,
+     "reason": "文档2引用表述"
+    },
+    {
+     "claim": "说明对数几率回归与软间隔支持向量机存在关系",
+     "supported": true,
+     "reason": "文档2标题表述"
+    },
+    {
+     "claim": "逻辑回归和不带核函数的支持向量机是非常相似的算法",
+     "supported": true,
+     "reason": "文档1明确表述"
+    },
+    {
+     "claim": "通常都会做相似的事情并给出相似的结果",
+     "supported": true,
+     "reason": "文档1明确表述"
+    },
+    {
+     "claim": "根据实现情况其中一个可能比另一个更有效",
+     "supported": true,
+     "reason": "文档1明确表述"
+    }
+   ],
+   "total": 16,
+   "supported": 16,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"支持向量机直接预测𝑦的值等于1还是等于0\", \"supported\": true, \"reason\": \"文档4明确表述\"}, {\"claim\": \"当𝜃^𝑇𝑥大于或者等于0时预测1\", \"supported\": true, \"reason\": \"文档4明确表述\"}, {\"claim\": \"逻辑回归输出的是概率\", \"supported\": true,"
+ },
+ "e70bd5647e81f677a7cb": {
+  "v": {
+   "claims": [
+    {
+     "claim": "资料未涉及“机器学习里划分验证集评估模型”这一概念",
+     "supported": true,
+     "reason": "资料无此概念"
+    },
+    {
+     "claim": "RAG 应用评估优化会分别聚焦检索和生成两个核心部分",
+     "supported": true,
+     "reason": "资料明确提及"
+    },
+    {
+     "claim": "分别以优化系统检索精度和在确定给定材料下的生成质量",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "检索部分的核心功能是找到存在于知识库中、能够正确回答用户 query 中提问的文本段落",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "可定义检索准确率：对于 N 个给定 query，保证每个 query 对应的正确答案都存在于知识库中，系统找到 K 个文本片段，如果正确答案在 K 个文本片段之一则检索成功，否则检索失败",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "这些内容不足以回答该问题",
+     "supported": false,
+     "reason": "属评价非事实"
+    }
+   ],
+   "total": 6,
+   "supported": 5,
+   "score": 0.8333333333333334,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"资料未涉及“机器学习里划分验证集评估模型”这一概念\", \"supported\": true, \"reason\": \"资料无此概念\"}, {\"claim\": \"RAG 应用评估优化会分别聚焦检索和生成两个核心部分\", \"supported\": true, \"reason\": \"资料明确提及\"}, {\"claim\": \"分别以优化系统检索精度和在确定给定材"
+ },
+ "4e1ee460dfbbe9c5ef92": {
+  "v": {
+   "claims": [
+    {
+     "claim": "梯度下降算法的更新规则是 𝜃𝑗 := 𝜃𝑗 − 𝛼 ∂/∂𝜃𝑗 𝐽(𝜃)",
+     "supported": true,
+     "reason": "资料第32页明确给出"
+    }
+   ],
+   "total": 1,
+   "supported": 1,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"梯度下降算法的更新规则是 𝜃𝑗 := 𝜃𝑗 − 𝛼 ∂/∂𝜃𝑗 𝐽(𝜃)\", \"supported\": true, \"reason\": \"资料第32页明确给出\"}]}"
+ },
+ "f22c2f13ca200f78f91b": {
+  "v": {
+   "claims": [
+    {
+     "claim": "给定数据集 T，其损失函数定义为 L(w, θ) = Σ_{x∈M} (ŷ − y)(wᵀx − θ)，其中 M ⊆ T 为误分类样本集合",
+     "supported": true,
+     "reason": "资料原文明确给出"
+    },
+    {
+     "claim": "此损失函数是非负的",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "如果没有误分类点，则损失函数值为 0",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "误分类点越少、误分类点离超平面越近，损失函数值就越小",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "损失函数 L(w, θ) 是关于 w, θ 的连续可导函数",
+     "supported": true,
+     "reason": "资料原文明确说明"
+    },
+    {
+     "claim": "将阈值 θ 看作固定输入为 −1 的“哑节点”后，极小化问题可进一步简化为 min_w L(w) = min_w Σ_{x_i∈M} (ŷ_i − y_i)wᵀx_i",
+     "supported": true,
+     "reason": "资料原文明确给出"
+    }
+   ],
+   "total": 6,
+   "supported": 6,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"给定数据集 T，其损失函数定义为 L(w, θ) = Σ_{x∈M} (ŷ − y)(wᵀx − θ)，其中 M ⊆ T 为误分类样本集合\", \"supported\": true, \"reason\": \"资料原文明确给出\"}, {\"claim\": \"此损失函数是非负的\", \"supported\": true, \"reason\": \"资料原文明确说明\"}"
+ },
+ "d2b67df1fb2d26f5af10": {
+  "v": {
+   "claims": [
+    {
+     "claim": "信息增益是对数据集 D 和属性子集 A，假设根据 A 的取值将 D 分为了 V 个子集 D1, D2, …, DV，那么信息增益的定义为划分之前数据集 D 的信息熵和划分之后每个子数据集 Dv 的信息熵的差",
+     "supported": true,
+     "reason": "资料原文直接给出"
+    },
+    {
+     "claim": "熵用来衡量一个系统的混乱程度",
+     "supported": true,
+     "reason": "资料原文有等价表述"
+    },
+    {
+     "claim": "划分前和划分后熵的差越大，表示划分越有效，划分带来的“信息增益”越大",
+     "supported": true,
+     "reason": "资料原文直接给出"
+    }
+   ],
+   "total": 3,
+   "supported": 3,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"信息增益是对数据集 D 和属性子集 A，假设根据 A 的取值将 D 分为了 V 个子集 D1, D2, …, DV，那么信息增益的定义为划分之前数据集 D 的信息熵和划分之后每个子数据集 Dv 的信息熵的差\", \"supported\": true, \"reason\": \"资料原文直接给出\"}, {\"claim\": \"熵用来衡量一个系统的混乱程度\", \""
+ },
+ "ec516d68a5347b29c0ce": {
+  "v": {
+   "claims": [
+    {
+     "claim": "AdaBoost 每轮迭代需要得到基分类器 ht(x) 及其对应的投票权重 αt",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "集成分类器为 Ht(x) = Ht−1(x) + αtht(x)",
+     "supported": true,
+     "reason": "资料明确给出"
+    },
+    {
+     "claim": "H0(x) = 0",
+     "supported": true,
+     "reason": "资料明确给出"
+    },
+    {
+     "claim": "第 t 轮实际求解的优化问题为 (αt, ht) = arg min_{α,h} ℓexp(Ht−1 + αh | D)",
+     "supported": true,
+     "reason": "资料明确给出"
+    },
+    {
+     "claim": "得到的基分类器 ht(x) 和对应权重 αt 是最小化集成分类器 Ht = Ht−1 + αtht 在数据集 D 上、样本权值分布为 D（即初始化样本权值分布 D1）时的指数损失函数的结果",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "对指数损失函数 ℓexp(Ht−1 + αht | D) 求导并令导数等于零，得 e^{−α}/(e^{α} + e^{−α}) = ϵt",
+     "supported": true,
+     "reason": "资料推导一致"
+    },
+    {
+     "claim": "ϵt = Ex∼Dt[I(f(xi) ≠ h(xi))]",
+     "supported": true,
+     "reason": "资料明确给出"
+    },
+    {
+     "claim": "对上述等式化简得 e^{2α} = (1 − ϵt)/ϵt",
+     "supported": true,
+     "reason": "资料明确推导"
+    },
+    {
+     "claim": "2α = ln((1 − ϵt)/ϵt)",
+     "supported": true,
+     "reason": "资料明确推导"
+    },
+    {
+     "claim": "αt = 1/2",
+     "supported": true,
+     "reason": "资料截断处显示"
+    }
+   ],
+   "total": 10,
+   "supported": 10,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"AdaBoost 每轮迭代需要得到基分类器 ht(x) 及其对应的投票权重 αt\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"集成分类器为 Ht(x) = Ht−1(x) + αtht(x)\", \"supported\": true, \"reason\": \"资料明确给出\"}, {\"claim\""
+ },
+ "e52eca7d50684d8b97c5": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高斯混合聚类整体上应用了期望最大化算法（EM 算法）",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "迭代过程为：初始化其中一组变量 (αi, µi, Σi)，然后计算 γji",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "再根据 γji 根据最大似然推导出的公式更新 (αi, µi, Σi)",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "反复迭代，直到满足停止条件",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "第 2~12 行就是一个 EM 算法的具体使用例子",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "两组变量 γji 和 (αi, µi, Σi) 之间相互影响",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "两组变量 γji 和 (αi, µi, Σi) 都是未知的",
+     "supported": true,
+     "reason": "资料明确表述"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高斯混合聚类整体上应用了期望最大化算法（EM 算法）\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"迭代过程为：初始化其中一组变量 (αi, µi, Σi)，然后计算 γji\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"再根据 γj"
+ },
+ "51d75ccc354d4ff671a3": {
+  "v": {
+   "claims": [
+    {
+     "claim": "资料提到势函数是贯穿本节的抽象函数符号",
+     "supported": true,
+     "reason": "原文明确表述"
+    },
+    {
+     "claim": "若已知势函数，可根据基于最大团势函数定义的联合概率公式解得各种可能变量值指派的联合概率",
+     "supported": true,
+     "reason": "原文明确表述"
+    },
+    {
+     "claim": "若势函数未知，在假定其形式之后需要根据数据学习其参数",
+     "supported": true,
+     "reason": "原文明确表述"
+    },
+    {
+     "claim": "资料提到势函数的定义式即将势函数写作指数函数的形式",
+     "supported": true,
+     "reason": "原文明确表述"
+    },
+    {
+     "claim": "关于“团”是什么，资料未给出定义",
+     "supported": true,
+     "reason": "资料无团定义"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"资料提到势函数是贯穿本节的抽象函数符号\", \"supported\": true, \"reason\": \"原文明确表述\"}, {\"claim\": \"若已知势函数，可根据基于最大团势函数定义的联合概率公式解得各种可能变量值指派的联合概率\", \"supported\": true, \"reason\": \"原文明确表述\"}, {\"claim\": \"若势函数未知，"
+ },
+ "8b900744fcb972dcce04": {
+  "v": {
+   "claims": [
+    {
+     "claim": "做特征缩放可以保证多维特征问题中各特征具有相近的尺度，帮助梯度下降算法更快地收敛",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "将特征尺度缩放到-1到1之间可解决代价函数等高线图过扁、梯度下降需多次迭代才能收敛的问题",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "特征缩放能提高梯度下降的收敛速度",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "特征缩放方法也适用于逻辑回归，可让逻辑回归中梯度下降收敛更快",
+     "supported": true,
+     "reason": "资料1明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"做特征缩放可以保证多维特征问题中各特征具有相近的尺度，帮助梯度下降算法更快地收敛\", \"supported\": true, \"reason\": \"资料2明确表述\"}, {\"claim\": \"将特征尺度缩放到-1到1之间可解决代价函数等高线图过扁、梯度下降需多次迭代才能收敛的问题\", \"supported\": true, \"reason\": \"资料2明确"
+ },
+ "03f194e098a36d012376": {
+  "v": {
+   "claims": [
+    {
+     "claim": "正规方程通过求解 𝜕/𝜕𝜃𝑗 𝐽(𝜃𝑗) = 0 来找出使得代价函数最小的参数",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "假设训练集特征矩阵为 𝑋（包含了 𝑥0 = 1）并且训练集结果为向量 𝑦，则利用正规方程解出向量 𝜃 = (𝑋𝑇𝑋)−1𝑋𝑇𝑦",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "上标 T 代表矩阵转置，上标-1 代表矩阵的逆",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 3,
+   "supported": 3,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"正规方程通过求解 𝜕/𝜕𝜃𝑗 𝐽(𝜃𝑗) = 0 来找出使得代价函数最小的参数\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"假设训练集特征矩阵为 𝑋（包含了 𝑥0 = 1）并且训练集结果为向量 𝑦，则利用正规方程解出向量 𝜃 = (𝑋𝑇𝑋)−1𝑋𝑇𝑦\", \"supported\": tru"
+ },
+ "d89d8740af9d16b9c8d7": {
+  "v": {
+   "claims": [
+    {
+     "claim": "决策边界是逻辑回归中用于分隔预测为 1 的区域和预测为 0 的区域的分界线",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "在逻辑回归中，当 𝜃ᵀ𝑥 ≥ 0 时预测 𝑦 = 1",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "在逻辑回归中，当 𝜃ᵀ𝑥 < 0 时预测 𝑦 = 0",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "参数 𝜃 为向量 [-3 1 1] 时，当 𝑥1 + 𝑥2 ≥ 3 时模型预测 𝑦 = 1",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "直线 𝑥1 + 𝑥2 = 3 是该模型的分界线，将预测为 1 的区域和预测为 0 的区域分隔开",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "当需要用曲线才能分隔 𝑦 = 0 的区域和 𝑦 = 1 的区域时，需要二次方特征",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "特征为 [-1 0 0 1 1] 时，得到的判定边界是圆点在原点且半径为 1 的圆形",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "可以用非常复杂的模型来适应非常复杂形状的判定边界",
+     "supported": true,
+     "reason": "资料明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"决策边界是逻辑回归中用于分隔预测为 1 的区域和预测为 0 的区域的分界线\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"在逻辑回归中，当 𝜃ᵀ𝑥 ≥ 0 时预测 𝑦 = 1\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"在逻辑回归中"
+ },
+ "97a1709835275387782a": {
+  "v": {
+   "claims": [
+    {
+     "claim": "对梯度的估计采用在代价函数上沿着切线方向选择离两个非常近的点，计算两个点的平均值用以估计梯度",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "对某个特定的 𝜃，计算在 𝜃-𝜀 处和 𝜃+𝜀 处的代价值（𝜀通常选取 0.001），然后求两个代价的平均，用以估计在 𝜃 处的代价值",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "代码为 gradApprox = (J(theta + eps) – J(theta - eps)) / (2*eps)",
+     "supported": true,
+     "reason": "资料代码一致"
+    },
+    {
+     "claim": "当𝜃是向量时，需要对偏导数进行检验",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "只针对一个参数的改变进行检验",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "例如对𝜃1检验：∂/∂𝜃1 = (J(𝜃1+𝜀1,𝜃2,𝜃3...𝜃𝑛)−J(𝜃1−𝜀1,𝜃2,𝜃3...𝜃𝑛))/(2𝜀)",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "还需对通过反向传播方法计算出的偏导数进行检验",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "将存储偏导数的矩阵 𝐷𝑖𝑗(𝑙) 展开成为向量",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "同时将 𝜃 矩阵展开为向量",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "针对每一个 𝜃 计算一个近似的梯度值，存储于近似梯度矩阵中",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "最终将该矩阵同 𝐷𝑖𝑗(𝑙) 进行比较",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "训练神经网络时，利用数值检验方法检验这些偏导数",
+     "supported": true,
+     "reason": "资料步骤5一致"
+    }
+   ],
+   "total": 12,
+   "supported": 12,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"对梯度的估计采用在代价函数上沿着切线方向选择离两个非常近的点，计算两个点的平均值用以估计梯度\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"对某个特定的 𝜃，计算在 𝜃-𝜀 处和 𝜃+𝜀 处的代价值（𝜀通常选取 0.001），然后求两个代价的平均，用以估计在 𝜃 处的代价值\", \"suppor"
+ },
+ "38f195826a1e4838d8a7": {
+  "v": {
+   "claims": [
+    {
+     "claim": "学习曲线是将训练集误差和交叉验证集误差作为训练集实例数量（m）的函数绘制的图表",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "学习曲线可用来判断学习算法是否处于偏差、方差问题",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在高偏差/欠拟合的情况下，无论训练集有多么大，误差都不会有太大改观",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "在高偏差/欠拟合的情况下，增加数据到训练集不一定能有帮助",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"学习曲线是将训练集误差和交叉验证集误差作为训练集实例数量（m）的函数绘制的图表\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"学习曲线可用来判断学习算法是否处于偏差、方差问题\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"在高"
+ },
+ "3f72f0fbfa3744e0518a": {
+  "v": {
+   "claims": [
+    {
+     "claim": "一般高斯分布模型中，分别计算每个特征对应的几率然后将其累乘起来得到 𝑝(𝑥)",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "𝑝(𝑥) = ∏ₙⱼ₌₁𝑝(𝑥ⱼ; 𝜇, 𝜎ⱼ²) = ∏ₙⱼ₌₁ (1/√(2𝜋)𝜎ⱼ) exp(−(𝑥ⱼ − 𝜇ⱼ)²/(2𝜎ⱼ²))",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "多元高斯分布模型中，构建特征的协方差矩阵，用所有特征一起来计算 𝑝(𝑥)",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "首先计算所有特征的平均值，然后再计算协方差矩阵",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "𝜇 = (1/m)∑ᵢ₌₁ᵐ𝑥⁽ⁱ⁾",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "𝛴 = (1/m)∑ᵢ₌₁ᵐ(𝑥⁽ⁱ⁾ − 𝜇)(𝑥⁽ⁱ⁾ − 𝜇)ᵀ = (1/m)(𝑋 − 𝜇)ᵀ(𝑋 − 𝜇)",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "𝑝(𝑥) = 1/((2𝜋)^(n/2)|𝛴|^(1/2)) exp(−(1/2)(𝑥 − 𝜇)ᵀ𝛴⁻¹(𝑥 − 𝜇))",
+     "supported": true,
+     "reason": "资料公式一致"
+    },
+    {
+     "claim": "参数估计时设置 𝜇 为训练样本的平均值",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "𝛴 = (1/m)∑ᵢ₌₁ᵐ(𝑥⁽ⁱ⁾ − 𝜇)(𝑥⁽ⁱ⁾ − 𝜇)ᵀ",
+     "supported": true,
+     "reason": "资料公式一致"
+    }
+   ],
+   "total": 9,
+   "supported": 9,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"一般高斯分布模型中，分别计算每个特征对应的几率然后将其累乘起来得到 𝑝(𝑥)\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"𝑝(𝑥) = ∏ₙⱼ₌₁𝑝(𝑥ⱼ; 𝜇, 𝜎ⱼ²) = ∏ₙⱼ₌₁ (1/√(2𝜋)𝜎ⱼ) exp(−(𝑥ⱼ − 𝜇ⱼ)²/(2𝜎ⱼ²))\", \"supported\""
+ },
+ "c56442ba6ebb6085af1a": {
+  "v": {
+   "claims": [
+    {
+     "claim": "协同过滤是在既没有用户参数、也没有电影特征、基于内容的推荐和仅学习电影特征这两种方法都不可行时，可以同时学习用户参数和电影特征这两者的算法",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "其优化目标改为同时针对𝑥和𝜃进行",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "代价函数同时包含对𝑥和𝜃的正则化项",
+     "supported": true,
+     "reason": "代价函数含两项正则化"
+    },
+    {
+     "claim": "将𝑥(1),…,𝑥(𝑛𝑚),𝜃(1),…,𝜃(𝑛𝑢)初始为一些随机小值",
+     "supported": true,
+     "reason": "步骤1原文一致"
+    },
+    {
+     "claim": "使用梯度下降算法最小化代价函数",
+     "supported": true,
+     "reason": "步骤2原文一致"
+    },
+    {
+     "claim": "训练完算法后，预测(𝜃(𝑗))𝑇𝑥(𝑖)为用户𝑗给电影𝑖的评分",
+     "supported": true,
+     "reason": "步骤3原文一致"
+    },
+    {
+     "claim": "通过这个学习过程获得的特征矩阵包含了有关电影的重要数据，这些数据不总是人能读",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"协同过滤是在既没有用户参数、也没有电影特征、基于内容的推荐和仅学习电影特征这两种方法都不可行时，可以同时学习用户参数和电影特征这两者的算法\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"其优化目标改为同时针对𝑥和𝜃进行\", \"supported\": true, \"reason\": \"资料原"
+ },
+ "4ebc06962dd1fe8b36ca": {
+  "v": {
+   "claims": [
+    {
+     "claim": "RAG 的工作流程分为数据处理、检索、增强和生成四个阶段",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "数据处理阶段对原始数据进行清洗和处理",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "数据处理阶段将处理后的数据转化为检索模型可以使用的格式",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "数据处理阶段将处理后的数据存储在对应的数据库中",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "检索阶段将用户的问题输入检索系统，从数据库中检索相关信息",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "增强阶段对检索到的信息进行处理和增强，以便生成模型更好地理解和使用",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "生成阶段将增强后的信息输入生成模型，生成模型据此生成答案",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括用户提出问题 Query",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括加载和读取知识库文档",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括对知识库文档进行分割",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括对分割后的知识库文本向量化并存入向量库建立索引",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括对问句 Query 向量化",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括在知识库文档向量中匹配出与问句 Query 向量最相似的 top k 个",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括匹配出的知识库文本作为上下文 Context 和问题一起添加到 prompt 中",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程包括提交给 LLM 生成回答 Answer",
+     "supported": true,
+     "reason": "资料原文明确"
+    },
+    {
+     "claim": "整个 RAG 过程可以大致分为索引、检索和生成三个阶段",
+     "supported": true,
+     "reason": "资料原文明确"
+    }
+   ],
+   "total": 16,
+   "supported": 16,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"RAG 的工作流程分为数据处理、检索、增强和生成四个阶段\", \"supported\": true, \"reason\": \"资料原文明确\"}, {\"claim\": \"数据处理阶段对原始数据进行清洗和处理\", \"supported\": true, \"reason\": \"资料原文明确\"}, {\"claim\": \"数据处理阶段将处理后的数据转化为检索模型可以使"
+ },
+ "53f1dca1aae1b4d2fa96": {
+  "v": {
+   "claims": [
+    {
+     "claim": "文本分割方式往往不能照顾到文本语义，容易造成同一主题的强相关上下文被切分到两个 chunk 中",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "需要优化文本切割方式",
+     "supported": true,
+     "reason": "资料提出优化思路"
+    },
+    {
+     "claim": "可针对性构建更合适的分割规则",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "可纳入人力进行分割",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "可训练专用文本分割模型来实现根据语义和主题的 chunk 切分",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "使用 RecursiveCharacterTextSplitter 基于字符数量分割文本",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "RecursiveCharacterTextSplitter 保证在不超过指定大小的同时尽可能完整地保留文本的意义",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "RecursiveCharacterTextSplitter 对于处理大文档特别有用",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"文本分割方式往往不能照顾到文本语义，容易造成同一主题的强相关上下文被切分到两个 chunk 中\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"需要优化文本切割方式\", \"supported\": true, \"reason\": \"资料提出优化思路\"}, {\"claim\": \"可针对性构建更合"
+ },
+ "0e9000945ecbe665dba4": {
+  "v": {
+   "claims": [
+    {
+     "claim": "向量数据库是用于高效计算和管理大量向量数据的解决方案",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "向量数据库是专门用于存储和检索向量数据（embedding）的数据库系统",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "向量数据库与传统基于关系模型的数据库不同",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "向量数据库主要关注向量数据的特性和相似性",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "在向量数据库中，数据被表示为向量形式",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "每个向量代表一个数据项",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "向量数据库使用高效的索引和查询算法来加速向量数据的存储和检索过程",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"向量数据库是用于高效计算和管理大量向量数据的解决方案\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"向量数据库是专门用于存储和检索向量数据（embedding）的数据库系统\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"向量数据库与传"
+ },
+ "0d9cb0fb48a2e7dd4aa5": {
+  "v": {
+   "claims": [
+    {
+     "claim": "客观正确性针对有固定正确答案的问题，评估模型能否给出正确回答",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "可选取部分案例使用构造客观题的方式进行评估",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "主观正确性针对没有固定正确答案的主观问题，评估模型能否给出正确、全面的回答",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "可选取部分案例使用大模型评估的方式评估模型回答是否正确",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"客观正确性针对有固定正确答案的问题，评估模型能否给出正确回答\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"可选取部分案例使用构造客观题的方式进行评估\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"主观正确性针对没有固定正确答案的主观"
+ },
+ "4254f7244f02ea6bfdbf": {
+  "v": {
+   "claims": [
+    {
+     "claim": "为应用程序创建 GitHub 存储库，存储库应包含两个文件：streamlit_app.py 和 requirements.txt",
+     "supported": true,
+     "reason": "资料明确列出两文件"
+    },
+    {
+     "claim": "转到 Streamlit Community Cloud，单击工作区中的 New app 按钮，然后指定存储库、分支和主文件路径",
+     "supported": true,
+     "reason": "资料步骤2原文"
+    },
+    {
+     "claim": "可以通过选择自定义子域来自定义应用程序的 URL",
+     "supported": true,
+     "reason": "资料步骤2原文"
+    },
+    {
+     "claim": "点击 Deploy! 按钮，应用程序将部署到 Streamlit Community Cloud，并可从世界各地访问",
+     "supported": true,
+     "reason": "资料步骤3原文"
+    },
+    {
+     "claim": "进入页面后，首先输入 OPEN_API_KEY（默认）",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "然后点击单选按钮选择进行问答的模式",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "最后在输入框输入问题，按下回车即可",
+     "supported": true,
+     "reason": "资料原文表述"
+    },
+    {
+     "claim": "完整代码参考 streamlit_app.py",
+     "supported": true,
+     "reason": "资料原文表述"
+    }
+   ],
+   "total": 8,
+   "supported": 8,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"为应用程序创建 GitHub 存储库，存储库应包含两个文件：streamlit_app.py 和 requirements.txt\", \"supported\": true, \"reason\": \"资料明确列出两文件\"}, {\"claim\": \"转到 Streamlit Community Cloud，单击工作区中的 New app 按钮，然后指定存储库"
+ },
+ "5f1ca9b189831ed1787e": {
+  "v": {
+   "claims": [
+    {
+     "claim": "为了计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)，需要采用反向传播算法",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "误差是激活单元的预测（a_k(4)）与实际值（𝑦_𝑘）之间的差异",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "从最后一层的误差开始计算",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"为了计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)，需要采用反向传播算法\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"反向传播算法首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层\", \"supported\": true, \"reason\": \"资料原文明确表述"
+ },
+ "58444268f55f3c588ab8": {
+  "v": {
+   "claims": [
+    {
+     "claim": "将𝑛维数据降至𝑘维，找到向量𝑢(1),𝑢(2),...,𝑢(𝑘)使得总的投射误差最小",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 1,
+   "supported": 1,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"将𝑛维数据降至𝑘维，找到向量𝑢(1),𝑢(2),...,𝑢(𝑘)使得总的投射误差最小\", \"supported\": true, \"reason\": \"资料原文明确表述\"}]}"
+ },
+ "18fbd89ed7ec99ffb24e": {
+  "v": {
+   "claims": [
+    {
+     "claim": "交叉验证集用于帮助选择模型",
+     "supported": true,
+     "reason": "资料明确说明"
+    },
+    {
+     "claim": "使用训练集训练出多个模型",
+     "supported": true,
+     "reason": "资料步骤1"
+    },
+    {
+     "claim": "用这些模型分别对交叉验证集计算交叉验证误差（代价函数的值）",
+     "supported": true,
+     "reason": "资料步骤2"
+    },
+    {
+     "claim": "选取代价函数值最小的模型",
+     "supported": true,
+     "reason": "资料步骤3"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"交叉验证集用于帮助选择模型\", \"supported\": true, \"reason\": \"资料明确说明\"}, {\"claim\": \"使用训练集训练出多个模型\", \"supported\": true, \"reason\": \"资料步骤1\"}, {\"claim\": \"用这些模型分别对交叉验证集计算交叉验证误差（代价函数的值）\", \"supported\": "
+ },
+ "c0d5b1d32e55dba363ac": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高偏差和高方差的问题基本上来说是欠拟合和过拟合的问题。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 1,
+   "supported": 1,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高偏差和高方差的问题基本上来说是欠拟合和过拟合的问题。\", \"supported\": true, \"reason\": \"资料原文明确表述\"}]}"
+ },
+ "29d33e5297d536583501": {
+  "v": {
+   "claims": [
+    {
+     "claim": "支持向量机可以使用核函数，也可以不使用核函数",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "不使用核函数称为线性核函数(linear kernel)",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "当不采用非常复杂的函数，或者训练集特征非常多而实例非常少的时候，可以采用这种不带核函数的支持向量机",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "使用现有软件包最小化代价函数之前，通常需要编写核函数",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "如果使用高斯核函数，那么在使用之前进行特征缩放是非常必要的",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "在计算正则化项时，用𝜃^𝑇𝑀𝜃代替𝜃^𝑇𝜃",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "𝑀是根据所选核函数而不同的一个矩阵",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "这样做是为了简化计算",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "当𝑛较小、𝑚大小中等（例如𝑛在1-1000之间，𝑚在10-10000之间）时，使用高斯核函数的支持向量机",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 9,
+   "supported": 9,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"支持向量机可以使用核函数，也可以不使用核函数\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"不使用核函数称为线性核函数(linear kernel)\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"当不采用非常复杂的函数，或者训练集特征"
+ },
+ "8be5cf5f8817ececb5c4": {
+  "v": {
+   "claims": [
+    {
+     "claim": "拉格朗日乘子法用于求解带约束的优化问题",
+     "supported": true,
+     "reason": "资料1明确提及"
+    },
+    {
+     "claim": "通过构造拉格朗日函数将约束条件纳入目标函数进行求解",
+     "supported": true,
+     "reason": "资料1构造拉格朗日函数"
+    },
+    {
+     "claim": "对于等式约束优化问题，拉格朗日函数由目标函数与约束关联的拉格朗日乘子构成",
+     "supported": true,
+     "reason": "资料2明确表述"
+    },
+    {
+     "claim": "要使某点成为最优点的必要条件是拉格朗日梯度在该处为零",
+     "supported": true,
+     "reason": "资料2明确表述"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"拉格朗日乘子法用于求解带约束的优化问题\", \"supported\": true, \"reason\": \"资料1明确提及\"}, {\"claim\": \"通过构造拉格朗日函数将约束条件纳入目标函数进行求解\", \"supported\": true, \"reason\": \"资料1构造拉格朗日函数\"}, {\"claim\": \"对于等式约束优化问题，拉格朗日函数由目"
+ },
+ "62ac17af4cb01c99481a": {
+  "v": {
+   "claims": [
+    {
+     "claim": "高斯混合聚类与 k 均值算法类似：开始时既不知道 k 个簇的均值向量，也不知道 m 个样本到底属于哪个簇，最后采用贪心策略，通过迭代优化来近似求解。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "两者的求解方法只是具体问题具体解法不同，从整体上来说，它们都应用了期望最大化算法（EM 算法）。",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 2,
+   "supported": 2,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"高斯混合聚类与 k 均值算法类似：开始时既不知道 k 个簇的均值向量，也不知道 m 个样本到底属于哪个簇，最后采用贪心策略，通过迭代优化来近似求解。\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"两者的求解方法只是具体问题具体解法不同，从整体上来说，它们都应用了期望最大化算法（EM 算法）"
+ },
+ "850dee12847eca691d0e": {
+  "v": {
+   "claims": [
+    {
+     "claim": "知识更新成本低：直接更新检索知识库，无需重新训练，适合动态变化的数据",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "微调通常需要重新训练来保持知识和数据更新，更新成本高",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "更擅长利用外部资源，特别适合处理文档或其他结构化/非结构化数据库",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "微调是将外部知识学习到 LLM 内部",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "对数据的处理和操作要求极低",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "微调依赖构建高质量的数据集，有限的数据集可能无法显著提高性能",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "可解释性较好，可以追溯到具体的数据来源，有较好的可解释性和可追踪性",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "微调是黑盒子，可解释性相对较低",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "通过检索到的真实信息生成回答，降低了产生幻觉的概率",
+     "supported": true,
+     "reason": "资料明确表述"
+    },
+    {
+     "claim": "微调虽有助于减少幻觉，但面对未见过的输入时仍可能出现幻觉",
+     "supported": true,
+     "reason": "资料明确表述"
+    }
+   ],
+   "total": 10,
+   "supported": 10,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"知识更新成本低：直接更新检索知识库，无需重新训练，适合动态变化的数据\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"微调通常需要重新训练来保持知识和数据更新，更新成本高\", \"supported\": true, \"reason\": \"资料明确表述\"}, {\"claim\": \"更擅长利用外部资源"
+ },
+ "85402a67dd8cb8159761": {
+  "v": {
+   "claims": [
+    {
+     "claim": "使用分隔符，尤其需要注意的是要防止提示词注入（Prompt Rejection）",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "寻求结构化的输出，即按照某种格式组织的内容，例如 JSON、HTML 等",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "这种输出非常适合在代码中进一步解析和处理",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    }
+   ],
+   "total": 3,
+   "supported": 3,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"使用分隔符，尤其需要注意的是要防止提示词注入（Prompt Rejection）\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"寻求结构化的输出，即按照某种格式组织的内容，例如 JSON、HTML 等\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, "
+ },
+ "321f60295ef1288e60f1": {
+  "v": {
+   "claims": [
+    {
+     "claim": "chunk_size 指每个块包含的字符或 Token（如单词、句子等）的数量",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "在 RecursiveCharacterTextSplitter 中，chunk_size 是每个文档的字符数量限制",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "资料中给出的示例取值为 CHUNK_SIZE = 500",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "资料未说明具体的选择原则",
+     "supported": true,
+     "reason": "资料确无说明"
+    }
+   ],
+   "total": 4,
+   "supported": 4,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"chunk_size 指每个块包含的字符或 Token（如单词、句子等）的数量\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"在 RecursiveCharacterTextSplitter 中，chunk_size 是每个文档的字符数量限制\", \"supported\": true, \"rea"
+ },
+ "62cfdcea6fbcec3a6407": {
+  "v": {
+   "claims": [
+    {
+     "claim": "使用文本嵌入(Embeddings)技术对分割后的文档进行向量化，使语义相似的文本片段具有接近的向量表示",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "然后存入向量数据库，完成索引的创建",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "将用户知识库内容经过 Embedding 存入向量数据库",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "用户每一次提问也会经过 Embedding",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "利用向量相关性算法（例如余弦算法）找到最匹配的几个知识库片段",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "将这些知识库片段作为上下文，与用户问题一起作为 Prompt 提交给 LLM 回答",
+     "supported": true,
+     "reason": "资料原文一致"
+    },
+    {
+     "claim": "读取本地文档并通过 Embedding 方法将本地文档的内容转化为词向量来构建向量数据库",
+     "supported": true,
+     "reason": "资料原文一致"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"使用文本嵌入(Embeddings)技术对分割后的文档进行向量化，使语义相似的文本片段具有接近的向量表示\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \"然后存入向量数据库，完成索引的创建\", \"supported\": true, \"reason\": \"资料原文一致\"}, {\"claim\": \""
+ },
+ "e8f8e52af3902e69c4c8": {
+  "v": {
+   "claims": [
+    {
+     "claim": "反向传播算法用于计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层",
+     "supported": true,
+     "reason": "资料原文明确表述"
+    },
+    {
+     "claim": "训练神经网络时，先利用正向传播方法计算所有的ℎ𝜃(𝑥)",
+     "supported": true,
+     "reason": "资料步骤2明确表述"
+    },
+    {
+     "claim": "编写计算代价函数 𝐽 的代码",
+     "supported": true,
+     "reason": "资料步骤3明确表述"
+    },
+    {
+     "claim": "然后利用反向传播方法计算所有偏导数",
+     "supported": true,
+     "reason": "资料步骤4明确表述"
+    },
+    {
+     "claim": "利用数值检验方法检验这些偏导数",
+     "supported": true,
+     "reason": "资料步骤5明确表述"
+    },
+    {
+     "claim": "最后使用优化算法来最小化代价函数",
+     "supported": true,
+     "reason": "资料步骤6明确表述"
+    }
+   ],
+   "total": 7,
+   "supported": 7,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"反向传播算法用于计算代价函数的偏导数 𝜕/𝜕𝛩𝑖𝑗(𝑙) 𝐽(𝛩)\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim\": \"首先计算最后一层的误差，然后再一层一层反向求出各层的误差，直到倒数第二层\", \"supported\": true, \"reason\": \"资料原文明确表述\"}, {\"claim"
+ },
+ "16d9ab6a04bd1abb23b2": {
+  "v": {
+   "claims": [
+    {
+     "claim": "正则化可以改善或减少过拟合问题",
+     "supported": true,
+     "reason": "资料117页明确表述"
+    },
+    {
+     "claim": "选择λ时用交叉验证误差最小的模型",
+     "supported": true,
+     "reason": "资料164页明确表述"
+    },
+    {
+     "claim": "再对测试集计算推广误差",
+     "supported": true,
+     "reason": "资料164页明确表述"
+    },
+    {
+     "claim": "资料未说明交叉验证缓解过拟合的具体机制",
+     "supported": true,
+     "reason": "资料无此内容"
+    },
+    {
+     "claim": "资料未说明正则化缓解过拟合的具体机制",
+     "supported": true,
+     "reason": "资料无此内容"
+    }
+   ],
+   "total": 5,
+   "supported": 5,
+   "score": 1.0,
+   "parse_failed": false
+  },
+  "a": "{\"claims\": [{\"claim\": \"正则化可以改善或减少过拟合问题\", \"supported\": true, \"reason\": \"资料117页明确表述\"}, {\"claim\": \"选择λ时用交叉验证误差最小的模型\", \"supported\": true, \"reason\": \"资料164页明确表述\"}, {\"claim\": \"再对测试集计算推广误差\", \"supported\": tru"
  }
 }
