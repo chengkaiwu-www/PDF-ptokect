@@ -13,7 +13,9 @@ os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 PDF_DIR = DATA_DIR / "pdfs"
-VECTOR_STORE_DIR = DATA_DIR / "vector_store"
+# 存储目录可用环境变量覆盖：做切分对照实验时需要并存两份索引
+# （例如 CHUNK_SIZE=128 与 384 各一份），覆盖默认值比复制整个 data/ 更安全。
+VECTOR_STORE_DIR = Path(os.getenv("VECTOR_STORE_DIR", str(DATA_DIR / "vector_store")))
 MODELS_DIR = BASE_DIR / "models"
 
 PDF_DIR.mkdir(parents=True, exist_ok=True)

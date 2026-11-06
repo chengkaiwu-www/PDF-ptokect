@@ -97,6 +97,14 @@ def layout_stats(retriever, questions: List[Dict[str, Any]], embedding_model) ->
     }
 
 
+# 碎块场景（CHUNK_SIZE=128）下的对照：预算对齐是关键
+S_SWEEP = [
+    ("碎块 k=4", 4, False, 1),
+    ("碎块 k=12", 12, False, 1),
+    ("碎块 父块 w=3 k=4", 4, True, 3),
+]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--questions", default=str(PROJECT_ROOT / "eval" / "questions_v2.json"))
@@ -107,6 +115,8 @@ def main() -> None:
     ap.add_argument("--parent-window", type=int, default=PARENT_WINDOW)
     ap.add_argument("--no-rerank", action="store_true")
     ap.add_argument("--sweep", action="store_true", help="跑内置的几组对照")
+    ap.add_argument("--sweep-small", action="store_true",
+                    help="碎块场景对照（配合 --store-dir 指向 CHUNK_SIZE=128 的索引）")
     ap.add_argument("--save", default="")
     args = ap.parse_args()
 
@@ -121,10 +131,13 @@ def main() -> None:
 
     # (标签, top_k, 是否父块, 窗口)
     configs = [
-        ("child k=4", 4, False, 3),
+        ("child k=4", 4, False, 1),
+        ("parent w=2 k=4", 4, True, 2),
         ("parent w=3 k=4", 4, True, 3),
+        ("parent w=4 k=4", 4, True, 4),
+        ("parent w=6 k=4", 4, True, 6),
         ("parent w=3 k=2", 2, True, 3),
-    ] if args.sweep else [
+    ] if args.sweep else (S_SWEEP if getattr(args, "sweep_small", False) else [
         (
             f"{'parent' if args.parent_expand else 'child'} "
             f"{'w=%d ' % args.parent_window if args.parent_expand else ''}k={args.top_k}",
@@ -132,7 +145,7 @@ def main() -> None:
             args.parent_expand,
             args.parent_window,
         )
-    ]
+    ])
 
     print("=" * 78)
     print(f"{'配置':<18}{'n':>4}{'上下文均值':>10}{'最大':>7}{'关键词命中':>10}{'首命中位置':>10}{'后半段':>8}")
