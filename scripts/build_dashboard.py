@@ -96,12 +96,18 @@ def num(v: Any, digits: int = 3) -> str:
     return str(v)
 
 
-def pct_cell(v: Any) -> str:
-    """比率单元格：带一条内嵌横条，方便一眼看出相对高低。"""
+def pct_cell(v: Any, warn: bool = False) -> str:
+    """
+    比率单元格：带一条内嵌横条。
+
+    warn=True 用于「越高越差」的指标（过度拒答）：条形换成警示色。
+    否则一条更长的蓝条在视觉上和「更好」分不开 —— 图表也会撒谎。
+    """
     if v is None:
         return '<td class="muted">—</td>'
     width = max(0.0, min(1.0, float(v))) * 100
-    return f'<td class="barcell"><span class="bar" style="width:{width:.1f}%"></span><b>{v:.4f}</b></td>'
+    cls = "bar bar-warn" if warn else "bar"
+    return f'<td class="barcell"><span class="{cls}" style="width:{width:.1f}%"></span><b>{v:.4f}</b></td>'
 
 
 def tag_html(tag: str) -> str:
@@ -166,7 +172,7 @@ def section_generation() -> str:
             f'{pct_cell(s.get("citation_validity"))}'
             f'{pct_cell(s.get("faithfulness"))}'
             f'<td class="muted">{"%d" % ctx if ctx else "—"}</td>'
-            f'{pct_cell(s.get("over_refusal_rate"))}'
+            f'{pct_cell(s.get("over_refusal_rate"), warn=True)}'
             f'{pct_cell(s.get("refusal_rate_on_no_answer"))}'
             f'<td class="note">{cfg.get("note", "")}</td>'
             "</tr>"
