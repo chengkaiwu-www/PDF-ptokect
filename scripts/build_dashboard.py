@@ -352,6 +352,7 @@ td.muted{color:var(--muted)}
 tbody tr:hover{background:#fbfcfd}
 .barcell{position:relative;min-width:110px;text-align:right}
 .barcell .bar{position:absolute;left:6px;bottom:3px;height:3px;background:var(--accent);opacity:.55;border-radius:2px}
+.barcell .bar-warn{background:var(--bad);opacity:.5}
 .barcell b{font-variant-numeric:tabular-nums;font-weight:600}
 .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;font-weight:600;border:1px solid}
 .tag-base{color:#374151;border-color:#d1d5db;background:#f3f4f6}
