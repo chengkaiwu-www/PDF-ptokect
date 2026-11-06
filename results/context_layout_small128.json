@@ -1,0 +1,32 @@
+{
+  "碎块 k=4": {
+    "n": 35,
+    "context_chars_avg": 815,
+    "context_chars_max": 998,
+    "keyword_hit_rate": 0.8571,
+    "first_hit_pos_avg": 0.1358,
+    "first_hit_pos_median": 0.1192,
+    "first_hit_pos_max": 0.4066,
+    "second_half": 0
+  },
+  "碎块 k=12": {
+    "n": 35,
+    "context_chars_avg": 2410,
+    "context_chars_max": 2889,
+    "keyword_hit_rate": 0.9429,
+    "first_hit_pos_avg": 0.0871,
+    "first_hit_pos_median": 0.0406,
+    "first_hit_pos_max": 0.7,
+    "second_half": 1
+  },
+  "碎块 父块 w=3 k=4": {
+    "n": 35,
+    "context_chars_avg": 1723,
+    "context_chars_max": 2392,
+    "keyword_hit_rate": 0.9143,
+    "first_hit_pos_avg": 0.1326,
+    "first_hit_pos_median": 0.1093,
+    "first_hit_pos_max": 0.746,
+    "second_half": 1
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "child k=4": {
+    "n": 35,
+    "context_chars_avg": 1941,
+    "context_chars_max": 2525,
+    "keyword_hit_rate": 0.8857,
+    "first_hit_pos_avg": 0.126,
+    "first_hit_pos_median": 0.0751,
+    "first_hit_pos_max": 0.6614,
+    "second_half": 1
+  },
+  "parent w=2 k=4": {
+    "n": 35,
+    "context_chars_avg": 3006,
+    "context_chars_max": 4311,
+    "keyword_hit_rate": 0.8857,
+    "first_hit_pos_avg": 0.1926,
+    "first_hit_pos_median": 0.1154,
+    "first_hit_pos_max": 0.8337,
+    "second_half": 3
+  },
+  "parent w=3 k=4": {
+    "n": 35,
+    "context_chars_avg": 3583,
+    "context_chars_max": 6357,
+    "keyword_hit_rate": 0.8857,
+    "first_hit_pos_avg": 0.1787,
+    "first_hit_pos_median": 0.0855,
+    "first_hit_pos_max": 0.8337,
+    "second_half": 3
+  },
+  "parent w=4 k=4": {
+    "n": 35,
+    "context_chars_avg": 4099,
+    "context_chars_max": 8232,
+    "keyword_hit_rate": 0.8857,
+    "first_hit_pos_avg": 0.1761,
+    "first_hit_pos_median": 0.109,
+    "first_hit_pos_max": 0.8337,
+    "second_half": 2
+  },
+  "parent w=6 k=4": {
+    "n": 35,
+    "context_chars_avg": 4358,
+    "context_chars_max": 9024,
+    "keyword_hit_rate": 0.8857,
+    "first_hit_pos_avg": 0.1799,
+    "first_hit_pos_median": 0.109,
+    "first_hit_pos_max": 0.8379,
+    "second_half": 2
+  },
+  "parent w=3 k=2": {
+    "n": 35,
+    "context_chars_avg": 1968,
+    "context_chars_max": 3242,
+    "keyword_hit_rate": 0.8571,
+    "first_hit_pos_avg": 0.2677,
+    "first_hit_pos_median": 0.1867,
+    "first_hit_pos_max": 0.8619,
+    "second_half": 6
+  }
+}
