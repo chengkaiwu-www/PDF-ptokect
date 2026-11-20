@@ -43,6 +43,14 @@ RETRIEVAL_RUNS: List[Dict[str, str]] = [
     {"file": "eval_v2_hybrid_k8", "label": "top_k=8", "judge": "keyword", "tag": "base"},
     {"file": "eval_v2_hybrid_k12", "label": "top_k=12", "judge": "keyword", "tag": "good",
      "note": "Hit@1 不动 → 缺的是预算不是排序"},
+    {"file": "eval_v2_vector_judge", "label": "仅向量", "judge": "llm", "tag": "ctrl",
+     "note": "S6-d 单通道对照：32/35"},
+    {"file": "eval_v2_bm25_judge", "label": "仅 BM25", "judge": "llm", "tag": "ctrl",
+     "note": "与向量 32=32 → 关键词口径的 1 题优势归零（同构偏袒）"},
+    {"file": "eval_v2_hybrid_judge", "label": "混合 RRF", "judge": "llm", "tag": "good",
+     "note": "+2 题、干扰来源 15/15；但多跳 0.750→0.625 反向恶化"},
+    {"file": "eval_v2_hybrid_rerank_judge", "label": "混合 + 精排", "judge": "llm", "tag": "good",
+     "note": "35/35 打满 → 三个指标同时饱和，这套题失去区分力"},
 ]
 
 GEN_RUNS: List[Dict[str, str]] = [
@@ -130,6 +138,7 @@ def section_retrieval() -> str:
             "<tr>"
             f'<td class="label">{cfg["label"]}</td>'
             f"<td>{tag_html(cfg['tag'])}</td>"
+            f'<td class="muted">{"语义" if s.get("judge") == "llm" else "关键词"}</td>'
             f'<td class="num">{num(s["hit_rate_at_1"])}</td>'
             f'<td class="num">{num(s["hit_rate_at_k"])}</td>'
             f'<td class="num">{num(s["mrr"])}</td>'
@@ -141,13 +150,14 @@ def section_retrieval() -> str:
         )
     return f"""
 <section>
-  <h2>一、检索层（50 题分层集，top_k 默认 4，关键词口径）</h2>
+  <h2>一、检索层（50 题分层集，top_k 默认 4）</h2>
   <p class="lead">Hit@1 / Hit@4 只在 35 道可回答题上算；多跳 8 题单列。
-  <b>同一个 Hit@k 在不同文本长度下不可直接比</b> —— 判定是「关键词在不在返回文本里」，
+  <b>纵向不能跨口径比</b>：语义口径整体更宽，所有配置一起涨 6~8 题 —— 那是尺子松了，不是方法变好。
+  <b>同一个 Hit@k 在不同文本长度下也不可直接比</b> —— 关键词判定是「关键词在不在返回文本里」，
   文本变长它自己会涨（见第四节）。</p>
   <table>
     <thead><tr>
-      <th>配置</th><th>结论</th><th>Hit@1</th><th>Hit@4</th><th>MRR</th>
+      <th>配置</th><th>结论</th><th>口径</th><th>Hit@1</th><th>Hit@4</th><th>MRR</th>
       <th>多跳覆盖</th><th>多跳全覆</th><th>延迟</th><th>备注</th>
     </tr></thead>
     <tbody>{''.join(rows)}</tbody>
