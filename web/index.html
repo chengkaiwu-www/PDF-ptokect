@@ -281,6 +281,20 @@
     </section>
 
     <section class="card">
+      <h2>回答模型</h2>
+      <div class="field">
+        <label>Provider</label>
+        <select id="sel-provider"></select>
+      </div>
+      <div class="field">
+        <label>模型</label>
+        <select id="sel-model"></select>
+        <input id="inp-model" placeholder="手填模型名，如 qwen2.5:14b" hidden />
+      </div>
+      <p class="hint" id="model-hint">加载中…</p>
+    </section>
+
+    <section class="card">
       <h2>Prompt 变体</h2>
       <select id="sel-prompt"></select>
       <p class="hint" id="prompt-hint">full：强制引用 + 拒答哨兵（正式配置）</p>
@@ -381,7 +395,12 @@
       candidate_k: 50,
       rrf_k: 60,
       rerank: false,
-      prompt_variant: "full"
+      prompt_variant: "full",
+      // 空串 = 用服务端配置的默认模型。
+      // 存到 localStorage 是为了「换了模型，刷新页面还在」——
+      // 否则每次刷新都悄悄回到默认模型，而你不会注意到账单变了。
+      provider: "",
+      model: ""
     }
   };
 
@@ -416,7 +435,99 @@
     $("rg-cand").value = s.candidate_k;
     $("v-cand").textContent = s.candidate_k;
     $("sel-prompt").value = s.prompt_variant;
+    syncModelControls();
     updatePromptHint();
+  }
+
+  // ------------------------------------------------------------- 模型选择
+  // 三个来源的优先级：localStorage > /api/models 的默认值 > 空（服务端配置）
+  let MODEL_INFO = null;   // /api/models 的原始返回
+
+  async function loadModels() {
+    try {
+      const r = await fetch(API_BASE + "/api/models");
+      MODEL_INFO = await r.json();
+    } catch (e) {
+      $("model-hint").textContent = "无法读取模型清单（服务未就绪？）";
+      return;
+    }
+    const dp = MODEL_INFO.default || {};
+    // 只在用户没选过时才用服务端默认值 —— 否则会把用户的选择覆盖掉
+    if (!state.settings.provider) state.settings.provider = dp.provider || "";
+    if (!state.settings.model) state.settings.model = dp.model || "";
+    renderProviders();
+  }
+
+  function currentProvider() {
+    if (!MODEL_INFO) return null;
+    return MODEL_INFO.providers.find((p) => p.name === state.settings.provider) || null;
+  }
+
+  // syncControls 在 status 回调里被调用，那时模型控件可能还没渲染
+  function syncModelControls() {
+    if (!MODEL_INFO) return;
+    $("sel-provider").value = state.settings.provider;
+    renderModels();
+  }
+
+  function renderProviders() {
+    if (!MODEL_INFO) return;
+    const sel = $("sel-provider");
+    sel.innerHTML = "";
+    MODEL_INFO.providers.forEach((p) => {
+      // 不可用的也列出来：用户可能刚在 .env 里加了 key 还没重启服务，
+      // 直接藏起来会让人以为「不支持这家」。
+      const tag = p.available ? "" : (p.is_local ? "（未启动）" : "（未配置 key）");
+      const free = p.models.some((m) => m.free) ? " · 有免费档" : "";
+      sel.appendChild(new Option(p.label + free + tag, p.name));
+    });
+    sel.value = state.settings.provider;
+    renderModels();
+  }
+
+  function renderModels() {
+    const p = currentProvider();
+    const sel = $("sel-model");
+    sel.innerHTML = "";
+    if (!p) return;
+    p.models.forEach((m) => {
+      sel.appendChild(new Option(m.label + (m.free ? " · 免费" : ""), m.id));
+    });
+    sel.appendChild(new Option("自定义…", "__custom__"));
+
+    const known = p.models.some((m) => m.id === state.settings.model);
+    if (known) {
+      sel.value = state.settings.model;
+      $("inp-model").hidden = true;
+    } else {
+      sel.value = "__custom__";
+      $("inp-model").hidden = false;
+      $("inp-model").value = state.settings.model || "";
+    }
+    updateModelHint();
+  }
+
+  function updateModelHint() {
+    const p = currentProvider();
+    if (!p) { $("model-hint").textContent = ""; return; }
+    const m = p.models.find((x) => x.id === state.settings.model);
+    const bits = [];
+    if (!p.available) {
+      bits.push(p.is_local
+        ? "<b>本地端点未监听</b>：先启动 Ollama（<code>ollama serve</code>）并 <code>ollama pull " + esc(state.settings.model || "qwen2.5:7b") + "</code>"
+        : "<b>未配置 key</b>：在 .env 里设置 " + esc(p.name.toUpperCase()) + "_API_KEY 后重启服务");
+    }
+    if (m && m.free) bits.push("免费档：额度以平台当期公告为准");
+    if (m && m.note) bits.push(esc(m.note));
+    if (p.note) bits.push(esc(p.note));
+    if (!bits.length) bits.push("换模型等于换裁判：历史评测指标不可直接与之比较");
+    $("model-hint").innerHTML = bits.join("<br>");
+  }
+
+  // 生成请求要带上的两个字段。空串表示「让服务端用配置默认」。
+  function modelPayload() {
+    const m = state.settings.model;
+    return { provider: state.settings.provider, model: m === "__custom__" ? "" : m };
   }
   const PROMPT_HINTS = {
     full: "full：强制引用 + 拒答哨兵（正式配置）",
@@ -662,7 +773,7 @@
       const resp = await fetch(API_BASE + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.assign({ question: question }, state.settings))
+        body: JSON.stringify(Object.assign({ question: question }, state.settings, modelPayload()))
       });
       if (!resp.ok) {
         const t = await resp.text();
@@ -795,6 +906,33 @@
       updatePromptHint(); saveSettings();
     });
 
+    // 换 provider 时模型名必须一起换：沿用上一个 provider 的模型名
+    // 会得到「provider=ollama, model=deepseek-chat」这种必然 404 的组合，
+    // 而错误信息（model not found）完全指不出真正的原因。
+    $("sel-provider").addEventListener("change", (e) => {
+      state.settings.provider = e.target.value;
+      const p = currentProvider();
+      state.settings.model = p && p.models.length ? p.models[0].id : "";
+      renderModels(); saveSettings();
+    });
+    $("sel-model").addEventListener("change", (e) => {
+      if (e.target.value === "__custom__") {
+        $("inp-model").hidden = false;
+        $("inp-model").focus();
+        // 光标落在空 field 上时不要立刻把 model 清空，
+        // 否则用户在输入途中切走再回来会发现模型被重置了
+        if ($("inp-model").value) state.settings.model = $("inp-model").value;
+      } else {
+        $("inp-model").hidden = true;
+        state.settings.model = e.target.value;
+      }
+      updateModelHint(); saveSettings();
+    });
+    $("inp-model").addEventListener("input", (e) => {
+      state.settings.model = e.target.value.trim();
+      updateModelHint(); saveSettings();
+    });
+
     document.querySelectorAll("#tabs button").forEach((b) => {
       b.addEventListener("click", () => {
         document.querySelectorAll("#tabs button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
@@ -830,6 +968,9 @@
   loadSettings();
   bind();
   syncControls();
+  // 模型清单与状态并行拉取：两者互不依赖，串行会让页面白等一个 RTT。
+  // 清单失败不影响问答（请求里 provider/model 为空时服务端用配置默认值）。
+  loadModels();
   pollStatus();
 })();
 </script>

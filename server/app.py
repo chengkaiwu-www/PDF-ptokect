@@ -98,19 +98,60 @@ _LOCK = threading.Lock()
 _RERANK_LOCK = threading.Lock()
 
 
-def _build_llm():
-    if not DEEPSEEK_API_KEY:
-        logger.warning("未配置 DEEPSEEK_API_KEY：问答接口只能返回召回片段，无法生成答案")
-        return None
-    from langchain_deepseek import ChatDeepSeek
+# 按 (provider, model) 缓存 LLM 实例。
+# 为什么要缓存：`create_llm` 每次都会新建一个 httpx 客户端连接池，
+# 前端每换一次模型就漏一个池子；而且同一模型重复构造会让日志被刷屏。
+_LLMS: Dict[Tuple[str, str], Any] = {}
+_LLM_LOCK = threading.Lock()
 
-    return ChatDeepSeek(
-        model=DEEPSEEK_MODEL,
-        api_key=DEEPSEEK_API_KEY,
-        base_url=DEEPSEEK_API_BASE,
-        temperature=0,
-        streaming=True,   # 让 llm.stream() 走真正的增量返回
-    )
+
+def _get_llm(provider: Optional[str] = None, model: Optional[str] = None,
+             strict: bool = False):
+    """
+    取（必要时创建）一个 LLM。
+
+    `strict=False`（启动预热）：失败返回 None，问答退化为「只返回召回片段」。
+    `strict=True`（单个请求）：失败**抛错**，不许沉默。
+
+    为什么必须有 strict 这个分支：
+    第一版这里是「失败就返回 None，调用方再 `or state['llm']`」，
+    结果是——用户在页面上选了「智谱 GLM-4-Flash（免费）」，因为没配 key，
+    请求静默回落到了默认的 DeepSeek 并在扣钱。用户以为在用免费模型。
+    这类问题的共同点是：**没有任何一方报错**。宁可这次请求失败。
+    """
+    from src.llm_factory import create_llm, describe, resolve
+
+    try:
+        resolved = resolve(provider, model)
+    except Exception as exc:
+        if strict:
+            raise
+        logger.warning(f"LLM 不可用（{exc}）：问答接口只能返回召回片段")
+        return None
+
+    key = (resolved["provider"], resolved["model"])
+    llm = _LLMS.get(key)            # 锁外快查
+    if llm is not None:
+        return llm
+    with _LLM_LOCK:
+        if key not in _LLMS:
+            _LLMS[key] = create_llm(
+                resolved["provider"], resolved["model"], role="generate",
+                streaming=True,     # 让 llm.stream() 走真正的增量返回
+            )
+            logger.info(f"LLM ready: {describe(*key)}")
+        return _LLMS[key]
+
+
+def _current_llm_label() -> Optional[str]:
+    """当前默认模型的可读标识（前端页头显示）。解析失败说明没配 key。"""
+    from src.llm_factory import resolve
+
+    try:
+        r = resolve()
+        return f"{r['provider']}:{r['model']}"
+    except Exception:
+        return None
 
 
 def _warmup() -> None:
@@ -126,7 +167,9 @@ def _warmup() -> None:
             _READY.set()
             return
 
-        llm = _build_llm()
+        # 预热默认模型：第一次问答就不会卡在「建连接 + 首次握手」上。
+        # 但预热失败不能阻断服务启动 —— 检索部分仍然是可用的。
+        llm = _get_llm()
         _STATE = {
             "embedding_model": embedding_model,
             "store": store,
@@ -268,6 +311,10 @@ class ChatRequest(BaseModel):
     rrf_k: int = Field(RRF_K, ge=1, le=200)
     rerank: bool = RERANK_ENABLED
     prompt_variant: str = "full"
+    # 空串 = 用配置里的默认值。单独开两个字段而不是塞进 prompt_variant，
+    # 是因为它们语义不同：一个是「怎么问」，一个是「谁来回答」。
+    provider: str = ""
+    model: str = ""
 
 
 class SearchRequest(BaseModel):
@@ -325,6 +372,29 @@ def index():
     return FileResponse(page, media_type="text/html; charset=utf-8")
 
 
+@app.get("/api/models")
+def models():
+    """
+    可选模型清单（前端下拉的数据源）。
+
+    返回里 `available` 只是**配置层面**的判断（有没有 key / 本地端口通不通），
+    不代表模型名一定正确 —— 各家的模型清单变化快，写死在这里的那几个
+    随时可能下线。所以前端同时允许手填模型名，实际对不对由第一次调用决定。
+    """
+    from src.llm_factory import available_providers, default_provider, default_model
+
+    dp = default_provider()
+    try:
+        dm = default_model(dp)
+    except Exception:
+        dm = ""
+    return {
+        "providers": available_providers(),
+        "default": {"provider": dp, "model": dm},
+        "current": _current_llm_label(),
+    }
+
+
 @app.get("/api/status")
 def status():
     if not _READY.is_set():
@@ -355,7 +425,7 @@ def status():
         "normalized": meta.get("normalized"),
         "embedding_model": Path(str(meta.get("embedding_model", ""))).name,
         "load_sec": _STATE.get("load_sec"),
-        "llm": DEEPSEEK_MODEL if _STATE.get("llm") else None,
+        "llm": _current_llm_label(),
         "defaults": {
             "retriever": RETRIEVAL_MODE,
             "top_k": RETRIEVAL_TOP_K,
@@ -410,8 +480,21 @@ def chat(req: ChatRequest):
             yield sse({"type": "error", "message": f"检索失败：{exc}"})
             return
 
+        # 每个请求自带 provider/model，互不影响 —— 同一个人在同一页面
+        # 可以先用便宜的模型试，再切贵的重问一次，无需重启服务。
+        asked = bool(req.provider or req.model)
+        try:
+            llm = _get_llm(req.provider or None, req.model or None, strict=asked)
+        except Exception as exc:
+            yield sse({"type": "error",
+                       "message": f"模型不可用（provider={req.provider or '默认'} "
+                                  f"model={req.model or '默认'}）：{exc}"})
+            return
+        if llm is None:
+            # 没指定、全局也没有：退化为只检索，与之前行为一致
+            llm = state.get("llm")
         pipeline = RAGPipeline(
-            llm=state["llm"],
+            llm=llm,
             retriever=_get_retriever(req.retriever, req.top_k, req.candidate_k, req.rrf_k, req.rerank),
             embedding_model=state["embedding_model"],
             prompt_variant=req.prompt_variant,
