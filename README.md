@@ -20,6 +20,7 @@ PDF-ptokect/
 │   ├── bm25.py              # 4'. 稀疏检索：自研 Okapi BM25（jieba 分词 + 倒排表）
 │   ├── hybrid_retriever.py  # 5. 多通道召回 + RRF 融合 + 可选精排（检索层唯一入口）
 │   ├── reranker.py          # 5'. Cross-Encoder 精排（bge-reranker-base）
+│   ├── llm_factory.py       # 6. LLM provider 注册表：OpenAI 兼容协议，一处配置换模型
 │   ├── query_rewriter.py    # 6. Query 改写：Multi-Query / HyDE（默认关闭，见实验 9）
 │   ├── parent_expander.py   # 6'. 父子块展开：子块检索、父块喂模型（默认关闭，见实验 10）
 │   ├── citation.py          # 6. 引用解析与合法性校验（确定性，不调模型）
@@ -72,16 +73,20 @@ PDF-ptokect/
    pip install -r requirements_torch_cuda.txt
    ```
 
-2. 配置环境变量：复制 `.env.example` 为 `.env`，填入 DeepSeek API Key。
+2. 配置环境变量：复制 `.env.example` 为 `.env`，填入**任意一家**的 API Key。
 
-   ```
+   ```bash
+   LLM_PROVIDER=deepseek          # deepseek | ollama | zhipu | siliconflow | qwen | moonshot | openai
+   LLM_MODEL=                     # 留空 = 该 provider 的第一个模型
    DEEPSEEK_API_KEY=sk-xxxxxxxx
-   DEEPSEEK_MODEL=deepseek-chat
-   DEEPSEEK_API_BASE=https://api.deepseek.com
    LOG_LEVEL=INFO
    ```
 
+   想不花钱：`LLM_PROVIDER=ollama`（本机跑，需装 Ollama），
+   或用各家的免费档（`zhipu` + `glm-4-flash`）。详见[模型选择](#模型选择s7-a)。
+
    > `.env` 已被 `.gitignore` 忽略，**不要提交到仓库**。
+   > 旧的 `DEEPSEEK_MODEL` / `DEEPSEEK_API_BASE` 仍兼容，但新配置请用 `LLM_*`。
 
 3. 准备 embedding 模型（首次运行需要）：
 
@@ -151,6 +156,10 @@ python main.py --reindex
 # 丢弃全部索引并重建（更换 embedding 模型或切分参数后必须执行）
 python main.py --recreate --query "什么是 RAG？"
 python main.py --recreate --reindex
+
+# 换模型回答问题（不重启服务、不改代码）
+python main.py --query "..." --provider deepseek --model deepseek-flash
+python main.py --query "..." --provider ollama  --model qwen2.5:7b   # 本地免费
 
 # 进入交互模式
 python main.py --chat
@@ -353,7 +362,125 @@ token，放行任意来源等于给用户浏览器里访问的每个网页都开
 - **embedding 模型**：`BAAI/bge-small-zh-v1.5`（512 维，中文）。取代了最初的
   `all-MiniLM-L6-v2`——后者是纯英文模型，见实验 1。
 
-## 评测方法（`eval/`）
+## 模型选择（S7-a）
+
+### 为什么要做成可切换
+
+在这之前 `ChatDeepSeek(...)` 在 **5 个地方**各写了一遍（`main.py` / `server/app.py` /
+`run_eval.py` / `run_gen_eval.py` / `judge.py`），且都硬绑 `DEEPSEEK_*` 三个配置。
+想换个模型得改 5 处，漏一处就会出现「检索用 A、判定用 B」的诡异组合。
+
+而在 RAG 里，换模型从来不是"顺便试试"，它同时是三件事：
+
+| 它是 | 含义 |
+|---|---|
+| **成本开关** | 同一批 50 题评测，DeepSeek 约 4 元，本地 7B 是 0 元，贵档模型可能 40 元 |
+| **判定器** | 换了模型就等于换了裁判 —— 历史指标**不可直接比**，旧 issue 里的数字会失去可比性 |
+| **故障出口** | 主通道欠费/限流时（本项目真被 402 卡过一次），要有第二家能顶上 |
+
+所以它必须是**运行时参数**，不是编译期常量。
+
+### 实现：一个注册表 + 一个工厂
+
+`src/llm_factory.py` 里 `PROVIDERS` 是一张表，新增一家只改那一处：
+
+```python
+"zhipu": ProviderSpec(
+    name="zhipu", label="智谱 GLM",
+    base_url="https://open.bigmodel.cn/api/paas/v4",
+    api_key_envs=("ZHIPU_API_KEY", "GLM_API_KEY"),
+    models=(ModelSpec("glm-4-flash", "glm-4-flash（免费档）", free=True), ...),
+)
+```
+
+**全部走 OpenAI 兼容协议**（`langchain_openai.ChatOpenAI` + 不同 `base_url`）。
+DeepSeek / 智谱 / 月之暗面 / 阿里百炼 / SiliconFlow / Ollama 现在都提供
+`POST /v1/chat/completions`，一套客户端全通。代价是各家的私有采样参数用不了 ——
+这个取舍对本项目有利：**可替换性比单家的边缘特性值钱**。
+
+温度按**角色**给，不按调用点手写（`ROLE_TEMPERATURE`）：
+
+```
+generate 0.0   评测要可复现
+judge    0.0   同一对（问题,块）不能今天判相关明天判不相关
+rewrite  0.7   温度 0 会让 N 条改写彼此几乎一样 = 花钱做同义反复
+```
+
+这三行是 S5/S6 踩出来的（S6-b：一个实例承担两种任务，必然把一个调错）。
+
+### 怎么用
+
+**命令行：**
+
+```bash
+python main.py --query "梯度下降的更新公式是什么"                     # 用配置默认
+python main.py --query "..." --provider deepseek --model deepseek-flash
+python main.py --query "..." --provider ollama  --model qwen2.5:7b    # 本地免费
+```
+
+**网页**：左栏「回答模型」卡片，选 Provider → 选模型 → 直接问。选择存 localStorage，
+刷新还在。每个请求自带 `provider` / `model`，**不用重启服务**。
+
+**配置文件**（`.env`）：改 `LLM_PROVIDER` / `LLM_MODEL` 即可全局生效。
+
+### 免费的两条路，代价不一样
+
+| 路径 | 花钱 | 代价 | 适合 |
+|---|---|---|---|
+| **Ollama 本地**（`qwen2.5:7b`） | 0 元 | 要装 Ollama + 拉 4~5GB 模型；7B 的**指令遵循明显弱**，引用格式、拒答哨兵容易不达标 | 反复调试、不想烧钱、数据不能出机器 |
+| **各家免费档**（`glm-4-flash` / Qwen2.5-7B） | 0 元 | 有速率限制；**免费额度是商业策略，随时会变** | 正常试用 |
+
+> 免费档不是"便宜的付费档"：小模型的失败方式不一样 —— 它更容易**格式不达标**
+> （引用写成别的样子、该拒答时不拒答），而不是答得差一点。
+> 所以换模型之后，`引用合法率` 这一列要重新看，它比 `Hit@1` 掉得更快。
+
+### 换模型的三个坑（都已处理，但要知道为什么）
+
+**1. 判定缓存必须按模型隔离。** `judge_cache` 的 key 从 `model` 改成了
+`provider:model`。两家可能都提供 `qwen2.5-7b` 这种同名模型，只按名字做 key
+会把 A 家的判定当成 B 家的，而且**完全无感**（缓存命中率还变高了，看起来很健康）。
+
+**2. 不许静默回落到默认模型。** 第一版服务端是「拿不到就 `or state['llm']`」，
+实测发现：用户在页面上选了「智谱（免费）」，因为没配 key，请求**静默回落到
+DeepSeek 并继续扣钱**。用户以为在用免费模型。
+现在 `_get_llm(strict=True)`：请求显式指定了 provider 却不可用 → 直接返回
+`{"type":"error", "message":"provider zhipu 缺少 API key：请设置 ZHIPU_API_KEY"}`。
+**宁可这次失败，也不能让账单和用户认知不一致。**
+
+**3. 模型清单一定会过期，报错信息才是最新文档。**
+写这张表时我以为 DeepSeek 只有 `deepseek-chat` / `deepseek-reasoner`，
+故意传一个错名字去测失败路径，官方 400 回的是：
+
+```
+The supported API model names are deepseek-flash, deepseek-v4-pro
+```
+
+`deepseek-chat` 仍可用（别名），但真名已经换了。所以：
+清单只是**起点**，前端允许手填模型名，最终以第一次调用的报错为准。
+
+### 换模型后什么能比、什么不能比
+
+| 指标 | 能否与旧结果比 | 原因 |
+|---|---|---|
+| 检索层（Hit@1 / MRR） | ✅ 能 | 检索不经过 LLM，除非你连 embedding 一起换了 |
+| 生成层（引用覆盖 / 拒答率） | ⚠️ 谨慎 | 换的是生成器本身，差异里混着模型能力差异 |
+| 忠实度 / 语义判定 | ❌ 不能 | 判定器也换了，分数不是同一把尺子量出来的 |
+| 延迟 / 成本 | ❌ 不能 | 本来就是要测这个 |
+
+要跨模型比较，只能**同一批题、同一套判定器**重跑。所以评估「换模型值不值」时，
+必须固定 judge、只换 generator —— 这也是为什么参数拆成了两对：
+
+```bash
+# 判：固定裁判为默认模型，只换生成器
+python eval/run_gen_eval.py --provider ollama --model qwen2.5:7b \
+    --judge-provider deepseek --judge-model deepseek-chat --judge
+```
+
+`--judge-provider` / `--judge-model` 默认跟随 `--provider` / `--model`（图省事），
+做对照实验时**必须显式钉住**。默认跟随是个陷阱：不钉的话，你看到的
+「B 模型比 A 差 0.07」里混着两个裁判的口径差，而这个差值并不比裁判本身的方差小。
+
+
 
 `eval/questions.json` 是 20 道固定问题（覆盖 3 篇文档）。`eval/run_eval.py`
 **直接调用线上检索路径**（`create_hybrid_retriever`，与 `main.py` 同一个工厂）并统计：
@@ -1276,3 +1403,4 @@ python eval/run_gen_eval.py --prompt-variant full --top-k 12 --judge --store-dir
 | S4 | 混合检索（BM25）+ RRF 融合 + Cross-Encoder 精排 + 第二套判定口径 | 已完成 |
 | S5 | 50 题分层评测集 + 生成层指标（引用 / 忠实度 / 拒答）+ prompt 模板化与消融 | 已完成 |
 | S6 | Query 改写 / 父子块 / 服务化 | 服务化（FastAPI + SSE + 前端）✅；Query 改写 ✅（默认关闭，见实验 9）；父子块 ✅（默认关闭，见实验 10） |
+| S7 | 可替换的生成层：LLM provider 抽象 | provider 注册表 + 工厂 ✅（7 家，含本地 Ollama 与免费档）；网页/CLI/评测三处统一 ✅；判定器与生成器可分开指定 ✅ |
