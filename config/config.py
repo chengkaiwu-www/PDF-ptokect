@@ -45,6 +45,26 @@ EMBEDDING_MODEL = os.getenv(
     str(MODELS_DIR / "bge-small-zh-v1.5"),
 )
 
+# --- LLM（S7-a：从「绑死 DeepSeek」改成「可切换 provider」）---
+# 所有 provider 都走 OpenAI 兼容协议，换模型 = 换 base_url + API key + 模型名。
+# 注册表在 src/llm_factory.py，新增一家只改那一处。
+#
+# LLM_PROVIDER 的可选值见 llm_factory.PROVIDERS：
+#   deepseek / ollama / zhipu / siliconflow / qwen / moonshot / openai
+# 想用真免费的就选 'ollama'（需本机装 Ollama）或各家的免费档（glm-4-flash 等）。
+#
+# 为什么默认仍然是 deepseek：本项目 S1~S6 的全部历史指标都是它跑的，
+# 换模型等于换裁判，旧指标不可直接比。默认值要稳定，切换要显式。
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "deepseek").strip().lower()
+LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
+
+# 自定义端点覆盖（自建 vLLM / one-api 网关 / 公司内网）。
+# 只在 provider == LLM_PROVIDER 时生效，避免「选了 ollama 却连到 deepseek」。
+LLM_API_BASE = os.getenv("LLM_API_BASE", "").strip()
+LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
+
+# 旧的 DeepSeek 三项保留：已有脚本 / 环境变量仍在用，删掉会静默改行为。
+# 新代码一律走 src/llm_factory.py，不要直接引用这三行。
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 DEEPSEEK_API_BASE = os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com")

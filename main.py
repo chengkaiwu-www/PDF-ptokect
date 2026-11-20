@@ -1,6 +1,6 @@
 import argparse
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from config.config import (
     PDF_DIR,
@@ -127,7 +127,8 @@ def build_vector_store(embedding_model, recreate: bool = False):
 
 
 def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE,
-                          rerank: bool = RERANK_ENABLED, rewrite: str = QUERY_REWRITE):
+                          rerank: bool = RERANK_ENABLED, rewrite: str = QUERY_REWRITE,
+                          provider: Optional[str] = None, model: Optional[str] = None):
     """
     Initialize the RAG system by loading documents and creating vector store.
 
@@ -136,6 +137,8 @@ def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE,
         mode: 检索模式 vector | bm25 | hybrid
         rerank: 是否启用 Cross-Encoder 精排
         rewrite: query 改写 off | multi_query | hyde
+        provider: LLM provider（见 src/llm_factory.py），None 表示用配置默认
+        model: 模型名，None 表示用该 provider 的默认模型
 
     Returns:
         RAGPipeline instance
@@ -149,33 +152,25 @@ def initialize_rag_system(recreate: bool = False, mode: str = RETRIEVAL_MODE,
     embedding_model = get_embedding_model()
     vector_store = build_vector_store(embedding_model, recreate=recreate)
 
-    if DEEPSEEK_API_KEY:
-        from langchain_deepseek import ChatDeepSeek
-        # 生成用的 LLM：temperature=0，同一问题同一答案，便于比对与评测
-        llm = ChatDeepSeek(
-            model=DEEPSEEK_MODEL,
-            api_key=DEEPSEEK_API_KEY,
-            base_url=DEEPSEEK_API_BASE,
-            temperature=0
-        )
-        logger.info(f"DeepSeek LLM initialized: {DEEPSEEK_MODEL}")
-    else:
-        logger.warning("DEEPSEEK_API_KEY not found. Please set it in the .env file to enable LLM generation.")
-        logger.info("You can still use the retrieval functionality.")
-        llm = None
+    # LLM 由工厂统一构造：provider/model 来自参数或配置，这里是唯一入口。
+    # 拿不到 key（或本地端点没起）就降级成 None —— 只跑检索仍然有价值，
+    # 但要打 warning，不能让「模型没接上」变成静默的空答案。
+    from src.llm_factory import create_llm, describe
+
+    llm = None
+    try:
+        llm = create_llm(provider=provider, model=model, role="generate")
+        logger.info(f"LLM initialized: {describe(provider, model)}")
+    except Exception as exc:
+        logger.warning(f"LLM 初始化失败，只启用检索功能：{exc}")
 
     # 改写用的 LLM 要和生成用的**分开建**：改写要的是多样性（temperature 高），
     # 生成要的是稳定（temperature 0）。共用一个实例必然把其中一个调错。
+    # 角色（role）在工厂里映射温度，所以这里只写 role，不写 temperature。
     rewrite_llm = None
     if rewrite not in ("", "off") and llm is not None:
-        from langchain_deepseek import ChatDeepSeek
-
-        rewrite_llm = ChatDeepSeek(
-            model=DEEPSEEK_MODEL,
-            api_key=DEEPSEEK_API_KEY,
-            base_url=DEEPSEEK_API_BASE,
-            temperature=0.7,
-            max_tokens=320,
+        rewrite_llm = create_llm(
+            provider=provider, model=model, role="rewrite", max_tokens=320
         )
 
     # 精排属于检索层，不挂在 RAGPipeline 上（见 rag_pipeline 的职责说明）
@@ -246,6 +241,13 @@ def main():
                         choices=["off", "multi_query", "hyde"],
                         help="query 改写：off | multi_query | hyde（默认取 QUERY_REWRITE）。"
                              "注意：hyde 与精排的收益高度重叠，同时开启通常没有额外提升（见 README 实验 9）")
+    parser.add_argument("--provider", type=str, default=None,
+                        help="LLM provider：deepseek | ollama | zhipu | siliconflow | qwen | "
+                             "moonshot | openai（默认取 LLM_PROVIDER）。"
+                             "想不花钱：--provider ollama（本机）或 zhipu/glm-4-flash 免费档")
+    parser.add_argument("--model", type=str, default=None,
+                        help="模型名，留空用该 provider 的默认模型。"
+                             "例：--provider ollama --model qwen2.5:7b")
 
     args = parser.parse_args()
 
@@ -265,7 +267,7 @@ def main():
 
         rag_pipeline = initialize_rag_system(
             recreate=args.recreate, mode=args.retriever, rerank=args.rerank,
-            rewrite=args.rewrite,
+            rewrite=args.rewrite, provider=args.provider, model=args.model,
         )
 
         if args.query:

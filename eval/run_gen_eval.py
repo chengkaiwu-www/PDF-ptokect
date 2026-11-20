@@ -64,17 +64,21 @@ from src.rag_pipeline import RAGPipeline  # noqa: E402
 from src.vector_store import load_vector_store  # noqa: E402
 
 
-def build_llm():
-    if not DEEPSEEK_API_KEY:
-        raise RuntimeError("未配置 DEEPSEEK_API_KEY，生成层评测无法进行")
-    from langchain_deepseek import ChatDeepSeek
+def build_llm(provider=None, model=None):
+    """
+    生成用的 LLM（role="generate" -> temperature 0，评测要可复现）。
 
-    return ChatDeepSeek(
-        model=DEEPSEEK_MODEL,
-        api_key=DEEPSEEK_API_KEY,
-        base_url=DEEPSEEK_API_BASE,
-        temperature=0,   # 评测要可复现；创意性不在这个项目的目标里
-    )
+    拿不到可用 provider 就直接抛错，不降级：生成层评测没有 generator 就等于没跑，
+    静默降级会产出一份「全部拒答」的报告，看上去像检索坏了。
+    """
+    from src.llm_factory import create_llm, describe
+
+    try:
+        llm = create_llm(provider=provider, model=model, role="generate")
+    except Exception as exc:
+        raise RuntimeError(f"生成层评测无法进行：{exc}") from exc
+    print(f"[INFO] 生成模型 = {describe(provider, model)}")
+    return llm
 
 
 def pct(num: float, den: float) -> float:
@@ -308,6 +312,13 @@ def main():
                     help="prompt 消融变体（full 为正式配置）")
     ap.add_argument("--detail", action="store_true")
     ap.add_argument("--save", default="", help="结果 JSON 路径（默认 results/gen_eval_<variant>.json）")
+    ap.add_argument("--provider", default=None,
+                    help="LLM provider（默认取配置）：deepseek | ollama | zhipu | siliconflow | ...")
+    ap.add_argument("--model", default=None, help="模型名，留空用该 provider 默认模型")
+    ap.add_argument("--judge-provider", default=None,
+                    help="判定器 provider（默认跟随 --provider）。跨生成模型比较时必须钉住它")
+    ap.add_argument("--judge-model", default=None,
+                    help="判定器模型（默认跟随 --model）。同上")
     args = ap.parse_args()
     if not args.save:
         args.save = str(PROJECT_ROOT / "results" / f"gen_eval_{args.prompt_variant}.json")
@@ -344,7 +355,8 @@ def main():
         retriever.label += f"+parent(w={args.parent_window})"
 
     pipeline = RAGPipeline(
-        llm=build_llm(), retriever=retriever, embedding_model=embedding_model,
+        llm=build_llm(args.provider, args.model), retriever=retriever,
+        embedding_model=embedding_model,
         prompt_variant=args.prompt_variant,
     )
 
@@ -352,7 +364,15 @@ def main():
     if args.judge:
         from judge import LLMJudge
 
-        judge = LLMJudge(Path(args.judge_cache))
+        # 判定器与生成器**可以分开指定**，这不是过度设计：
+        # 评估「换个生成模型值不值」时，判定器必须固定，否则
+        # 「A 模型 0.95、B 模型 0.88」里混着两个裁判的口径差异，无法归因。
+        # 默认跟随生成模型（图省事），做对照实验时显式钉住 judge。
+        judge = LLMJudge(
+            Path(args.judge_cache),
+            provider=args.judge_provider or args.provider,
+            model=args.judge_model or args.model,
+        )
 
     print("=" * 78)
     print(

@@ -176,14 +176,18 @@ class LLMJudge:
         cache_path: Optional[Path] = None,
         model: Optional[str] = None,
         max_chars: int = 1200,
+        provider: Optional[str] = None,
     ):
-        from config.config import DEEPSEEK_API_BASE, DEEPSEEK_API_KEY, DEEPSEEK_MODEL
+        from src.llm_factory import describe, resolve
 
-        self.model_name = model or DEEPSEEK_MODEL
-        self.api_base = DEEPSEEK_API_BASE
-        self.api_key = DEEPSEEK_API_KEY
-        if not self.api_key:
-            raise RuntimeError("未配置 DEEPSEEK_API_KEY，无法使用 LLM-as-Judge")
+        # 先解析成 (provider, model) —— 解析失败要在这里就炸，
+        # 而不是等跑到第 20 题才因为「没 key」抛出来（那时已经烧了一半额度）。
+        resolved = resolve(provider, model)
+        self.provider = resolved["provider"]
+        self.model_name = resolved["model"]
+        # 缓存 key 必须含 provider：两家可能都提供 `qwen2.5-7b` 这种同名模型，
+        # 只按模型名做 key 会把 A 家的判定拿去当 B 家的，而且完全无感。
+        self.model_id = describe(self.provider, self.model_name)
 
         # 截断：块长约 384 token，正常情况下不会触发；这里只是防御超长块
         self.max_chars = max_chars
@@ -210,18 +214,16 @@ class LLMJudge:
         # 判定结果与「模型 + prompt 版本 + 问题 + 文档」绑定。
         # 把 prompt 版本也放进去是必须的：改了 prompt 就等于换了判定标准，
         # 复用旧缓存会让新口径看上去"没生效"，这类问题极难察觉。
-        raw = f"{self.model_name}\x00{PROMPT_VERSION}\x00{question}\x00{text}"
+        raw = f"{self.model_id}\x00{PROMPT_VERSION}\x00{question}\x00{text}"
         return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:20]
 
     def _ensure_llm(self):
         if self._llm is None:
-            from langchain_deepseek import ChatDeepSeek
+            from src.llm_factory import create_llm
 
-            self._llm = ChatDeepSeek(
-                model=self.model_name,
-                api_key=self.api_key,
-                base_url=self.api_base,
-                temperature=0,   # 判定任务要确定性
+            # role="judge" -> temperature 0（判定要确定性，由工厂按角色给）
+            self._llm = create_llm(
+                self.provider, self.model_name, role="judge",
                 max_tokens=32,   # 只要「是 | 理由」一行，限制输出让延迟和成本可控
             )
         return self._llm
@@ -296,13 +298,10 @@ class LLMJudge:
         共用一个模型实例会让 JSON 被截断，所以分开建。
         """
         if self._faith_llm is None:
-            from langchain_deepseek import ChatDeepSeek
+            from src.llm_factory import create_llm
 
-            self._faith_llm = ChatDeepSeek(
-                model=self.model_name,
-                api_key=self.api_key,
-                base_url=self.api_base,
-                temperature=0,
+            self._faith_llm = create_llm(
+                self.provider, self.model_name, role="judge",
                 max_tokens=800,
             )
         return self._faith_llm

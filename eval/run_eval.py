@@ -69,41 +69,41 @@ from src.embedding import get_embedding_model  # noqa: E402
 from src.vector_store import load_vector_store  # noqa: E402
 
 
-def _build_rewriter(mode: str, n, weight):
+def _build_rewriter(mode: str, n, weight, provider=None, model=None):
     """
     按需构造改写器（以及它需要的 LLM）。
 
     两个刻意的选择：
       1. temperature=0.7 而不是 0 —— 改写要的是**多样性**，
          温度 0 会让 3 条改写彼此高度相似，等于花钱做了一次同义反复。
-         （注意这和判定器相反：判定要确定性，所以那边是 0。）
-      2. 没有 API key 时直接报错退出，而不是静默降级成「不改写」——
+         （注意这和判定器相反：判定要确定性，所以那边是 0。温度由
+         `llm_factory.ROLE_TEMPERATURE` 按角色给，这里不再手写数字。）
+      2. 没有可用 provider 时直接报错退出，而不是静默降级成「不改写」——
          否则你会拿着一份「改写」的实验结果，其实是 baseline。
     """
     if not mode or mode == "off":
         return None
-    if not DEEPSEEK_API_KEY:
-        print("[ERROR] --rewrite 需要 DEEPSEEK_API_KEY（在 .env 中配置）")
-        sys.exit(1)
 
-    from langchain_deepseek import ChatDeepSeek
-
+    from src.llm_factory import create_llm, describe
     from src.query_rewriter import create_rewriter
 
-    llm = ChatDeepSeek(
-        model=DEEPSEEK_MODEL,
-        api_key=DEEPSEEK_API_KEY,
-        base_url=DEEPSEEK_API_BASE,
-        temperature=0.7,
-        max_tokens=320,
-    )
-    return create_rewriter(mode, llm=llm, n=n, weight=weight, model_name=DEEPSEEK_MODEL)
+    try:
+        llm = create_llm(provider=provider, model=model, role="rewrite",
+                         max_tokens=320)
+    except Exception as exc:
+        print(f"[ERROR] --rewrite 需要可用的 LLM：{exc}")
+        sys.exit(1)
+
+    # 缓存 key 里带的模型标识必须和实际用的一致，否则换模型后会读到旧改写。
+    return create_rewriter(mode, llm=llm, n=n, weight=weight,
+                           model_name=describe(provider, model))
 
 
 def build_retriever(store, mode: str, candidate_k: int, rrf_k: int, rerank: bool,
                     weights: str = "", rewrite: str = "off",
                     rewrite_n=None, rewrite_weight=None,
-                    parent_expand: bool = False, parent_window: int = 3):
+                    parent_expand: bool = False, parent_window: int = 3,
+                    provider=None, model=None):
     """
     组装检索器。四种策略只在「开了哪几路召回 + 要不要精排」上不同，
     其余（向量库、embedding 模型、候选数、评测题）全部固定 —— 单变量。
@@ -133,7 +133,7 @@ def build_retriever(store, mode: str, candidate_k: int, rrf_k: int, rerank: bool
             raise ValueError(f"--rrf-weight 需要 {len(keys)} 个数（对应 {keys}），收到 {len(parts)}")
         channel_weights = dict(zip(keys, parts))
 
-    rewriter = _build_rewriter(rewrite, rewrite_n, rewrite_weight)
+    rewriter = _build_rewriter(rewrite, rewrite_n, rewrite_weight, provider, model)
 
     retriever = create_hybrid_retriever(
         store, mode=mode, candidate_k=candidate_k, rrf_k=rrf_k, rerank=rerank,
@@ -475,6 +475,15 @@ def main():
     parser.add_argument("--judge-cache", type=str,
                         default=str(PROJECT_ROOT / "results" / "judge_cache.json"),
                         help="LLM 判定缓存路径（必须保留，否则每次评测都重新调用且不可复现）")
+    parser.add_argument("--provider", type=str, default=None,
+                        help="判定/改写用的 LLM provider（默认取配置）。"
+                             "换 provider 等于换裁判，旧缓存不会命中")
+    parser.add_argument("--model", type=str, default=None,
+                        help="模型名，留空用该 provider 默认模型")
+    parser.add_argument("--judge-provider", type=str, default=None,
+                        help="判定器 provider（默认跟随 --provider）。做对照实验时应钉住")
+    parser.add_argument("--judge-model", type=str, default=None,
+                        help="判定器模型（默认跟随 --model）")
     parser.add_argument("--save", type=str, default="", help="把结果 JSON 存到指定路径")
     args = parser.parse_args()
 
@@ -497,6 +506,7 @@ def main():
         store, args.retriever, args.candidate_k, args.rrf_k, rerank, args.rrf_weight,
         rewrite=args.rewrite, rewrite_n=args.rewrite_n, rewrite_weight=args.rewrite_weight,
         parent_expand=args.parent_expand, parent_window=args.parent_window,
+        provider=args.provider, model=args.model,
     )
 
     # 预热：首次调用会触发 reranker 模型加载（数百 MB，数秒）与 BM25 建索引
@@ -509,7 +519,14 @@ def main():
     if args.judge:
         from judge import LLMJudge  # eval/ 目录本身在 sys.path 里
 
-        judge = LLMJudge(Path(args.judge_cache))
+        # 判定器和被测生成器是两件事，但默认用同一个 provider：
+        # 换 provider 等于换裁判，judge_cache 里旧模型的判定不可复用
+        # （缓存 key 含 provider:model，所以这里传进去是必须的，不是可选的）。
+        judge = LLMJudge(
+            Path(args.judge_cache),
+            provider=args.judge_provider or args.provider,
+            model=args.judge_model or args.model,
+        )
 
     result = evaluate(
         store, questions, embedding_model, args.top_k, args.detail, retriever, label,
