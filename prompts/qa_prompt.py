@@ -99,7 +99,10 @@ PROMPT_VARIANTS = {
 
 def build_prompt_variant(question: str, context: str, variant: str = "full"):
     """返回 (prompt, version)。version 供评测记录口径。"""
+    # 变体名非法时直接报错，避免拼错后静默回落到默认模板
     if variant not in PROMPT_VARIANTS:
         raise ValueError(f"未知 prompt 变体: {variant}（可选 {list(PROMPT_VARIANTS)}）")
+    # 模板与版本号成对取出，保证填出的 prompt 与其口径一致
     template, version = PROMPT_VARIANTS[variant]
+    # 版本号随 prompt 一起返回，供评测结果标注来源
     return template.format(question=question, context=context), version
