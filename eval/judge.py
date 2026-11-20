@@ -103,6 +103,25 @@ FAITH_PROMPT_TEMPLATE = """你是答案忠实度审查员。给定【资料】�
 若答案没有任何事实性断言（例如拒答），输出 {{"claims": []}}"""
 
 
+# 这几类错误意味着「判定这套东西根本用不了」，而不是「这一条判断出错了」：
+#   401 密钥无效 / 402 余额不足 / 403 无权限 / 404 模型名不存在
+# 区别很重要 —— 瞬时错误（超时、限流）可以降级成一条「不相关」，
+# 但配置错误降级之后，整份报告会变成一条条「不相关」，看起来完整、实际全是假的。
+_FATAL_MARKERS = (
+    "Error code: 401",
+    "Error code: 402",
+    "Error code: 403",
+    "Error code: 404",
+    "insufficient_balance_error",
+    "authentication_error",
+)
+
+
+def _is_fatal_api_error(message: str) -> bool:
+    """区分「这次判定失败了」和「判定能力本身不可用」。"""
+    return any(m in (message or "") for m in _FATAL_MARKERS)
+
+
 def _parse_verdict(answer: str) -> tuple:
     """
     解析 judge 输出，返回 (是否相关, 理由)。
@@ -174,6 +193,7 @@ class LLMJudge:
         self._faith_llm = None
         self.calls = 0
         self.hits = 0
+        self.failures = 0   # 调用失败被降级成「不相关」的条数，必须能看见
         self.faith_calls = 0
         self.faith_parse_fail = 0
 
@@ -234,13 +254,28 @@ class LLMJudge:
         prompt = PROMPT_TEMPLATE.format(
             question=question, text=text[: self.max_chars]
         )
+        # answer 必须先有初值：异常分支里也要写缓存，
+        # 否则 invoke() 抛错时 answer 未绑定，异常处理自己再抛 UnboundLocalError，
+        # 把整个评测打崩 —— 「降级」变成了「崩溃」，而且只在出错时才暴露。
+        answer = ""
         try:
             resp = self._ensure_llm().invoke(prompt)
             answer = (resp.content or "").strip()
             verdict, reason = _parse_verdict(answer)
         except Exception as e:
-            # 判定失败时**保守处理为不相关**，并把失败计入日志。
-            # 反过来（当成相关）会让指标虚高且无人察觉 —— 静默失效更危险。
+            message = str(e)
+            if _is_fatal_api_error(message):
+                # 配置性错误：继续跑会产出一份「每一题都不相关」的假报告，
+                # 而且没有任何字段能看出来它是假的。宁可当场终止。
+                raise RuntimeError(
+                    "LLM 判定不可用，评测中止。\n"
+                    f"  底层错误: {message[:200]}\n"
+                    "  这是密钥/余额/模型名的问题，不是判定口径的问题。\n"
+                    "  若强行降级，所有题都会被判成「不相关」，指标会变成 0 而看上去只是「效果差」。"
+                ) from e
+            # 瞬时错误：保守判为不相关（判「相关」会让指标虚高且无人察觉），
+            # 但计数并计入 stats()，让「这份报告的判定有几条是猜的」可查。
+            self.failures += 1
             logger.error(f"judge 调用失败，按不相关处理: {e}")
             verdict, reason = False, "(调用失败)"
 
@@ -326,6 +361,7 @@ class LLMJudge:
             "calls": self.calls,
             "cache_hits": self.hits,
             "cached_total": len(self.cache),
+            "failures": self.failures,
             "faith_calls": self.faith_calls,
             "faith_parse_fail": self.faith_parse_fail,
         }

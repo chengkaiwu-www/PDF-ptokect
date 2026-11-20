@@ -518,7 +518,15 @@ def main():
 
     if judge is not None:
         judge.save()
-        print(f"LLM 判定统计: {judge.stats()}")
+        st = judge.stats()
+        print(f"LLM 判定统计: {st}")
+        # 降级的判定必须打在最显眼的地方：否则「失败 40 次」只会安静地
+        # 摊薄成「Hit@1 低了 0.1」，看起来像检索变差，其实是判定器坏了。
+        if st.get("failures"):
+            print(
+                f"[!] 有 {st['failures']} 条判定调用失败并被按「不相关」处理，"
+                "本次指标系统性偏低，不可用于结论。"
+            )
 
     # 改写缓存必须落盘：第一次跑花的是真金白银（每题 1 次 LLM 调用），
     # 落盘后重跑同一配置是 0 成本，而且两次跑出来的结果能对得上。
