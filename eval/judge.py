@@ -239,19 +239,25 @@ class LLMJudge:
 
     # ------------------------------------------------------------------ 对外
 
-    def explain(self, question: str, text: str) -> tuple:
+    def explain(self, question: str, text: str, bypass_cache: bool = False) -> tuple:
         """
         返回 (是否相关, 理由)。
 
         保留理由不是冗余：评测系统本身也必须**可诊断**。
         只存「是/否」时，看到 Hit@1 从 0.70 掉到 0.40 根本无法判断
         是「judge 判定过严」还是「关键词口径虚高」—— 前者要改 prompt，后者是真实结论。
+
+        `bypass_cache=True`：既不读也不写缓存，每次都真打一次 API。
+        这是**测判定器自身稳定性**的唯一正确姿势 —— 默认行为下第二次调用会命中
+        第一次缓存，测出来的「一致率」必然是 100%，而那个 100% 什么也没说。
+        （只读不写：重复测量的样本是随机样本，不该混进正式缓存供评测复用。）
         """
         key = self._key(question, text)
-        cached = self.cache.get(key)
-        if cached is not None:
-            self.hits += 1
-            return bool(cached["v"]), cached.get("r", "")
+        if not bypass_cache:
+            cached = self.cache.get(key)
+            if cached is not None:
+                self.hits += 1
+                return bool(cached["v"]), cached.get("r", "")
 
         prompt = PROMPT_TEMPLATE.format(
             question=question, text=text[: self.max_chars]
@@ -282,12 +288,13 @@ class LLMJudge:
             verdict, reason = False, "(调用失败)"
 
         self.calls += 1
-        self.cache[key] = {"v": verdict, "a": answer[:60], "r": reason}
+        if not bypass_cache:
+            self.cache[key] = {"v": verdict, "a": answer[:60], "r": reason}
         return verdict, reason
 
-    def is_relevant(self, question: str, text: str) -> bool:
+    def is_relevant(self, question: str, text: str, bypass_cache: bool = False) -> bool:
         """判断 text 是否能为 question 提供有用信息。"""
-        return self.explain(question, text)[0]
+        return self.explain(question, text, bypass_cache=bypass_cache)[0]
 
     # ------------------------------------------------------- 忠实度（生成层）
 
