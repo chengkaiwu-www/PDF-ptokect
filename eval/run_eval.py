@@ -180,6 +180,7 @@ def evaluate(
     retriever,
     label: str,
     judge=None,
+    judge_all: bool = False,
 ) -> Dict[str, Any]:
     documents = store.documents
     n_chunks = len(documents)
@@ -203,6 +204,8 @@ def evaluate(
     rr_sum = 0.0
     valid_count = 0
     distractor_count = source_hit_count = source_at1_count = 0
+    prec_sum = 0.0
+    prec_n = 0
     hop_count = 0
     hop_cov_sum = 0.0
     hop_full = 0
@@ -253,12 +256,19 @@ def evaluate(
         # 本次召回覆盖到哪些文档：多跳题与来源判定都基于它
         sources_in_topk = {Path(d.get("metadata", {}).get("source", "?")).name for d, _ in ranked}
 
+        # 判定是逐块进行的。默认「判到第一个命中就停」—— 便宜，但丢掉了
+        # 「另外几块有多不相关」这个信息。judge_all=True 时判完 top_k 全部块，
+        # 才能算 Precision@k：Hit@k 只问「有没有一块对」，Precision 问「有几块对」。
         first_hit_rank = None
+        relevant_flags: List[bool] = []
         if is_hit is not None:
             for rank, (doc, _score) in enumerate(ranked, start=1):
-                if is_hit(doc.get("page_content", "")):
+                ok = is_hit(doc.get("page_content", ""))
+                relevant_flags.append(ok)
+                if ok and first_hit_rank is None:
                     first_hit_rank = rank
-                    break
+                    if not judge_all:
+                        break
 
         # 多跳：要求 top-k 同时覆盖所有 required_sources
         hop_coverage = None
@@ -298,6 +308,10 @@ def evaluate(
             hit_at_k += 1 if first_hit_rank else 0
             hit_at_1 += 1 if first_hit_rank == 1 else 0
             rr_sum += (1.0 / first_hit_rank) if first_hit_rank else 0.0
+            # Precision@k 只在「k 块全判过」时计入，避免半截数据污染均值
+            if judge_all and relevant_flags and len(relevant_flags) == len(ranked):
+                prec_sum += sum(relevant_flags) / len(ranked)
+                prec_n += 1
             if qtype == "distractor":
                 distractor_count += 1
                 source_hit_count += 1 if source_hit else 0
@@ -313,6 +327,8 @@ def evaluate(
             "question": question,
             "status": status,
             "first_hit_rank": first_hit_rank,
+            "relevant_flags": relevant_flags if judge_all else None,
+            "n_relevant": sum(relevant_flags) if judge_all else None,
             "corpus_coverage": coverage,
             "sources_in_topk": sorted(sources_in_topk),
             "required_sources": required_sources,
@@ -376,7 +392,10 @@ def evaluate(
         "hit_rate_at_1": round(hit_at_1 / valid_count, 4) if valid_count else 0.0,
         "hit_rate_at_k": round(hit_at_k / valid_count, 4) if valid_count else 0.0,
         "mrr": round(rr_sum / valid_count, 4) if valid_count else 0.0,
-        # 干扰题：答案所在文档是否出现在 top-k / top-1。关键词命中看不见「捞错书」
+        # Precision@k：k 块里相关块的平均占比。Hit@k 饱和后仍可能有区分力
+        "precision_at_k": round(prec_sum / prec_n, 4) if prec_n else None,
+        "precision_n": prec_n,
+        # 干扰题：答案所在文档是否出现在 top-k / top-1。关键词命中看不见「捞错书"
         "distractor_n": distractor_count,
         "source_hit_at_k": source_hit_count,
         "source_accuracy_at_k": round(source_hit_count / distractor_count, 4) if distractor_count else None,
@@ -397,6 +416,11 @@ def evaluate(
     print(f"Hit@{1}  = {summary['hit_rate_at_1']:.4f}   ({hit_at_1}/{valid_count})")
     print(f"Hit@{top_k}  = {summary['hit_rate_at_k']:.4f}   ({hit_at_k}/{valid_count})")
     print(f"MRR    = {summary['mrr']:.4f}    平均检索延迟 = {summary['avg_retrieve_ms']:.1f} ms/题")
+    if prec_n:
+        print(
+            f"Precision@{top_k} = {summary['precision_at_k']:.4f}   "
+            f"（{top_k} 块中相关块的平均占比，{prec_n} 题全判；Hit@k 满分时它仍能区分）"
+        )
     if distractor_count:
         print(
             f"干扰题来源命中: @{top_k} = {summary['source_accuracy_at_k']:.4f} "
@@ -470,6 +494,8 @@ def main():
                              "判定文本变长，数字**不可**与基线直接比较，只用于看上下文成本）")
     parser.add_argument("--parent-window", type=int, default=PARENT_WINDOW,
                         help=f"父块包含的子块数（默认 {PARENT_WINDOW}）")
+    parser.add_argument("--judge-all", action="store_true",
+                        help="判完 top-k 的每一块（默认判到第一个命中就停），用于计算 Precision@k")
     parser.add_argument("--judge", action="store_true",
                         help="用 LLM 做语义判定替代关键词判定（第二套口径，需 API key）")
     parser.add_argument("--judge-cache", type=str,
@@ -530,7 +556,7 @@ def main():
 
     result = evaluate(
         store, questions, embedding_model, args.top_k, args.detail, retriever, label,
-        judge=judge,
+        judge=judge, judge_all=args.judge_all,
     )
 
     if judge is not None:
