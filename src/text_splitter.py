@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 from langchain_core.documents import Document
@@ -9,8 +10,11 @@ from config.config import (
     CHUNK_OVERLAP,
     CHUNK_UNIT,
     CHUNK_NORMALIZE,
+    CHUNK_DROP_TOC,
+    CHUNK_DROP_HEADERS,
     EMBEDDING_MODEL,
 )
+from src.boilerplate import clean_documents
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -151,6 +155,22 @@ def split_documents(documents: List[Document]) -> List[Document]:
     if not documents:
         logger.warning("No documents to split")
         return []
+
+    # 高分噪声过滤必须在切分之前：页眉页脚要按「整本书的页」统计才能识别，
+    # 切完块之后就看不到「这一行在多少页里出现过」了。
+    if CHUNK_DROP_TOC or CHUNK_DROP_HEADERS:
+        documents, bstats = clean_documents(
+            documents, drop_toc=CHUNK_DROP_TOC, drop_headers=CHUNK_DROP_HEADERS
+        )
+        logger.info(
+            f"噪声过滤: 页 {bstats['pages_before']} -> {bstats['pages_after']}"
+            f"（目录页 -{bstats['toc_pages_dropped']}，"
+            f"整页清空 -{bstats['pages_emptied']}），"
+            f"页眉页脚行 -{bstats['header_lines_removed']}，"
+            f"字符 -{bstats['chars_removed']}"
+        )
+        for src, lines in (bstats.get("repeated_lines") or {}).items():
+            logger.info(f"  跨页重复行 {len(lines)} 条 @ {Path(src).name}: {lines[:3]}")
 
     if CHUNK_NORMALIZE:
         documents = [

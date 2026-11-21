@@ -35,6 +35,18 @@ CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "384"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "80"))
 CHUNK_NORMALIZE = os.getenv("CHUNK_NORMALIZE", "0") == "1"
 
+# --- 高分噪声过滤（切分前，页级）---
+# CHUNK_DROP_TOC     : 整页丢掉目录页（「标题 …… 页码」密集的页）
+# CHUNK_DROP_HEADERS : 删除跨页重复行（每页都印的书名/推广语/网址）
+#
+# 实测结论（README 实验 13）：**两个都默认关，因为没有收益**。
+#   · 目录页只占 4 页 / 53 块，在 140 个召回位置里仅 1 个 → 删掉后 Hit@1 四组不变
+#   · 删页眉会让南瓜书 732 块的切分边界整体重排（每页少 60 字符 → 切分点前移），
+#     相关块净 -3，三组 Precision 一致下降
+# 保留开关是为了能复现这个负结果；判据与实现见 src/boilerplate.py。
+CHUNK_DROP_TOC = os.getenv("CHUNK_DROP_TOC", "0") == "1"
+CHUNK_DROP_HEADERS = os.getenv("CHUNK_DROP_HEADERS", "0") == "1"
+
 # --- Embedding 模型 ---
 # 取值可以是 HuggingFace 模型名（如 "BAAI/bge-m3"），也可以是本地模型目录路径。
 # 默认指向本地已下载的中文模型 BAAI/bge-small-zh-v1.5（512 维，约 92MB）：
