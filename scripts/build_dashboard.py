@@ -43,14 +43,14 @@ RETRIEVAL_RUNS: List[Dict[str, str]] = [
     {"file": "eval_v2_hybrid_k8", "label": "top_k=8", "judge": "keyword", "tag": "base"},
     {"file": "eval_v2_hybrid_k12", "label": "top_k=12", "judge": "keyword", "tag": "good",
      "note": "Hit@1 不动 → 缺的是预算不是排序"},
-    {"file": "eval_v2_vector_judge", "label": "仅向量", "judge": "llm", "tag": "ctrl",
-     "note": "S6-d 单通道对照：32/35"},
-    {"file": "eval_v2_bm25_judge", "label": "仅 BM25", "judge": "llm", "tag": "ctrl",
-     "note": "与向量 32=32 → 关键词口径的 1 题优势归零（同构偏袒）"},
-    {"file": "eval_v2_hybrid_judge", "label": "混合 RRF", "judge": "llm", "tag": "good",
-     "note": "+2 题、干扰来源 15/15；但多跳 0.750→0.625 反向恶化"},
-    {"file": "eval_v2_hybrid_rerank_judge", "label": "混合 + 精排", "judge": "llm", "tag": "good",
-     "note": "35/35 打满 → 三个指标同时饱和，这套题失去区分力"},
+    {"file": "eval_v2_vector_judgeall", "label": "仅向量", "judge": "llm", "tag": "ctrl",
+     "note": "S6-d 单通道对照：32/35；噪声块最多（110/140）"},
+    {"file": "eval_v2_bm25_judgeall", "label": "仅 BM25", "judge": "llm", "tag": "ctrl",
+     "note": "Hit 与向量 32=32，但 Precision 高 10 块 → 向量是「带噪声」而非「导不准」"},
+    {"file": "eval_v2_hybrid_judgeall", "label": "混合 RRF", "judge": "llm", "tag": "good",
+     "note": "+2 题；Precision 只比 BM25 多 1 块 → 收益主要是「不丢」，不是「更准」"},
+    {"file": "eval_v2_hybrid_rerank_judgeall", "label": "混合 + 精排", "judge": "llm", "tag": "ok",
+     "note": "35/35 但 Precision 只 +2 块，63× 延迟；且不单调：s10 4→2、d11 4→2"},
 ]
 
 GEN_RUNS: List[Dict[str, str]] = [
@@ -142,6 +142,7 @@ def section_retrieval() -> str:
             f'<td class="num">{num(s["hit_rate_at_1"])}</td>'
             f'<td class="num">{num(s["hit_rate_at_k"])}</td>'
             f'<td class="num">{num(s["mrr"])}</td>'
+            f'<td class="num">{num(s.get("precision_at_k"), 4)}</td>'
             f'<td class="num">{num(s["multihop_coverage"])}</td>'
             f'<td class="num">{num(s["multihop_full_rate"])}</td>'
             f'<td class="num">{s["avg_retrieve_ms"]:.0f} ms</td>'
@@ -157,7 +158,7 @@ def section_retrieval() -> str:
   文本变长它自己会涨（见第四节）。</p>
   <table>
     <thead><tr>
-      <th>配置</th><th>结论</th><th>口径</th><th>Hit@1</th><th>Hit@4</th><th>MRR</th>
+      <th>配置</th><th>结论</th><th>口径</th><th>Hit@1</th><th>Hit@4</th><th>MRR</th><th>Precision@k</th>
       <th>多跳覆盖</th><th>多跳全覆</th><th>延迟</th><th>备注</th>
     </tr></thead>
     <tbody>{''.join(rows)}</tbody>
