@@ -1,0 +1,228 @@
+==============================================================================
+判定器稳定性  |  题 28 道 × 配置 ['hybrid', 'vector'] × top_k=4
+抽样（seed=20261121）：d02, d03, d05, d06, d09, d10, d12, m01, m02, m03, m05, m06, m07, m08, n01, n02, n03, n04, n05, n06, n07, s03, s06, s08, s14, s16, s17, s18
+题型分布：{'distractor': 7, 'multi_hop': 7, 'no_answer': 7, 'single_fact': 7}
+==============================================================================
+
+检索：hybrid -> hybrid
+
+检索：vector -> vector
+
+召回位置 224 个 → 唯一 (问题,块) 对 154 个（去重省下 70 次重复判定）
+预计调用 770 次（串行，避免限流伪装成不一致）
+判定器：deepseek:deepseek-chat
+  [  1/154] d02 hybrid #1 TTTTT  pumpkin-book.pdf
+  [  2/154] d02 hybrid #2 FFFFF  pumpkin-book.pdf
+  [  3/154] d02 hybrid #3 FFFFF  pumpkin-book.pdf
+  [  4/154] d02 hybrid #4 FFFFF  pumpkin-book.pdf
+  [  5/154] d03 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [  6/154] d03 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [  7/154] d03 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [  8/154] d03 hybrid #4 TTTTT  ml-notes-ng.pdf
+  [  9/154] d05 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 10/154] d05 hybrid #2 TTTTT  pumpkin-book.pdf
+  [ 11/154] d05 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [ 12/154] d05 hybrid #4 TTTTT  ml-notes-ng.pdf
+  [ 13/154] d06 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 14/154] d06 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [ 15/154] d06 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [ 16/154] d06 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 17/154] d09 hybrid #1 TTTTT  pumpkin-book.pdf
+  [ 18/154] d09 hybrid #2 TTTTT  pumpkin-book.pdf
+  [ 19/154] d09 hybrid #3 TTTTT  pumpkin-book.pdf
+  [ 20/154] d09 hybrid #4 TTTTT  pumpkin-book.pdf
+  [ 21/154] d10 hybrid #1 TTTTT  pumpkin-book.pdf
+  [ 22/154] d10 hybrid #2 TTTTT  pumpkin-book.pdf
+  [ 23/154] d10 hybrid #3 TTTTT  pumpkin-book.pdf
+  [ 24/154] d10 hybrid #4 FTTTT  ml-notes-ng.pdf
+  [ 25/154] d12 hybrid #1 TTTTT  llm-universe.pdf
+  [ 26/154] d12 hybrid #2 TTTTT  llm-universe.pdf
+  [ 27/154] d12 hybrid #3 TTTTT  llm-universe.pdf
+  [ 28/154] d12 hybrid #4 TTTTT  llm-universe.pdf
+  [ 29/154] m01 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 30/154] m01 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [ 31/154] m01 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [ 32/154] m01 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 33/154] m02 hybrid #1 FFFFF  ml-notes-ng.pdf
+  [ 34/154] m02 hybrid #2 TTTTT  pumpkin-book.pdf
+  [ 35/154] m02 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [ 36/154] m02 hybrid #4 TTTTT  ml-notes-ng.pdf
+  [ 37/154] m03 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 38/154] m03 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [ 39/154] m03 hybrid #3 FFFFF  ml-notes-ng.pdf
+  [ 40/154] m03 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 41/154] m05 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 42/154] m05 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [ 43/154] m05 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [ 44/154] m05 hybrid #4 TTTTT  ml-notes-ng.pdf
+  [ 45/154] m06 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 46/154] m06 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [ 47/154] m06 hybrid #3 FFFFF  pumpkin-book.pdf
+  [ 48/154] m06 hybrid #4 FFFFF  pumpkin-book.pdf
+  [ 49/154] m07 hybrid #1 TTTTT  llm-universe.pdf
+  [ 50/154] m07 hybrid #2 TTTTT  llm-universe.pdf
+  [ 51/154] m07 hybrid #3 TTTTT  llm-universe.pdf
+  [ 52/154] m07 hybrid #4 TTTTT  llm-universe.pdf
+  [ 53/154] m08 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 54/154] m08 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [ 55/154] m08 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [ 56/154] m08 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 57/154] n01 hybrid #1 FFFFF  ml-notes-ng.pdf
+  [ 58/154] n01 hybrid #2 FFFFF  ml-notes-ng.pdf
+  [ 59/154] n01 hybrid #3 FFFFF  llm-universe.pdf
+  [ 60/154] n01 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 61/154] n02 hybrid #1 FFFFF  pumpkin-book.pdf
+  [ 62/154] n02 hybrid #2 FFFFF  pumpkin-book.pdf
+  [ 63/154] n02 hybrid #3 FFFFF  pumpkin-book.pdf
+  [ 64/154] n02 hybrid #4 FFFFF  pumpkin-book.pdf
+  [ 65/154] n03 hybrid #1 FFFFF  ml-notes-ng.pdf
+  [ 66/154] n03 hybrid #2 FFFFF  pumpkin-book.pdf
+  [ 67/154] n03 hybrid #3 FFFFF  ml-notes-ng.pdf
+  [ 68/154] n03 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 69/154] n04 hybrid #1 FFFFF  ml-notes-ng.pdf
+  [ 70/154] n04 hybrid #2 FFFFF  ml-notes-ng.pdf
+  [ 71/154] n04 hybrid #3 FFFFF  ml-notes-ng.pdf
+  [ 72/154] n04 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 73/154] n05 hybrid #1 FFFFF  ml-notes-ng.pdf
+  [ 74/154] n05 hybrid #2 FFFFF  llm-universe.pdf
+  [ 75/154] n05 hybrid #3 FFFFF  llm-universe.pdf
+  [ 76/154] n05 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 77/154] n06 hybrid #1 FFFFF  llm-universe.pdf
+  [ 78/154] n06 hybrid #2 FFFFF  llm-universe.pdf
+  [ 79/154] n06 hybrid #3 FFFFF  llm-universe.pdf
+  [ 80/154] n06 hybrid #4 FFFFF  llm-universe.pdf
+  [ 81/154] n07 hybrid #1 FFFFF  llm-universe.pdf
+  [ 82/154] n07 hybrid #2 FFFFF  llm-universe.pdf
+  [ 83/154] n07 hybrid #3 FFFFF  pumpkin-book.pdf
+  [ 84/154] n07 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 85/154] s03 hybrid #1 TTTTT  pumpkin-book.pdf
+  [ 86/154] s03 hybrid #2 TTTTT  pumpkin-book.pdf
+  [ 87/154] s03 hybrid #3 FFFFF  pumpkin-book.pdf
+  [ 88/154] s03 hybrid #4 TTTTT  pumpkin-book.pdf
+  [ 89/154] s06 hybrid #1 TTTTT  pumpkin-book.pdf
+  [ 90/154] s06 hybrid #2 TTTTT  pumpkin-book.pdf
+  [ 91/154] s06 hybrid #3 TTTTT  pumpkin-book.pdf
+  [ 92/154] s06 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 93/154] s08 hybrid #1 FFFFF  ml-notes-ng.pdf
+  [ 94/154] s08 hybrid #2 TTTTT  pumpkin-book.pdf
+  [ 95/154] s08 hybrid #3 FFFFF  pumpkin-book.pdf
+  [ 96/154] s08 hybrid #4 FFFFF  ml-notes-ng.pdf
+  [ 97/154] s14 hybrid #1 TTTTT  ml-notes-ng.pdf
+  [ 98/154] s14 hybrid #2 TTTTT  ml-notes-ng.pdf
+  [ 99/154] s14 hybrid #3 TTTTT  ml-notes-ng.pdf
+  [100/154] s14 hybrid #4 TTTTT  ml-notes-ng.pdf
+  [101/154] s16 hybrid #1 TTTTT  llm-universe.pdf
+  [102/154] s16 hybrid #2 TTTTT  llm-universe.pdf
+  [103/154] s16 hybrid #3 TTTTT  llm-universe.pdf
+  [104/154] s16 hybrid #4 TTTTT  llm-universe.pdf
+  [105/154] s17 hybrid #1 TTTTT  llm-universe.pdf
+  [106/154] s17 hybrid #2 TTTTT  llm-universe.pdf
+  [107/154] s17 hybrid #3 TTTTT  llm-universe.pdf
+  [108/154] s17 hybrid #4 TTTTT  llm-universe.pdf
+  [109/154] s18 hybrid #1 TTTTT  llm-universe.pdf
+  [110/154] s18 hybrid #2 TTTTT  llm-universe.pdf
+  [111/154] s18 hybrid #3 TTTTT  llm-universe.pdf
+  [112/154] s18 hybrid #4 TTTTT  llm-universe.pdf
+  [113/154] d03 vector #4 TTTTT  ml-notes-ng.pdf
+  [114/154] d05 vector #3 TTTTT  pumpkin-book.pdf
+  [115/154] d05 vector #4 TTTTT  pumpkin-book.pdf
+  [116/154] d06 vector #4 FFFFF  ml-notes-ng.pdf
+  [117/154] d09 vector #1 TTTTT  pumpkin-book.pdf
+  [118/154] d12 vector #3 TTTTT  llm-universe.pdf
+  [119/154] d12 vector #4 FFFFF  llm-universe.pdf
+  [120/154] m01 vector #2 TFFFF  ml-notes-ng.pdf
+  [121/154] m02 vector #4 TTFTT  ml-notes-ng.pdf
+  [122/154] m03 vector #3 FFFFF  ml-notes-ng.pdf
+  [123/154] m06 vector #3 FFFFF  ml-notes-ng.pdf
+  [124/154] m06 vector #4 FFFFF  ml-notes-ng.pdf
+  [125/154] m07 vector #1 FFFFF  ml-notes-ng.pdf
+  [126/154] m07 vector #3 TTTTT  ml-notes-ng.pdf
+  [127/154] m08 vector #1 TTTTT  ml-notes-ng.pdf
+  [128/154] m08 vector #2 FFFFF  ml-notes-ng.pdf
+  [129/154] n01 vector #2 FFFFF  ml-notes-ng.pdf
+  [130/154] n01 vector #3 FFFFF  llm-universe.pdf
+  [131/154] n01 vector #4 FFFFF  ml-notes-ng.pdf
+  [132/154] n02 vector #4 FFFFF  pumpkin-book.pdf
+  [133/154] n03 vector #1 TFTTT  ml-notes-ng.pdf
+  [134/154] n03 vector #2 FFFFF  ml-notes-ng.pdf
+  [135/154] n03 vector #3 FFFFF  pumpkin-book.pdf
+  [136/154] n04 vector #2 FFFFF  ml-notes-ng.pdf
+  [137/154] n04 vector #3 FFFFF  ml-notes-ng.pdf
+  [138/154] n04 vector #4 FFFFF  ml-notes-ng.pdf
+  [139/154] n05 vector #3 FFFFF  llm-universe.pdf
+  [140/154] n05 vector #4 FFFFF  llm-universe.pdf
+  [141/154] n06 vector #1 FFFFF  pumpkin-book.pdf
+  [142/154] n06 vector #2 FFFFF  pumpkin-book.pdf
+  [143/154] n06 vector #4 FFFFF  pumpkin-book.pdf
+  [144/154] n07 vector #1 FFFFF  llm-universe.pdf
+  [145/154] n07 vector #2 FFFFF  llm-universe.pdf
+  [146/154] n07 vector #4 FFFFF  ml-notes-ng.pdf
+  [147/154] s03 vector #4 FFFFF  pumpkin-book.pdf
+  [148/154] s08 vector #3 FFFFF  ml-notes-ng.pdf
+  [149/154] s14 vector #4 TTTTT  ml-notes-ng.pdf
+  [150/154] s16 vector #3 TTTTT  llm-universe.pdf
+  [151/154] s16 vector #4 TTTTT  llm-universe.pdf
+  [152/154] s17 vector #1 TTTTT  llm-universe.pdf
+  [153/154] s17 vector #4 TTFTT  llm-universe.pdf
+  [154/154] s18 vector #3 TTTTT  llm-universe.pdf
+
+==============================================================================
+一、一致性（取前 2 次判定配对，与 repeats=2 口径可比）
+==============================================================================
+  判两次一致     : 151/154 = 0.9805
+  Cohen's κ      : 0.9608   (>0.8 很好 / 0.6~0.8 好 / 0.4~0.6 中 / <0.4 差)
+  翻转           : 不相关→相关 1  |  相关→不相关 2
+  正类样本（至少一次相关）: 84 个，一致 81 = 0.9643
+  负类样本（两次都不相关）: 70 个，一致 70 = 1.0000
+  正类占比       : 0.5455   ← 占比高时「一致率」会被常量判定器白送
+
+==============================================================================
+二、票型分布（每块判 5 次，横轴=判「相关」的次数）
+==============================================================================
+  0/5:   70  0.4545  ██████████████████
+  1/5:    1  0.0065  
+  2/5:    0  0.0000  
+  3/5:    0  0.0000  
+  4/5:    4  0.0260  █
+  5/5:   79  0.5130  █████████████████████
+  全票一致（0 票或全票）: 149/154 = 0.9675  ← 这些块判定是确定的
+  边界块（中间票型）    : 5/154 = 0.0325
+  单次判定与多数票不符  : 5/770 = 0.0065  ← 单次测量的「翻错」概率
+
+==============================================================================
+三、分题型（同一对在多个题型下只属其一，按 qid 归属）
+==============================================================================
+  distractor     n=35   一致 0.9714  κ=0.9057
+  multi_hop      n=37   一致 0.9730  κ=0.9396
+  no_answer      n=46   一致 0.9783  κ=0.0000
+  single_fact    n=36   一致 1.0000  κ=1.0000
+
+==============================================================================
+四、判定抖动 → 指标抖动（Hit@1 / Hit@k：单次 vs 多数票）
+==============================================================================
+  hybrid   Hit@1 = 19/28 (单次) vs 19/28 (多数票)   Hit@4 = 21/28 vs 21/28
+           首命中位置变化的题：无
+  vector   Hit@1 = 17/28 (单次) vs 17/28 (多数票)   Hit@4 = 22/28 vs 22/28
+           首命中位置变化的题：无
+
+==============================================================================
+五、翻转样例（共 3 个，最多列 10 个）
+==============================================================================
+  [d10] False vs True   ml-notes-ng.pdf p209
+      理由A: 只讲K均值未提高斯混合
+      理由B: 涉及K均值聚类算法
+      块: 机器学习课程-第 8 周-聚类(Clustering) 201 13.2 K-均值算法 参考视频: 13 - 2 - K-Means Algorithm (13 min).mkv K-均值是最普及的聚类算法，算法接受一个未标记的数据集，然后…
+  [m01] True vs False   ml-notes-ng.pdf p148
+      理由A: 涉及梯度下降与梯度检验
+      理由B: 讲的是梯度检验方法
+      块: 机器学习课程-第 5 周-神经网络的学习(Neural Networks: Learning) 140 9.5 梯度检验 参考视频: 9 - 5 - Gradient Checking (12 min).mkv 当我们对一个较为复杂的模型（…
+  [n03] True vs False   ml-notes-ng.pdf p132
+      理由A: 含前向传播公式
+      理由B: 讲的是普通神经网络前向传播
+      块: 𝑎1 (2) = 𝑔(𝛩10 (1) 𝑥0 + 𝛩11 (1) 𝑥1 + 𝛩12 (1) 𝑥2 + 𝛩13 (1) 𝑥3) 𝑎2 (2) = 𝑔(𝛩20 (1) 𝑥0 + 𝛩21 (1) 𝑥1 + 𝛩22 (1) 𝑥2 + 𝛩23 (1) …
+
+==============================================================================
+耗时 550s，调用 770 次，失败 0 次
+==============================================================================
+
+结果已保存 -> results\judge_stability_r5.json
